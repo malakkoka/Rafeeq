@@ -1,0 +1,49 @@
+name: koka
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  awesome_dialog: ^3.1.0
+  cupertino_icons: ^1.0.8
+  geolocator: ^14.0.2
+  http: ^1.5.0
+
+  # Firebase (Dart packages)
+  firebase_core: ^3.6.0
+  firebase_analytics: ^11.2.1
+  cloud_firestore: ^5.6.12
+  firebase_storage: ^12.4.10
+  firebase_messaging: ^15.2.10
+  firebase_auth: ^5.7.0
+  google_sign_in: ^7.2.0
+  gap: ^3.0.1
+  dropdown_button2: ^2.3.9
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "images/37697d6e01e2feb56ae523e8c486fe82.jpg"
+  min_sdk_android: 21
+
+flutter:
+  uses-material-design: true
+  assets:
+    - images/37697d6e01e2feb56ae523e8c486fe82.jpg
+
+  fonts:
+    - family: Caveat
+      fonts:
+        - asset: fonts/Caveat-VariableFont_wght.ttf
