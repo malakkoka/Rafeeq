@@ -1,9 +1,9 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:koka/component/custom_button_auth.dart';
-import 'package:koka/component/password.dart';
-import 'package:koka/component/textform.dart';
+import 'package:front/component/custom_button_auth.dart';
+import 'package:front/component/password.dart';
+import 'package:front/component/textform.dart';
 import 'package:gap/gap.dart';
 
 class Login extends StatefulWidget {

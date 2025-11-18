@@ -2,11 +2,11 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:koka/component/dropdown.dart';
-import 'package:koka/component/role_fields.dart';   
-import 'package:koka/component/password.dart';
-import 'package:koka/component/textform.dart';
-import 'package:koka/component/custom_button_auth.dart';
+import 'package:front/component/dropdown.dart';
+import 'package:front/component/role_fields.dart';   
+import 'package:front/component/password.dart';
+import 'package:front/component/textform.dart';
+import 'package:front/component/custom_button_auth.dart';
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
