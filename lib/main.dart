@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:front/auth/blind.dart';
 import 'package:front/auth/editprofile.dart';
 import 'package:front/auth/login.dart';
 import 'package:front/auth/signup.dart';
@@ -9,9 +10,14 @@ import 'package:front/theme/theme.dart';
 import 'package:front/theme/themeprovider.dart';
 import 'package:provider/provider.dart';
 
+//camera imp.
+import 'package:camera/camera.dart';
+
+List<CameraDescription>? cameras;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  cameras = await availableCameras();
   // Firebase initialization
   await Firebase.initializeApp();
 
@@ -56,6 +62,8 @@ class _MyAppState extends State<MyApp> {
         "homepage": (context) => Homepage(),
         "signup": (context) => Signup(),
         "editprofile": (context) => EditProfile(),
+        "blind": (context) => Blind(),
+
       },
       theme: Provider.of<Themeprovider>(context).themeData,
       darkTheme: darkMode,
