@@ -13,7 +13,7 @@ class RoleDropdown extends StatelessWidget {
     super.key,
     required this.value,
     required this.onChanged,
-    this.hintText = 'Select who u r ',
+    this.hintText = 'Select role ',
     this.margin,
   });
 

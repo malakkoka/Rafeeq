@@ -170,10 +170,14 @@ String? _validateAdult(String? v) {
             ),
             const Gap(8),
             CustomText(
-              hinttext: "enter age",
-              mycontroller: widget.volunteerage,
-
+              hinttext: "enter your age",
+              mycontroller: widget.assistage,
+              validator: _validateAdult,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
+            
             const Gap(12),
             const Text(
               "Driver's license",

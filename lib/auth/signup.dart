@@ -1,5 +1,6 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:front/component/dropdown.dart';
@@ -19,6 +20,7 @@ class _SignupState extends State<Signup> {
   final TextEditingController firstName = TextEditingController();
   final TextEditingController lastName  = TextEditingController();
   final TextEditingController email     = TextEditingController();
+  final TextEditingController username     = TextEditingController();
   final TextEditingController phone     = TextEditingController();
   final TextEditingController password  = TextEditingController();
 
@@ -30,7 +32,7 @@ class _SignupState extends State<Signup> {
   final TextEditingController patientAge       = TextEditingController();
   final TextEditingController assistage = TextEditingController();
   final TextEditingController assistantDept    = TextEditingController();
-  final TextEditingController volunteerOrg     = TextEditingController();
+  final TextEditingController volunteerage     = TextEditingController();
   final TextEditingController volunteerHours   = TextEditingController();
   final TextEditingController repassword = TextEditingController();
 
@@ -39,6 +41,7 @@ class _SignupState extends State<Signup> {
     firstName.dispose();
     lastName.dispose();
     email.dispose();
+    username.dispose();
     phone.dispose();
     password.dispose();
     repassword.dispose();
@@ -46,9 +49,69 @@ class _SignupState extends State<Signup> {
     patientAge.dispose();
     assistage.dispose();
     assistantDept.dispose();
-    volunteerOrg.dispose();
+    volunteerage.dispose();
     volunteerHours.dispose();
     super.dispose();
+  }
+
+
+//api 
+  Future<Map<String, dynamic>> registerOnDjango() async {
+
+
+    final url = Uri.parse("http://10.0.2.2:8000/api/account/register/");
+    int age = 0;
+    
+if (selectedRole == "patient") {
+  age = int.tryParse(patientAge.text.trim()) ?? 0;
+} 
+else if (selectedRole == "assistant") {
+  age = int.tryParse(assistage.text.trim()) ?? 0;
+} 
+else if (selectedRole == "volunteer") {
+  age = int.tryParse(volunteerage.text.trim()) ?? 0;
+}
+String userType = "patient";
+
+if (selectedRole == "First Assistant") {
+  userType = "assistant";
+} else if (selectedRole == "Volunteer") {
+  userType = "volunteer";
+}
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+        
+          "username": username.text.trim(),                                    
+          "email": email.text.trim(),                             
+          "phone": phone.text.trim(),                              
+          "age": age,                  
+          "address": "default",                                        
+          "gender": "female",                                        
+          "can_write": true,                                           
+          "can_speak_with_sign_language": false,                       
+          "is_active": true,                                           
+          "user_type": userType ,                      
+          "password": password.text.trim(),                             
+        }),
+      );
+
+          print("STATUS: ${response.statusCode}");
+          print("BODY: ${response.body}");
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 201 && data["Isuccess"] == true) {
+        return {"success": true, "data": data};
+      } else {
+        return {"success": false, "message": data};
+      }
+
+    } catch (e) {
+      return {"success": false, "message": e.toString()};
+    }
   }
 
   @override
@@ -142,6 +205,16 @@ class _SignupState extends State<Signup> {
                               mycontroller: email,
                             ),
 
+                            //
+                            const Text("Email",
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold)),
+                            const Gap(8),
+                            CustomText(
+                              hinttext: "enter your username",
+                              mycontroller: username,
+                            ),
+
                             // Password
                             const Gap(16),
                             const Text("Password",
@@ -187,7 +260,7 @@ const Gap(16),
                             // Role dropdown
                             const Gap(16),
                             const Text(
-                              "Who are you",
+                              "your role",
                               style: TextStyle(
                                   fontSize: 20, fontWeight: FontWeight.bold),
                             ),
@@ -207,7 +280,7 @@ const Gap(16),
                                 patientAge: patientAge,
                                 assistage: assistage,
                                 assistantDept: assistantDept,
-                                volunteerage: volunteerOrg,
+                                volunteerage: volunteerage,
                                 volunteerHours: volunteerHours,
                               ),
                             ),
@@ -217,47 +290,28 @@ const Gap(16),
                             CustomButtonAuth(
                               title: "Sign Up",
                               onPressed: () async {
-                                try {
-                                  await FirebaseAuth.instance
-                                      .createUserWithEmailAndPassword(
-                                    email: email.text.trim(),
-                                    password: password.text,
-                                  );
-                                  if (!mounted) return;
-                                  Navigator.of(context)
-                                      .pushReplacementNamed("homepage");
-                                } on FirebaseAuthException catch (e) {
-                                  debugPrint('Auth code: ${e.code}');
-                                  String msg;
-                                  switch (e.code) {
-                                    case 'email-already-in-use':
-                                      msg = 'This email is already in use.';
-                                      break;
-                                    case 'invalid-email':
-                                      msg = 'Invalid email format.';
-                                      break;
-                                    case 'weak-password':
-                                      msg = 'Password is too weak.';
-                                      break;
-                                    default:
-                                      msg = e.message ??
-                                          'Unexpected error occurred.';
-                                  }
+                                final result = await registerOnDjango();
+
+                                if (result["success"] == true) {
+                                  // Successful
                                   await AwesomeDialog(
                                     context: context,
-                                    dialogType: DialogType.error,
-                                    animType: AnimType.rightSlide,
-                                    title: 'Sign Up Error',
-                                    desc: msg,
+                                    dialogType: DialogType.success,
+                                    title: "Success",
+                                    desc: "Account created successfully!",
                                     btnOkOnPress: () {},
                                   ).show();
-                                } catch (e) {
+
+                                  if (!mounted) return;
+                                  Navigator.of(context).pushReplacementNamed("login");
+
+                                } else {
+                                  // Error from backend
                                   await AwesomeDialog(
                                     context: context,
                                     dialogType: DialogType.error,
-                                    animType: AnimType.rightSlide,
-                                    title: 'Error',
-                                    desc: 'Unexpected error: $e',
+                                    title: "Sign Up Error",
+                                    desc: result["message"].toString(),
                                     btnOkOnPress: () {},
                                   ).show();
                                 }

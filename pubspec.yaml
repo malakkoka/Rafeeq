@@ -27,7 +27,11 @@ dependencies:
   gap: ^3.0.1
   dropdown_button2: ^2.3.9
   camera: ^0.11.3
-
+  audio_waveforms: ^2.0.0
+  #soundwaive
+  avatar_glow: ^3.0.1
+  flutter_tts: ^3.6.3
+  flutter_secure_storage: ^10.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
