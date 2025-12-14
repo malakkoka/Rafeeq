@@ -1,9 +1,6 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
-<<<<<<< HEAD
-import 'package:front/component/UserProvider.dart';
-=======
 import 'package:front/color.dart';
->>>>>>> 5e54c68add19fe87d7780c00aaf660a95dfde551
+import 'package:front/component/UserProvider.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -29,27 +26,17 @@ class _SignupState extends State<Signup> {
   final TextEditingController username = TextEditingController();
   final TextEditingController phone = TextEditingController();
   final TextEditingController password = TextEditingController();
+  final TextEditingController repassword = TextEditingController();
 
   // Role selection
   String? selectedRole;
-String? disability;
-
+  String? disability;
 
   // Role-specific controllers
   final TextEditingController assistantnumber = TextEditingController();
   final TextEditingController patientAge = TextEditingController();
   final TextEditingController assistage = TextEditingController();
-<<<<<<< HEAD
-  final TextEditingController assistantDept    = TextEditingController();
-  final TextEditingController volunteerage     = TextEditingController();
-  final TextEditingController volunteerHours   = TextEditingController();
-  //final TextEditingController disability  = TextEditingController();
-=======
-  final TextEditingController assistantDept = TextEditingController();
   final TextEditingController volunteerage = TextEditingController();
-  final TextEditingController volunteerHours = TextEditingController();
->>>>>>> 5e54c68add19fe87d7780c00aaf660a95dfde551
-  final TextEditingController repassword = TextEditingController();
 
   @override
   void dispose() {
@@ -63,26 +50,24 @@ String? disability;
     assistantnumber.dispose();
     patientAge.dispose();
     assistage.dispose();
-    assistantDept.dispose();
     volunteerage.dispose();
-    volunteerHours.dispose();
     super.dispose();
   }
 
-//api
+  // API
   Future<Map<String, dynamic>> registerOnDjango() async {
     final url = Uri.parse("http://10.0.2.2:8000/api/account/register/");
     int age = 0;
 
-    if (selectedRole == "patient") {
+    if (selectedRole == "Patient") {
       age = int.tryParse(patientAge.text.trim()) ?? 0;
-    } else if (selectedRole == "assistant") {
+    } else if (selectedRole == "First Assistant") {
       age = int.tryParse(assistage.text.trim()) ?? 0;
-    } else if (selectedRole == "volunteer") {
+    } else if (selectedRole == "Volunteer") {
       age = int.tryParse(volunteerage.text.trim()) ?? 0;
     }
-    String userType = "patient";
 
+    String userType = "patient";
     if (selectedRole == "First Assistant") {
       userType = "assistant";
     } else if (selectedRole == "Volunteer") {
@@ -108,8 +93,6 @@ String? disability;
         }),
       );
 
-      print("STATUS: ${response.statusCode}");
-      print("BODY: ${response.body}");
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 201 && data["Isuccess"] == true) {
@@ -165,137 +148,44 @@ String? disability;
                               ),
                             ),
 
-                            // First/Last name
+                            // First / Last name
                             const Gap(16),
                             Row(
                               children: [
                                 Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text("First Name",
-                                          style: TextStyle(
-                                              color: AppColors.primary,
-                                              fontSize: 17,
-                                              fontWeight: FontWeight.bold)),
-                                      const Gap(8),
-                                      CustomText(
-                                        hinttext: "first name",
-                                        mycontroller: firstName,
-                                      ),
-                                    ],
+                                  child: _labeledField(
+                                    "First Name",
+                                    firstName,
                                   ),
                                 ),
                                 const Gap(12),
                                 Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text("Last Name",
-                                          style: TextStyle(
-                                              color: AppColors.primary,
-                                              fontSize: 17,
-                                              fontWeight: FontWeight.bold)),
-                                      const Gap(8),
-                                      CustomText(
-                                        hinttext: "last name",
-                                        mycontroller: lastName,
-                                      ),
-                                    ],
+                                  child: _labeledField(
+                                    "Last Name",
+                                    lastName,
                                   ),
                                 ),
                               ],
                             ),
 
-                            // Email
-                            const Gap(16),
-                            const Text("Email",
-                                style: TextStyle(
-                                    color: AppColors.primary,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold)),
-                            const Gap(8),
-                            CustomText(
-                              hinttext: "enter your email",
-                              mycontroller: email,
-                            ),
+                            _section("Email", email),
+                            _section("Username", username),
 
-                            //
-                            const Text("User Name",
-                                style: TextStyle(
-                                    color: AppColors.primary,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold)),
-                            const Gap(8),
-                            CustomText(
-                              hinttext: "enter your username",
-                              mycontroller: username,
-                            ),
+                            // Passwords
+                            _passwordSection("Password", password),
+                            _confirmPasswordSection(),
 
-                            // Password
-                            const Gap(16),
-                            const Text("Password",
-                                style: TextStyle(
-                                    color: AppColors.primary,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold)),
-                            const Gap(8),
-                            PasswordField(
-                              phint: "enter your password",
-                              mycontroller: password,
-                              validator: (v) {
-                                if (v == null || v.isEmpty)
-                                  return "Password is required";
-                                return null;
-                              },
-                              autovalidateMode:
-                                  AutovalidateMode.onUserInteraction,
-                            ),
+                            _section("Phone Number", phone),
 
-                            const Gap(16),
-                            const Text("Confirm Password",
-                                style: TextStyle(
-                                    color: AppColors.primary,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold)),
-                            const Gap(8),
-                            PasswordField(
-                              phint: "enter your password again",
-                              mycontroller: repassword,
-                              validator: (v) {
-                                if (v == null || v.isEmpty)
-                                  return "Please confirm your password";
-                                if (v != password.text)
-                                  return "Passwords do not match";
-                                return null;
-                              },
-                              autovalidateMode:
-                                  AutovalidateMode.onUserInteraction,
-                            ),
-
-                            // Phone
-                            const Gap(16),
-                            const Text("Phone Number",
-                                style: TextStyle(
-                                    color: AppColors.primary,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold)),
-                            const Gap(8),
-                            CustomText(
-                              hinttext: "enter your phone number",
-                              mycontroller: phone,
-                            ),
-
-                            // Role dropdown
+                            // Role
                             const Gap(16),
                             const Text(
                               "Your Role",
                               style: TextStyle(
-                                  color: AppColors.primary,
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.bold),
+                                color: AppColors.primary,
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const Gap(8),
                             RoleDropdown(
@@ -304,8 +194,7 @@ String? disability;
                                   setState(() => selectedRole = v),
                             ),
 
-                            // Role-specific fields (ONE place)
-                            Gap(12),
+                            const Gap(12),
                             AnimatedSwitcher(
                               duration: const Duration(milliseconds: 250),
                               child: RoleFields(
@@ -314,11 +203,9 @@ String? disability;
                                 patientAge: patientAge,
                                 assistage: assistage,
                                 volunteerage: volunteerage,
-                               // disability:disability,
                               ),
                             ),
 
-                            // Submit
                             const Gap(20),
                             CustomButtonAuth(
                               title: "Sign Up",
@@ -326,40 +213,30 @@ String? disability;
                                 final result = await registerOnDjango();
 
                                 if (result["success"] == true) {
-                                  // Successful
-<<<<<<< HEAD
-                                  final userProvider =
-                                    Provider.of<UserProvider>(context, listen: false);
-                                    userProvider.setUser(
+                                  Provider.of<UserProvider>(
+                                    context,
+                                    listen: false,
+                                  ).setUser(
                                     name: username.text,
                                     email: email.text,
-                                    role: selectedRole!,
-                                );
-                                  if (selectedRole == "Patient") 
-                                  {
-                                    if (disability == "blind")
-                                    {Navigator.of(context).pushReplacementNamed("blind");}
-                                    }
-                                  if (selectedRole == "First Assistant") 
-                                  {Navigator.of(context).pushReplacementNamed("assistant");}
-                                  if (selectedRole == "Volunteer") 
-                                  {Navigator.of(context).pushReplacementNamed("homepage");}
-
-=======
-                                  await AwesomeDialog(
-                                    context: context,
-                                    dialogType: DialogType.success,
-                                    title: "Success",
-                                    desc: "Account created successfully!",
-                                    btnOkOnPress: () {},
-                                  ).show();
+                                    role: selectedRole ?? '',
+                                  );
 
                                   if (!mounted) return;
-                                  Navigator.of(context)
-                                      .pushReplacementNamed("login");
->>>>>>> 5e54c68add19fe87d7780c00aaf660a95dfde551
+
+                                  if (selectedRole == "Patient" &&
+                                      disability == "blind") {
+                                    Navigator.of(context)
+                                        .pushReplacementNamed("blind");
+                                  } else if (selectedRole ==
+                                      "First Assistant") {
+                                    Navigator.of(context)
+                                        .pushReplacementNamed("assistant");
+                                  } else {
+                                    Navigator.of(context)
+                                        .pushReplacementNamed("homepage");
+                                  }
                                 } else {
-                                  // Error from backend
                                   await AwesomeDialog(
                                     context: context,
                                     dialogType: DialogType.error,
@@ -373,20 +250,20 @@ String? disability;
 
                             const Gap(12),
                             InkWell(
-                              onTap: () {
-                                Navigator.of(context)
-                                    .pushReplacementNamed("login");
-                              },
+                              onTap: () => Navigator.of(context)
+                                  .pushReplacementNamed("login"),
                               child: const Center(
                                 child: Text.rich(
                                   TextSpan(
                                     children: [
                                       TextSpan(
-                                          text: "Already have an account?",
-                                          style: TextStyle(
-                                              fontSize: 14.7,
-                                              fontWeight: FontWeight.w500,
-                                              color: AppColors.primary)),
+                                        text: "Already have an account? ",
+                                        style: TextStyle(
+                                          fontSize: 14.7,
+                                          fontWeight: FontWeight.w500,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
                                       TextSpan(
                                         text: "Login",
                                         style: TextStyle(
@@ -411,6 +288,103 @@ String? disability;
           );
         },
       ),
+    );
+  }
+
+  Widget _section(String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Gap(16),
+        Text(
+          label,
+          style: const TextStyle(
+            color: AppColors.primary,
+            fontSize: 17,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const Gap(8),
+        CustomText(
+          hinttext: "enter your ${label.toLowerCase()}",
+          mycontroller: controller,
+        ),
+      ],
+    );
+  }
+
+  Widget _labeledField(String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: AppColors.primary,
+            fontSize: 17,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const Gap(8),
+        CustomText(
+          hinttext: label.toLowerCase(),
+          mycontroller: controller,
+        ),
+      ],
+    );
+  }
+
+  Widget _passwordSection(
+      String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Gap(16),
+        Text(
+          label,
+          style: const TextStyle(
+            color: AppColors.primary,
+            fontSize: 17,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const Gap(8),
+        PasswordField(
+          phint: "enter your password",
+          mycontroller: controller,
+          validator: (v) =>
+              v == null || v.isEmpty ? "Password is required" : null,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+        ),
+      ],
+    );
+  }
+
+  Widget _confirmPasswordSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Gap(16),
+        const Text(
+          "Confirm Password",
+          style: TextStyle(
+            color: AppColors.primary,
+            fontSize: 17,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const Gap(8),
+        PasswordField(
+          phint: "enter your password again",
+          mycontroller: repassword,
+          validator: (v) {
+            if (v == null || v.isEmpty) return "Please confirm your password";
+            if (v != password.text) return "Passwords do not match";
+            return null;
+          },
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+        ),
+      ],
     );
   }
 }

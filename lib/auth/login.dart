@@ -1,10 +1,7 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
-import 'package:front/component/UserProvider.dart';
-=======
 import 'package:front/color.dart';
->>>>>>> 5e54c68add19fe87d7780c00aaf660a95dfde551
+import 'package:front/component/UserProvider.dart';
 import 'package:front/component/custom_button_auth.dart';
 import 'package:front/component/password.dart';
 import 'package:front/component/textform.dart';
@@ -23,7 +20,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final TextEditingController username = TextEditingController();
   final TextEditingController password = TextEditingController();
-  final storage = FlutterSecureStorage();
+  final storage = const FlutterSecureStorage();
 
   Future<Map<String, dynamic>> loginToDjango() async {
     final url = Uri.parse("http://10.0.2.2:8000/api/account/login/");
@@ -33,18 +30,16 @@ class _LoginState extends State<Login> {
         url,
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
-          "username": username.text.trim(), // NEW → Django يحتاج username
-          "password": password.text.trim(), // NEW
+          "username": username.text.trim(),
+          "password": password.text.trim(),
         }),
       );
 
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200 && data["access"] != null) {
-        // ✔ تخزين التوكنات
-        await storage.write(key: "access", value: data["access"]); // NEW
-        await storage.write(key: "refresh", value: data["refresh"]); // NEW
-
+        await storage.write(key: "access", value: data["access"]);
+        await storage.write(key: "refresh", value: data["refresh"]);
         return {"success": true, "data": data};
       } else {
         return {"success": false, "message": data};
@@ -130,7 +125,6 @@ class _LoginState extends State<Login> {
                               alignment: Alignment.topRight,
                               child: const Text(
                                 "forgot password?",
-                                textAlign: TextAlign.right,
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w500,
@@ -141,27 +135,22 @@ class _LoginState extends State<Login> {
                             CustomButtonAuth(
                               title: "Login",
                               onPressed: () async {
-                                final result = await loginToDjango(); // NEW
+                                final result = await loginToDjango();
 
                                 if (result["success"] == true) {
                                   final userProvider =
                                       Provider.of<UserProvider>(context, listen: false);
-                                      userProvider.setUser(
-                                      name: result["username"],   
-                                      email: result["email"],
-                                      role: result["role"] ?? '',
+
+                                  userProvider.setUser(
+                                    name: result["username"],
+                                    email: result["email"],
+                                    role: result["role"] ?? '',
                                   );
 
-<<<<<<< HEAD
-                                  Navigator.of(context).pushReplacementNamed("homepage");
-=======
                                   if (!mounted) return;
-                                  Navigator.of(
-                                    context,
-                                  ).pushReplacementNamed("homepage");
->>>>>>> 5e54c68add19fe87d7780c00aaf660a95dfde551
+                                  Navigator.of(context)
+                                      .pushReplacementNamed("homepage");
                                 } else {
-                                  // Error message
                                   await AwesomeDialog(
                                     context: context,
                                     dialogType: DialogType.error,
@@ -179,7 +168,6 @@ class _LoginState extends State<Login> {
                                   child: Divider(
                                     color: AppColors.yellowButton,
                                     thickness: 1.4,
-                                    endIndent: 10,
                                   ),
                                 ),
                                 Text(
@@ -193,7 +181,6 @@ class _LoginState extends State<Login> {
                                   child: Divider(
                                     color: AppColors.yellowButton,
                                     thickness: 1.4,
-                                    indent: 10,
                                   ),
                                 ),
                               ],
@@ -220,16 +207,15 @@ class _LoginState extends State<Login> {
                             const Gap(12),
                             InkWell(
                               onTap: () {
-                                Navigator.of(
-                                  context,
-                                ).pushReplacementNamed("signup");
+                                Navigator.of(context)
+                                    .pushReplacementNamed("signup");
                               },
                               child: const Center(
                                 child: Text.rich(
                                   TextSpan(
                                     children: [
                                       TextSpan(
-                                        text: "Don't have an account?",
+                                        text: "Don't have an account? ",
                                         style: TextStyle(
                                           fontWeight: FontWeight.w500,
                                           color: AppColors.primary,

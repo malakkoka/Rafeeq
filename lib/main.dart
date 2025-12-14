@@ -1,52 +1,42 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+
 import 'package:front/auth/assistant.dart';
 import 'package:front/auth/blind.dart';
 import 'package:front/auth/editprofile.dart';
 import 'package:front/auth/login.dart';
 import 'package:front/auth/signup.dart';
+
 import 'package:front/component/UserProvider.dart';
 import 'package:front/homepage.dart';
+
 import 'package:front/theme/theme.dart';
 import 'package:front/theme/themeprovider.dart';
+
 import 'package:provider/provider.dart';
 import 'auth/volunteer/volunteerpage.dart';
 
-//import 'package:front/emergencymode/fall_detector.dart';
-//import 'package:front/emergencymode/user_type.dart';
-
-
-//camera imp.
+// camera
 import 'package:camera/camera.dart';
 
 List<CameraDescription>? cameras;
-void main() async {
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   cameras = await availableCameras();
-  // Firebase initialization
   await Firebase.initializeApp();
 
-  // Theme Provider + MyApp
-<<<<<<< HEAD
-runApp(
-  MultiProvider(
-    providers: [
-      ChangeNotifierProvider(create: (_) => Themeprovider()),
-      ChangeNotifierProvider(create: (_) => UserProvider()),
-    ],
-    child: const MyApp(),
-  ),
-);
-=======
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => Themeprovider(),
-      child: MyApp(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => Themeprovider()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+      ],
+      child: const MyApp(),
     ),
   );
->>>>>>> 5e54c68add19fe87d7780c00aaf660a95dfde551
 }
 
 class MyApp extends StatefulWidget {
@@ -57,8 +47,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  bool isDarkMode = false;
-
   @override
   void initState() {
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
@@ -75,7 +63,6 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      // home: FirebaseAuth.instance.currentUser == null ? Login() : Homepage(),
       home: Login(),
 
       routes: {
@@ -84,12 +71,10 @@ class _MyAppState extends State<MyApp> {
         "signup": (context) => Signup(),
         "editprofile": (context) => EditProfile(),
         "blind": (context) => Blind(),
-<<<<<<< HEAD
-        "assistent": (context) => Assistent(),
-
-=======
->>>>>>> 5e54c68add19fe87d7780c00aaf660a95dfde551
+        "assistant": (context) => Assistent(),
+        "volunteer": (context) => VolunteerHome(),
       },
+
       theme: Provider.of<Themeprovider>(context).themeData,
       darkTheme: darkMode,
     );
