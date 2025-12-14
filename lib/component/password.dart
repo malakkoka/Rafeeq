@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:front/color.dart';
 
 class PasswordField extends StatefulWidget {
   final TextEditingController mycontroller;
   final String phint;
   final String? Function(String?)? validator;
   final AutovalidateMode? autovalidateMode;
-  const PasswordField(
-    {super.key,
-      required this.mycontroller,
-        required this.phint,
-          this.validator,
-            this.autovalidateMode
-            });
-  
+  const PasswordField({
+    super.key,
+    required this.mycontroller,
+    required this.phint,
+    this.validator,
+    this.autovalidateMode,
+  });
 
   @override
   State<PasswordField> createState() => _PasswordFieldState();
@@ -27,25 +27,23 @@ class _PasswordFieldState extends State<PasswordField> {
       controller: widget.mycontroller,
       obscureText: !_isVisible,
       decoration: InputDecoration(
-        hintText:widget.phint,
-        hintStyle: const TextStyle(fontSize: 14),
-        contentPadding:
-            const EdgeInsets.symmetric(vertical: 4, horizontal: 20),
+        hintText: widget.phint,
+        hintStyle: const TextStyle(fontSize: 16, color: AppColors.primary),
+        contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 20),
         filled: true,
-        fillColor: Colors.grey[200],
+        fillColor: AppColors.background,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(color: Colors.grey),
+          borderSide: BorderSide(color: AppColors.background),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(
-              color: Color.fromARGB(255, 199, 197, 197)),
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide(color: AppColors.background),
         ),
         suffixIcon: IconButton(
           icon: Icon(
             _isVisible ? Icons.visibility : Icons.visibility_off,
-            color: Colors.grey[600],
+            color: AppColors.accent,
           ),
           onPressed: () {
             setState(() {
@@ -54,7 +52,7 @@ class _PasswordFieldState extends State<PasswordField> {
           },
         ),
       ),
-      validator:widget.validator,
+      validator: widget.validator,
       autovalidateMode: widget.autovalidateMode,
     );
   }

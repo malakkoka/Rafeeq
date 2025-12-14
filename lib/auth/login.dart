@@ -1,15 +1,18 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:front/component/UserProvider.dart';
+=======
+import 'package:front/color.dart';
+>>>>>>> 5e54c68add19fe87d7780c00aaf660a95dfde551
 import 'package:front/component/custom_button_auth.dart';
 import 'package:front/component/password.dart';
 import 'package:front/component/textform.dart';
 import 'package:gap/gap.dart';
-import 'dart:convert'; 
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
-
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -30,8 +33,8 @@ class _LoginState extends State<Login> {
         url,
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
-          "username": username.text.trim(),   // NEW → Django يحتاج username
-          "password": password.text.trim(),   // NEW
+          "username": username.text.trim(), // NEW → Django يحتاج username
+          "password": password.text.trim(), // NEW
         }),
       );
 
@@ -54,6 +57,7 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
@@ -71,7 +75,7 @@ class _LoginState extends State<Login> {
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 420),
                     child: Card(
-                      color: const Color.fromARGB(255, 201, 171, 226),
+                      color: AppColors.inputField,
                       elevation: 8,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -87,49 +91,57 @@ class _LoginState extends State<Login> {
                               child: Text(
                                 "Login",
                                 style: TextStyle(
-                                  fontSize: 20,
-                                  color: Color(0xff3B1E54),
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 40,
+                                  color: AppColors.accent,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
                             const Gap(16),
                             const Text(
-                              "username",
+                              "Username",
                               style: TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold),
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primary,
+                              ),
                             ),
-                            const Gap(12),
+                            const Gap(5),
                             CustomText(
-                              hinttext: "enter your username ",
+                              hinttext: "Enter your username",
                               mycontroller: username,
                             ),
-                            const Gap(12),
+                            const Gap(16),
                             const Text(
-                              "password",
+                              "Password",
                               style: TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold),
+                                color: AppColors.primary,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                            const Gap(12),
-                            PasswordField(phint: "Enter your password",
-                              mycontroller: password),
+                            const Gap(5),
+                            PasswordField(
+                              phint: "Enter your password",
+                              mycontroller: password,
+                            ),
                             Container(
-                              margin:
-                                  const EdgeInsets.only(top: 10, bottom: 20),
+                              margin: const EdgeInsets.only(top: 2, bottom: 20),
                               alignment: Alignment.topRight,
                               child: const Text(
-                                "forget password ?",
+                                "forgot password?",
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  color: Color.fromARGB(255, 150, 148, 148),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.primary,
                                 ),
                               ),
                             ),
                             CustomButtonAuth(
-                              title: "login",
+                              title: "Login",
                               onPressed: () async {
-                                 final result = await loginToDjango(); // NEW
+                                final result = await loginToDjango(); // NEW
 
                                 if (result["success"] == true) {
                                   final userProvider =
@@ -140,7 +152,14 @@ class _LoginState extends State<Login> {
                                       role: result["role"] ?? '',
                                   );
 
+<<<<<<< HEAD
                                   Navigator.of(context).pushReplacementNamed("homepage");
+=======
+                                  if (!mounted) return;
+                                  Navigator.of(
+                                    context,
+                                  ).pushReplacementNamed("homepage");
+>>>>>>> 5e54c68add19fe87d7780c00aaf660a95dfde551
                                 } else {
                                   // Error message
                                   await AwesomeDialog(
@@ -158,60 +177,71 @@ class _LoginState extends State<Login> {
                               children: const [
                                 Expanded(
                                   child: Divider(
-                                    color: Colors.grey,
-                                    thickness: 1,
+                                    color: AppColors.yellowButton,
+                                    thickness: 1.4,
                                     endIndent: 10,
                                   ),
                                 ),
                                 Text(
-                                  "Or",
+                                  "OR",
                                   style: TextStyle(
-                                      color: Colors.grey,
-                                      fontWeight: FontWeight.bold),
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                                 Expanded(
                                   child: Divider(
-                                    color: Colors.grey,
-                                    thickness: 1,
+                                    color: AppColors.yellowButton,
+                                    thickness: 1.4,
                                     indent: 10,
                                   ),
                                 ),
                               ],
                             ),
                             const Gap(12),
-                            SizedBox(
-                              width: double.infinity,
-                              height: 48,
-                              child: MaterialButton(
-                                onPressed: () {},
-                                color: const Color(0xff4E56C0),
-                                textColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Image.network(
-                                  "https://image.similarpng.com/file/similarpng/very-thumbnail/2020/06/Logo-google-icon-PNG.png",
-                                  width: 20,
-                                  height: 20,
+                            Center(
+                              child: SizedBox(
+                                width: 170,
+                                height: 50,
+                                child: MaterialButton(
+                                  onPressed: () {},
+                                  color: AppColors.accent,
+                                  textColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  child: Image.asset(
+                                    "images/googleImage.webp",
+                                    width: 43,
+                                  ),
                                 ),
                               ),
                             ),
                             const Gap(12),
                             InkWell(
                               onTap: () {
-                                Navigator.of(context)
-                                    .pushReplacementNamed("signup");
+                                Navigator.of(
+                                  context,
+                                ).pushReplacementNamed("signup");
                               },
                               child: const Center(
                                 child: Text.rich(
                                   TextSpan(
                                     children: [
-                                      TextSpan(text: "dont have acount? "),
                                       TextSpan(
-                                        text: "register ",
+                                        text: "Don't have an account?",
                                         style: TextStyle(
-                                          color: Color(0xff4E56C0),
-                                          fontWeight: FontWeight.bold,
+                                          fontWeight: FontWeight.w500,
+                                          color: AppColors.primary,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: "Sign Up",
+                                        style: TextStyle(
+                                          fontSize: 15.5,
+                                          color: AppColors.accent,
+                                          fontWeight: FontWeight.w900,
                                         ),
                                       ),
                                     ],

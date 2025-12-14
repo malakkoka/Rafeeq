@@ -11,6 +11,10 @@ import 'package:front/homepage.dart';
 import 'package:front/theme/theme.dart';
 import 'package:front/theme/themeprovider.dart';
 import 'package:provider/provider.dart';
+import 'auth/volunteer/volunteerpage.dart';
+
+//import 'package:front/emergencymode/fall_detector.dart';
+//import 'package:front/emergencymode/user_type.dart';
 
 
 //camera imp.
@@ -25,6 +29,7 @@ void main() async {
   await Firebase.initializeApp();
 
   // Theme Provider + MyApp
+<<<<<<< HEAD
 runApp(
   MultiProvider(
     providers: [
@@ -34,6 +39,14 @@ runApp(
     child: const MyApp(),
   ),
 );
+=======
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => Themeprovider(),
+      child: MyApp(),
+    ),
+  );
+>>>>>>> 5e54c68add19fe87d7780c00aaf660a95dfde551
 }
 
 class MyApp extends StatefulWidget {
@@ -62,7 +75,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-     // home: FirebaseAuth.instance.currentUser == null ? Login() : Homepage(),
+      // home: FirebaseAuth.instance.currentUser == null ? Login() : Homepage(),
       home: Login(),
 
       routes: {
@@ -71,8 +84,11 @@ class _MyAppState extends State<MyApp> {
         "signup": (context) => Signup(),
         "editprofile": (context) => EditProfile(),
         "blind": (context) => Blind(),
+<<<<<<< HEAD
         "assistent": (context) => Assistent(),
 
+=======
+>>>>>>> 5e54c68add19fe87d7780c00aaf660a95dfde551
       },
       theme: Provider.of<Themeprovider>(context).themeData,
       darkTheme: darkMode,
