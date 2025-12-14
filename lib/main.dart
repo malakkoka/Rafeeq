@@ -9,6 +9,10 @@ import 'package:front/homepage.dart';
 import 'package:front/theme/theme.dart';
 import 'package:front/theme/themeprovider.dart';
 import 'package:provider/provider.dart';
+import 'auth/volunteer/volunteerpage.dart';
+
+//import 'package:front/emergencymode/fall_detector.dart';
+//import 'package:front/emergencymode/user_type.dart';
 
 //camera imp.
 import 'package:camera/camera.dart';
@@ -26,8 +30,8 @@ void main() async {
     ChangeNotifierProvider(
       create: (context) => Themeprovider(),
       child: MyApp(),
-),
-);
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -56,7 +60,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-     // home: FirebaseAuth.instance.currentUser == null ? Login() : Homepage(),
+      // home: FirebaseAuth.instance.currentUser == null ? Login() : Homepage(),
       home: Login(),
 
       routes: {
@@ -65,7 +69,6 @@ class _MyAppState extends State<MyApp> {
         "signup": (context) => Signup(),
         "editprofile": (context) => EditProfile(),
         "blind": (context) => Blind(),
-
       },
       theme: Provider.of<Themeprovider>(context).themeData,
       darkTheme: darkMode,
