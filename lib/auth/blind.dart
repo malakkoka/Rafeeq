@@ -4,6 +4,10 @@ import 'package:front/main.dart';
 import 'package:front/component/customdrawer.dart';
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
 class Blind extends StatefulWidget {
   const Blind({super.key});
 
@@ -15,9 +19,11 @@ class _BlindState extends State<Blind> {
   late CameraController controller;
   bool isReady = false;
 
-//sound
+  Timer? captureTimer;
+  bool isSending = false;
+
   final FlutterTts tts = FlutterTts();
-  bool isSpeaking = false; 
+  bool isSpeaking = false;
 
   @override
   void initState() {
@@ -26,8 +32,68 @@ class _BlindState extends State<Blind> {
     setupTTS();
   }
 
-  Future<void> setupTTS() async {
-  //stop waive
+  // ================= CAMERA =================
+
+  Future<void> initCamera() async {
+    controller = CameraController(
+      cameras![0],
+      ResolutionPreset.medium,
+      enableAudio: false,
+    );
+
+    await controller.initialize();
+    if (!mounted) return;
+
+    setState(() => isReady = true);
+
+    startAutoCapture();
+  }
+
+  void startAutoCapture() {
+    captureTimer = Timer.periodic(
+      const Duration(seconds: 3),
+      (_) => captureAndSend(),
+    );
+  }
+
+  Future<void> captureAndSend() async {
+    if (!controller.value.isInitialized) return;
+    if (isSending) return;
+
+    try {
+      isSending = true;
+
+      final XFile image = await controller.takePicture();
+
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('http://10.0.2.2:8000/api/analyze-image/'),
+      );
+
+      request.files.add(
+        await http.MultipartFile.fromPath('image', image.path),
+      );
+
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        final body = await response.stream.bytesToString();
+        final text = jsonDecode(body)['result'] ?? '';
+
+        if (text.isNotEmpty) {
+          speakText(text);
+        }
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      isSending = false;
+    }
+  }
+
+  // ================= TTS =================
+
+  void setupTTS() {
     tts.setCompletionHandler(() {
       setState(() {
         isSpeaking = false;
@@ -36,97 +102,55 @@ class _BlindState extends State<Blind> {
   }
 
   Future<void> speakText(String text) async {
+    if (isSpeaking) return;
+
     setState(() {
-      isSpeaking = true; //waivestart
+      isSpeaking = true;
     });
+
     await tts.speak(text);
   }
 
-  Future<void> initCamera() async {
-    controller = CameraController(
-      cameras![0],
-      ResolutionPreset.high,
-      enableAudio: false,
-      
-    );
-
-    await controller.initialize();
-    if (!mounted) return;
-
-    setState(() => isReady = true);
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-    tts.stop();
-  }
+  // ================= UI =================
 
   @override
   Widget build(BuildContext context) {
-      return  Scaffold(
-        drawer: CustomDrawer(),
-        appBar: AppBar(
-          backgroundColor: const Color.fromARGB(255, 35, 85, 82),
-          title: const Text("blind interface"),
-        ),
-            body: Stack(
+    return Scaffold(
+      drawer: CustomDrawer(),
+      appBar: AppBar(
+        title: const Text("Blind Interface"),
+        backgroundColor: const Color.fromARGB(255, 35, 85, 82),
+      ),
+      body: Stack(
         alignment: Alignment.center,
         children: [
-          // الكاميرا
           isReady
-              ? Center(
-                  child: Container(
-                    width: 350,
-                    height: 550,
-                    decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 145, 143, 143),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color.fromARGB(255, 145, 143, 143),
-                          blurRadius: 15,
-                          spreadRadius: 3,
-                        )
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: CameraPreview(controller),
-                    ),
-                  ),
-                )
-              : const Center(child: CircularProgressIndicator()),
+              ? CameraPreview(controller)
+              : const CircularProgressIndicator(),
 
-          // دائرة الموجات أسفل الشاشة
           Positioned(
             bottom: 30,
             child: AvatarGlow(
               glowColor: const Color.fromARGB(255, 35, 85, 82),
               animate: isSpeaking,
               duration: const Duration(milliseconds: 1500),
-              glowShape: BoxShape.circle,
-              child: Material(
-                elevation: 5,
-                shape: const CircleBorder(),
-                color: const Color.fromARGB(255, 35, 85, 82),
-                child: const CircleAvatar(
-                  radius: 35,
-                  backgroundColor: Color.fromARGB(255, 35, 85, 82),
-                  child: Icon(
-                    Icons.graphic_eq,
-                    color: Colors.white,
-                    size: 35,
-                  ),
-                ),
+              child: const CircleAvatar(
+                radius: 35,
+                backgroundColor: Color.fromARGB(255, 35, 85, 82),
+                child: Icon(Icons.graphic_eq, color: Colors.white),
               ),
             ),
           ),
         ],
       ),
     );
-    
+  }
 
+  @override
+  void dispose() {
+    captureTimer?.cancel();
+    tts.stop();
+    controller.dispose();
+    super.dispose();
   }
 }

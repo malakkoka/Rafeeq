@@ -1,4 +1,5 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:front/component/UserProvider.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:front/component/role_fields.dart';
 import 'package:front/component/password.dart';
 import 'package:front/component/textform.dart';
 import 'package:front/component/custom_button_auth.dart';
+import 'package:provider/provider.dart';
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -26,6 +28,8 @@ class _SignupState extends State<Signup> {
 
   // Role selection
   String? selectedRole;
+String? disability;
+
 
   // Role-specific controllers
   final TextEditingController assistantnumber        = TextEditingController();
@@ -34,6 +38,7 @@ class _SignupState extends State<Signup> {
   final TextEditingController assistantDept    = TextEditingController();
   final TextEditingController volunteerage     = TextEditingController();
   final TextEditingController volunteerHours   = TextEditingController();
+  //final TextEditingController disability  = TextEditingController();
   final TextEditingController repassword = TextEditingController();
 
   @override
@@ -279,9 +284,8 @@ const Gap(16),
                                 assistantnumber: assistantnumber,
                                 patientAge: patientAge,
                                 assistage: assistage,
-                                assistantDept: assistantDept,
                                 volunteerage: volunteerage,
-                                volunteerHours: volunteerHours,
+                               // disability:disability,
                               ),
                             ),
 
@@ -294,16 +298,22 @@ const Gap(16),
 
                                 if (result["success"] == true) {
                                   // Successful
-                                  await AwesomeDialog(
-                                    context: context,
-                                    dialogType: DialogType.success,
-                                    title: "Success",
-                                    desc: "Account created successfully!",
-                                    btnOkOnPress: () {},
-                                  ).show();
-
-                                  if (!mounted) return;
-                                  Navigator.of(context).pushReplacementNamed("login");
+                                  final userProvider =
+                                    Provider.of<UserProvider>(context, listen: false);
+                                    userProvider.setUser(
+                                    name: username.text,
+                                    email: email.text,
+                                    role: selectedRole!,
+                                );
+                                  if (selectedRole == "Patient") 
+                                  {
+                                    if (disability == "blind")
+                                    {Navigator.of(context).pushReplacementNamed("blind");}
+                                    }
+                                  if (selectedRole == "First Assistant") 
+                                  {Navigator.of(context).pushReplacementNamed("assistant");}
+                                  if (selectedRole == "Volunteer") 
+                                  {Navigator.of(context).pushReplacementNamed("homepage");}
 
                                 } else {
                                   // Error from backend

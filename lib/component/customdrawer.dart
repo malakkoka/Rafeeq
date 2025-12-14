@@ -1,3 +1,4 @@
+import 'package:front/component/UserProvider.dart';
 import 'package:front/component/customlisttile.dart';
 import '../theme/themeprovider.dart';
 import 'package:flutter/material.dart';
@@ -6,10 +7,13 @@ import 'package:provider/provider.dart';
 
 
 class CustomDrawer extends StatelessWidget {
+  
+
   const CustomDrawer({super.key});
 
 @override
   Widget build(BuildContext context) {
+    final user = Provider.of<UserProvider>(context);
     return Drawer(
       child: Container(
         padding: const EdgeInsets.all(10),
@@ -36,18 +40,18 @@ class CustomDrawer extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          "Walaa",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          "walaamhmd@gmail.com",
-                          style: TextStyle(fontWeight: FontWeight.w500),
-                        ),
+                        Text(
+                        user.name ?? '',
+                        style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                      ),
+                    const SizedBox(height: 4),
+                    Text(
+                    user.email ?? '',
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
                         const SizedBox(height: 8),
                         Align(
                           child: SizedBox(
@@ -188,7 +192,10 @@ class CustomDrawer extends StatelessWidget {
                   color: Color.fromARGB(255, 28, 79, 127),
                 ),
               ),
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context)
+                                    .pushReplacementNamed("login");
+              },
             ),
           ],
         ),

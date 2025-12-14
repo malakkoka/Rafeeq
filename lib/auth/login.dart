@@ -1,5 +1,6 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:front/component/UserProvider.dart';
 import 'package:front/component/custom_button_auth.dart';
 import 'package:front/component/password.dart';
 import 'package:front/component/textform.dart';
@@ -7,6 +8,7 @@ import 'package:gap/gap.dart';
 import 'dart:convert'; 
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:provider/provider.dart';
 
 
 class Login extends StatefulWidget {
@@ -130,16 +132,14 @@ class _LoginState extends State<Login> {
                                  final result = await loginToDjango(); // NEW
 
                                 if (result["success"] == true) {
-                                  // Success → انتقلي للهوم
-                                  await AwesomeDialog(
-                                    context: context,
-                                    dialogType: DialogType.success,
-                                    title: "Success",
-                                    desc: "Login successful!",
-                                    btnOkOnPress: () {},
-                                  ).show();
+                                  final userProvider =
+                                      Provider.of<UserProvider>(context, listen: false);
+                                      userProvider.setUser(
+                                      name: result["username"],   
+                                      email: result["email"],
+                                      role: result["role"] ?? '',
+                                  );
 
-                                  if (!mounted) return;
                                   Navigator.of(context).pushReplacementNamed("homepage");
                                 } else {
                                   // Error message

@@ -1,14 +1,17 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:front/auth/assistant.dart';
 import 'package:front/auth/blind.dart';
 import 'package:front/auth/editprofile.dart';
 import 'package:front/auth/login.dart';
 import 'package:front/auth/signup.dart';
+import 'package:front/component/UserProvider.dart';
 import 'package:front/homepage.dart';
 import 'package:front/theme/theme.dart';
 import 'package:front/theme/themeprovider.dart';
 import 'package:provider/provider.dart';
+
 
 //camera imp.
 import 'package:camera/camera.dart';
@@ -22,11 +25,14 @@ void main() async {
   await Firebase.initializeApp();
 
   // Theme Provider + MyApp
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => Themeprovider(),
-      child: MyApp(),
-),
+runApp(
+  MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => Themeprovider()),
+      ChangeNotifierProvider(create: (_) => UserProvider()),
+    ],
+    child: const MyApp(),
+  ),
 );
 }
 
@@ -65,6 +71,7 @@ class _MyAppState extends State<MyApp> {
         "signup": (context) => Signup(),
         "editprofile": (context) => EditProfile(),
         "blind": (context) => Blind(),
+        "assistent": (context) => Assistent(),
 
       },
       theme: Provider.of<Themeprovider>(context).themeData,

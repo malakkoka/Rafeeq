@@ -42,7 +42,6 @@ class RoleDropdown extends StatelessWidget {
               .toList(),
           onChanged: onChanged,
 
-          // زر الاختيار (نفس أجواء CustomText عندك)
           buttonStyleData: ButtonStyleData(
             height: 48,
             padding: const EdgeInsets.symmetric(horizontal: 16),

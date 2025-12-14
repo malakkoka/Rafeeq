@@ -17,7 +17,9 @@ class _HomepageState extends State<Homepage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: CustomDrawer(),
+      appBar: AppBar(title:Text(" home page"),),
+      drawer: CustomDrawer(),
+      body: Container(),
       
     );
   }
