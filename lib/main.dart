@@ -4,16 +4,14 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'package:front/auth/assistant.dart';
 import 'package:front/auth/blind.dart';
-import 'package:front/auth/editprofile.dart';
+import 'package:front/auth/deaf.dart';
 import 'package:front/auth/login.dart';
 import 'package:front/auth/signup.dart';
-
+import 'package:front/component/editprofile.dart';
 import 'package:front/component/UserProvider.dart';
 import 'package:front/homepage.dart';
-
 import 'package:front/theme/theme.dart';
 import 'package:front/theme/themeprovider.dart';
-
 import 'package:provider/provider.dart';
 import 'auth/volunteer/volunteerpage.dart';
 
@@ -63,16 +61,18 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Login(),
+      home: Blind(),
 
       routes: {
         "login": (context) => Login(),
         "homepage": (context) => Homepage(),
         "signup": (context) => Signup(),
-        "editprofile": (context) => EditProfile(),
+        "editprofile": (context) => const EditProfile(),
         "blind": (context) => Blind(),
         "assistant": (context) => Assistent(),
         "volunteer": (context) => VolunteerHome(),
+        "deaf": (context) => Deaf(),
+
       },
 
       theme: Provider.of<Themeprovider>(context).themeData,

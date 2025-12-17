@@ -23,31 +23,52 @@ class _LoginState extends State<Login> {
   final storage = const FlutterSecureStorage();
 
   Future<Map<String, dynamic>> loginToDjango() async {
-    final url = Uri.parse("http://10.0.2.2:8000/api/account/login/");
+  final url = Uri.parse('http://192.168.52.212:8000/api/account/login/');
 
-    try {
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "username": username.text.trim(),
-          "password": password.text.trim(),
-        }),
-      );
+  try {
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "username": username.text.trim(),
+        "password": password.text.trim(),
+      }),
+    );
 
+    debugPrint("LOGIN STATUS: ${response.statusCode}");
+    debugPrint("LOGIN RAW RESPONSE: ${response.body}");
+
+    if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200 && data["access"] != null) {
-        await storage.write(key: "access", value: data["access"]);
-        await storage.write(key: "refresh", value: data["refresh"]);
-        return {"success": true, "data": data};
-      } else {
-        return {"success": false, "message": data};
+      
+        if (data["user"] == null) {
+        return {
+          "success": false,
+          "message": "Invalid response: user is null",
+        };
       }
-    } catch (e) {
-      return {"success": false, "message": e.toString()};
+
+      return {
+        "success": true,
+        "username": data["user"]["username"],
+        "email": data["user"]["email"],
+        "role": data["user"]["user_type"],
+        "token": data["access"],
+      };
+    } else {
+      return {
+        "success": false,
+        "message": response.body.toString(),
+      };
     }
+  } catch (e) {
+    return {
+      "success": false,
+      "message": e.toString(),
+    };
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -139,28 +160,39 @@ class _LoginState extends State<Login> {
 
                                 if (result["success"] == true) {
                                   final userProvider =
-                                      Provider.of<UserProvider>(context, listen: false);
+                                  Provider.of<UserProvider>(context, listen: false);
 
                                   userProvider.setUser(
-                                    name: result["username"],
-                                    email: result["email"],
-                                    role: result["role"] ?? '',
-                                  );
+                                  name: result["username"],
+                                  email: result["email"],
+                                  role: result["role"] ?? '',
+                                );
 
-                                  if (!mounted) return;
-                                  Navigator.of(context)
-                                      .pushReplacementNamed("homepage");
-                                } else {
-                                  await AwesomeDialog(
-                                    context: context,
-                                    dialogType: DialogType.error,
-                                    title: 'Login Error',
-                                    desc: result["message"].toString(),
-                                    btnOkOnPress: () {},
-                                  ).show();
-                                }
-                              },
-                            ),
+                                if (!mounted) return;
+                                if (result["role"] == "blind") {
+                                Navigator.of(context)
+                                  .pushReplacementNamed("blind");
+                            } else if (result["role"] == "assistant") {
+                              Navigator.of(context)
+                                  .pushReplacementNamed("assistant");
+                            } else if (result["role"] == "volunteer") {
+                              Navigator.of(context)
+                                  .pushReplacementNamed("volunteerpage");
+                            } else if (result["role"] == "deaf") {
+                              Navigator.of(context)
+                                  .pushReplacementNamed("deaf");
+                            } 
+                              } else {
+                                await AwesomeDialog(
+                                  context: context,
+                                  dialogType: DialogType.error,
+                                  title: "Login Error",
+                                  desc: result["message"].toString(),
+                                  btnOkOnPress: () {},
+                                ).show();
+                              }
+                            },
+                          ),
                             const Gap(12),
                             Row(
                               children: const [

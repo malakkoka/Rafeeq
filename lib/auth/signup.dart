@@ -30,7 +30,7 @@ class _SignupState extends State<Signup> {
 
   // Role selection
   String? selectedRole;
-  String? disability;
+  late final String disability;
 
   // Role-specific controllers
   final TextEditingController assistantnumber = TextEditingController();
@@ -56,7 +56,7 @@ class _SignupState extends State<Signup> {
 
   // API
   Future<Map<String, dynamic>> registerOnDjango() async {
-    final url = Uri.parse("http://10.0.2.2:8000/api/account/register/");
+    final url = Uri.parse('http://192.168.52.212:8000/api/account/register/');
     int age = 0;
 
     if (selectedRole == "Patient") {
@@ -67,12 +67,14 @@ class _SignupState extends State<Signup> {
       age = int.tryParse(volunteerage.text.trim()) ?? 0;
     }
 
-    String userType = "patient";
+    String userType = "blind";
     if (selectedRole == "First Assistant") {
       userType = "assistant";
     } else if (selectedRole == "Volunteer") {
       userType = "volunteer";
     }
+    if (selectedRole == "Patient") {
+      userType = disability;}
 
     try {
       final response = await http.post(
@@ -224,17 +226,20 @@ class _SignupState extends State<Signup> {
 
                                   if (!mounted) return;
 
-                                  if (selectedRole == "Patient" &&
-                                      disability == "blind") {
+                                  if (disability == "blind") {
                                     Navigator.of(context)
                                         .pushReplacementNamed("blind");
                                   } else if (selectedRole ==
-                                      "First Assistant") {
+                                      "Assistant") {
                                     Navigator.of(context)
                                         .pushReplacementNamed("assistant");
-                                  } else {
+                                  }  else if (selectedRole ==
+                                      "deaf") {
                                     Navigator.of(context)
-                                        .pushReplacementNamed("homepage");
+                                        .pushReplacementNamed("deaf");
+                                  }else {
+                                    Navigator.of(context)
+                                        .pushReplacementNamed("volunteerpage");
                                   }
                                 } else {
                                   await AwesomeDialog(
