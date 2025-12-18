@@ -8,10 +8,10 @@ class RoleFields extends StatefulWidget {
   final TextEditingController patientAge;
   final TextEditingController assistantnumber;
   final TextEditingController assistage;
-  final TextEditingController assistantDept;
   final TextEditingController volunteerage;
-  final TextEditingController volunteerHours;
   final String? Function(String?)? validator;
+    final String? Function(String?)? disability;
+
   final AutovalidateMode? autovalidateMode;
 
   const RoleFields({
@@ -20,9 +20,8 @@ class RoleFields extends StatefulWidget {
     required this.assistantnumber,
     required this.patientAge,
     required this.assistage,
-    required this.assistantDept,
     required this.volunteerage,
-    required this.volunteerHours,
+    this.disability,
     this.validator,
     this.autovalidateMode, 
   });

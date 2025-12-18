@@ -2,6 +2,7 @@
 
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:front/color.dart';
+//import 'package:front/component/UserProvider.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ import 'package:front/component/role_fields.dart';
 import 'package:front/component/password.dart';
 import 'package:front/component/textform.dart';
 import 'package:front/component/custom_button_auth.dart';
+//import 'package:provider/provider.dart';
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -26,18 +28,17 @@ class _SignupState extends State<Signup> {
   final TextEditingController username = TextEditingController();
   final TextEditingController phone = TextEditingController();
   final TextEditingController password = TextEditingController();
+  final TextEditingController repassword = TextEditingController();
 
   // Role selection
   String? selectedRole;
+  late final String disability;
 
   // Role-specific controllers
   final TextEditingController assistantnumber = TextEditingController();
   final TextEditingController patientAge = TextEditingController();
   final TextEditingController assistage = TextEditingController();
-  final TextEditingController assistantDept = TextEditingController();
   final TextEditingController volunteerage = TextEditingController();
-  final TextEditingController volunteerHours = TextEditingController();
-  final TextEditingController repassword = TextEditingController();
 
   @override
   void dispose() {
@@ -51,31 +52,31 @@ class _SignupState extends State<Signup> {
     assistantnumber.dispose();
     patientAge.dispose();
     assistage.dispose();
-    assistantDept.dispose();
     volunteerage.dispose();
-    volunteerHours.dispose();
     super.dispose();
   }
 
-//api
+  // API
   Future<Map<String, dynamic>> registerOnDjango() async {
-    final url = Uri.parse("http://10.0.2.2:8000/api/account/register/");
+    final url = Uri.parse('http://192.168.52.212:8000/api/account/register/');
     int age = 0;
 
-    if (selectedRole == "patient") {
+    if (selectedRole == "Patient") {
       age = int.tryParse(patientAge.text.trim()) ?? 0;
-    } else if (selectedRole == "assistant") {
+    } else if (selectedRole == "First Assistant") {
       age = int.tryParse(assistage.text.trim()) ?? 0;
-    } else if (selectedRole == "volunteer") {
+    } else if (selectedRole == "Volunteer") {
       age = int.tryParse(volunteerage.text.trim()) ?? 0;
     }
-    String userType = "patient";
 
+    String userType = "blind";
     if (selectedRole == "First Assistant") {
       userType = "assistant";
     } else if (selectedRole == "Volunteer") {
       userType = "volunteer";
     }
+    if (selectedRole == "Patient") {
+      userType = disability;}
 
     try {
       final response = await http.post(
@@ -96,8 +97,6 @@ class _SignupState extends State<Signup> {
         }),
       );
 
-      print("STATUS: ${response.statusCode}");
-      print("BODY: ${response.body}");
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 201 && data["Isuccess"] == true) {
@@ -153,137 +152,44 @@ class _SignupState extends State<Signup> {
                               ),
                             ),
 
-                            // First/Last name
+                            // First / Last name
                             const Gap(16),
                             Row(
                               children: [
                                 Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text("First Name",
-                                          style: TextStyle(
-                                              color: AppColors.primary,
-                                              fontSize: 17,
-                                              fontWeight: FontWeight.bold)),
-                                      const Gap(8),
-                                      CustomText(
-                                        hinttext: "first name",
-                                        mycontroller: firstName,
-                                      ),
-                                    ],
+                                  child: _labeledField(
+                                    "First Name",
+                                    firstName,
                                   ),
                                 ),
                                 const Gap(12),
                                 Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text("Last Name",
-                                          style: TextStyle(
-                                              color: AppColors.primary,
-                                              fontSize: 17,
-                                              fontWeight: FontWeight.bold)),
-                                      const Gap(8),
-                                      CustomText(
-                                        hinttext: "last name",
-                                        mycontroller: lastName,
-                                      ),
-                                    ],
+                                  child: _labeledField(
+                                    "Last Name",
+                                    lastName,
                                   ),
                                 ),
                               ],
                             ),
 
-                            // Email
-                            const Gap(16),
-                            const Text("Email",
-                                style: TextStyle(
-                                    color: AppColors.primary,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold)),
-                            const Gap(8),
-                            CustomText(
-                              hinttext: "enter your email",
-                              mycontroller: email,
-                            ),
+                            _section("Email", email),
+                            _section("Username", username),
 
-                            //
-                            const Text("User Name",
-                                style: TextStyle(
-                                    color: AppColors.primary,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold)),
-                            const Gap(8),
-                            CustomText(
-                              hinttext: "enter your username",
-                              mycontroller: username,
-                            ),
+                            // Passwords
+                            _passwordSection("Password", password),
+                            _confirmPasswordSection(),
 
-                            // Password
-                            const Gap(16),
-                            const Text("Password",
-                                style: TextStyle(
-                                    color: AppColors.primary,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold)),
-                            const Gap(8),
-                            PasswordField(
-                              phint: "enter your password",
-                              mycontroller: password,
-                              validator: (v) {
-                                if (v == null || v.isEmpty)
-                                  return "Password is required";
-                                return null;
-                              },
-                              autovalidateMode:
-                                  AutovalidateMode.onUserInteraction,
-                            ),
+                            _section("Phone Number", phone),
 
-                            const Gap(16),
-                            const Text("Confirm Password",
-                                style: TextStyle(
-                                    color: AppColors.primary,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold)),
-                            const Gap(8),
-                            PasswordField(
-                              phint: "enter your password again",
-                              mycontroller: repassword,
-                              validator: (v) {
-                                if (v == null || v.isEmpty)
-                                  return "Please confirm your password";
-                                if (v != password.text)
-                                  return "Passwords do not match";
-                                return null;
-                              },
-                              autovalidateMode:
-                                  AutovalidateMode.onUserInteraction,
-                            ),
-
-                            // Phone
-                            const Gap(16),
-                            const Text("Phone Number",
-                                style: TextStyle(
-                                    color: AppColors.primary,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold)),
-                            const Gap(8),
-                            CustomText(
-                              hinttext: "enter your phone number",
-                              mycontroller: phone,
-                            ),
-
-                            // Role dropdown
+                            // Role
                             const Gap(16),
                             const Text(
                               "Your Role",
                               style: TextStyle(
-                                  color: AppColors.primary,
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.bold),
+                                color: AppColors.primary,
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const Gap(8),
                             RoleDropdown(
@@ -292,8 +198,7 @@ class _SignupState extends State<Signup> {
                                   setState(() => selectedRole = v),
                             ),
 
-                            // Role-specific fields (ONE place)
-                            Gap(12),
+                            const Gap(12),
                             AnimatedSwitcher(
                               duration: const Duration(milliseconds: 250),
                               child: RoleFields(
@@ -301,13 +206,10 @@ class _SignupState extends State<Signup> {
                                 assistantnumber: assistantnumber,
                                 patientAge: patientAge,
                                 assistage: assistage,
-                                assistantDept: assistantDept,
                                 volunteerage: volunteerage,
-                                volunteerHours: volunteerHours,
                               ),
                             ),
 
-                            // Submit
                             const Gap(20),
                             CustomButtonAuth(
                               title: "Sign Up",
@@ -322,7 +224,6 @@ class _SignupState extends State<Signup> {
                                   Navigator.of(context)
                                       .pushReplacementNamed("homepage");
                                 } else {
-                                  // Error from backend
                                   await AwesomeDialog(
                                     context: context,
                                     dialogType: DialogType.error,
@@ -336,20 +237,20 @@ class _SignupState extends State<Signup> {
 
                             const Gap(12),
                             InkWell(
-                              onTap: () {
-                                Navigator.of(context)
-                                    .pushReplacementNamed("login");
-                              },
+                              onTap: () => Navigator.of(context)
+                                  .pushReplacementNamed("login"),
                               child: const Center(
                                 child: Text.rich(
                                   TextSpan(
                                     children: [
                                       TextSpan(
-                                          text: "Already have an account?",
-                                          style: TextStyle(
-                                              fontSize: 14.7,
-                                              fontWeight: FontWeight.w500,
-                                              color: AppColors.primary)),
+                                        text: "Already have an account? ",
+                                        style: TextStyle(
+                                          fontSize: 14.7,
+                                          fontWeight: FontWeight.w500,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
                                       TextSpan(
                                         text: "Login",
                                         style: TextStyle(
@@ -374,6 +275,103 @@ class _SignupState extends State<Signup> {
           );
         },
       ),
+    );
+  }
+
+  Widget _section(String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Gap(16),
+        Text(
+          label,
+          style: const TextStyle(
+            color: AppColors.primary,
+            fontSize: 17,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const Gap(8),
+        CustomText(
+          hinttext: "enter your ${label.toLowerCase()}",
+          mycontroller: controller,
+        ),
+      ],
+    );
+  }
+
+  Widget _labeledField(String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: AppColors.primary,
+            fontSize: 17,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const Gap(8),
+        CustomText(
+          hinttext: label.toLowerCase(),
+          mycontroller: controller,
+        ),
+      ],
+    );
+  }
+
+  Widget _passwordSection(
+      String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Gap(16),
+        Text(
+          label,
+          style: const TextStyle(
+            color: AppColors.primary,
+            fontSize: 17,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const Gap(8),
+        PasswordField(
+          phint: "enter your password",
+          mycontroller: controller,
+          validator: (v) =>
+              v == null || v.isEmpty ? "Password is required" : null,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+        ),
+      ],
+    );
+  }
+
+  Widget _confirmPasswordSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Gap(16),
+        const Text(
+          "Confirm Password",
+          style: TextStyle(
+            color: AppColors.primary,
+            fontSize: 17,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const Gap(8),
+        PasswordField(
+          phint: "enter your password again",
+          mycontroller: repassword,
+          validator: (v) {
+            if (v == null || v.isEmpty) return "Please confirm your password";
+            if (v != password.text) return "Passwords do not match";
+            return null;
+          },
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+        ),
+      ],
     );
   }
 }

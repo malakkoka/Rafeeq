@@ -1,9 +1,14 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:front/main.dart';
 import 'package:front/component/customdrawer.dart';
 import 'package:avatar_glow/avatar_glow.dart';
-import 'package:flutter_tts/flutter_tts.dart';
+//import 'package:flutter_tts/flutter_tts.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
 class Blind extends StatefulWidget {
   const Blind({super.key});
 
@@ -14,119 +19,168 @@ class Blind extends StatefulWidget {
 class _BlindState extends State<Blind> {
   late CameraController controller;
   bool isReady = false;
-
-//sound
-  final FlutterTts tts = FlutterTts();
-  bool isSpeaking = false; 
-
+  String? lastPlayedAudio;
+  Timer? captureTimer;
+  bool isSending = false;
+  
+  final AudioPlayer audioPlayer = AudioPlayer();
+  final List<String> audioQueue = [];
+  bool isSpeaking = false;
+  String lastSpokenText = '';
   @override
   void initState() {
     super.initState();
     initCamera();
-    setupTTS();
+
+
+      //Future.delayed(const Duration(seconds: 2), () {
+    //tts.speak("Text to speech is working");
+  //});
   }
 
-  Future<void> setupTTS() async {
-  //stop waive
-    tts.setCompletionHandler(() {
-      setState(() {
-        isSpeaking = false;
-      });
-    });
-  }
-
-  Future<void> speakText(String text) async {
-    setState(() {
-      isSpeaking = true; //waivestart
-    });
-    await tts.speak(text);
-  }
+  // ================= CAMERA =================
 
   Future<void> initCamera() async {
     controller = CameraController(
       cameras![0],
-      ResolutionPreset.high,
+      ResolutionPreset.medium,
       enableAudio: false,
-      
     );
 
     await controller.initialize();
     if (!mounted) return;
 
     setState(() => isReady = true);
+
+    startAutoCapture();
   }
 
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-    tts.stop();
+  void startAutoCapture() {
+    captureTimer = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) => captureAndSend(),
+    );
   }
+
+//==================captureAndSend =================
+
+  Future<void> captureAndSend() async {
+    if (!controller.value.isInitialized) return;
+    if (isSending) return;
+
+    try {
+      isSending = true;
+
+      final XFile image = await controller.takePicture();
+
+      final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('http://192.168.52.212:8000/api/account/vision/')
+
+
+    );
+
+      request.files.add(
+        await http.MultipartFile.fromPath('image', image.path),
+      );
+
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        final body = await response.stream.bytesToString();
+        debugPrint("SERVER RAW RESPONSE: $body");
+        final data = jsonDecode(body);
+        debugPrint("SERVER DECODED: $data");
+        final audioPath = data['audio_file'];
+
+        if (audioPath != null) {
+          final audioUrl = "http://192.168.52.212:8000$audioPath";
+          audioQueue.add(audioUrl);
+          
+          if (audioQueue.length > 5) {
+          audioQueue.removeAt(0); 
+        }
+        if (audioUrl != lastPlayedAudio) {
+          audioQueue.add(audioUrl);
+          playNextIfIdle();
+        }
+        }
+        
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      isSending = false;
+    }
+  }
+/// ================= AUDIO PLAYER =================d
+  Future<void> playAudio(String url) async {
+  if (isSpeaking) return;
+  lastPlayedAudio = url;
+  setState(() {
+    isSpeaking = true;
+  });
+  
+  await audioPlayer.play(UrlSource(url));
+  audioPlayer.onPlayerComplete.listen((event) {
+    setState(() {
+      isSpeaking = false;
+    });
+    playNextIfIdle();
+    //if (isSpeaking) return;
+  });
+}
+//================== QUEUE HANDLER =================
+    void playNextIfIdle() {
+  if (isSpeaking) return;
+  if (audioQueue.isEmpty) return;
+
+  final nextAudio = audioQueue.removeAt(0);
+  playAudio(nextAudio);
+
+}
+
+
+  // ================= UI =================
 
   @override
   Widget build(BuildContext context) {
-      return  Scaffold(
-        drawer: CustomDrawer(),
-        appBar: AppBar(
-          backgroundColor: const Color.fromARGB(255, 35, 85, 82),
-          title: const Text("blind interface"),
-        ),
-            body: Stack(
+    return Scaffold(
+      drawer: CustomDrawer(),
+      appBar: AppBar(
+        title: const Text("Blind Interface"),
+        backgroundColor: const Color.fromARGB(255, 35, 85, 82),
+      ),
+      body: Stack(
         alignment: Alignment.center,
         children: [
-          // الكاميرا
           isReady
-              ? Center(
-                  child: Container(
-                    width: 350,
-                    height: 550,
-                    decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 145, 143, 143),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color.fromARGB(255, 145, 143, 143),
-                          blurRadius: 15,
-                          spreadRadius: 3,
-                        )
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: CameraPreview(controller),
-                    ),
-                  ),
-                )
-              : const Center(child: CircularProgressIndicator()),
+              ? CameraPreview(controller)
+              : const CircularProgressIndicator(),
 
-          // دائرة الموجات أسفل الشاشة
           Positioned(
             bottom: 30,
             child: AvatarGlow(
               glowColor: const Color.fromARGB(255, 35, 85, 82),
               animate: isSpeaking,
               duration: const Duration(milliseconds: 1500),
-              glowShape: BoxShape.circle,
-              child: Material(
-                elevation: 5,
-                shape: const CircleBorder(),
-                color: const Color.fromARGB(255, 35, 85, 82),
-                child: const CircleAvatar(
-                  radius: 35,
-                  backgroundColor: Color.fromARGB(255, 35, 85, 82),
-                  child: Icon(
-                    Icons.graphic_eq,
-                    color: Colors.white,
-                    size: 35,
-                  ),
-                ),
+              child: const CircleAvatar(
+                radius: 35,
+                backgroundColor: Color.fromARGB(255, 35, 85, 82),
+                child: Icon(Icons.graphic_eq, color: Colors.white),
               ),
             ),
           ),
         ],
       ),
     );
-    
-
   }
+
+  @override
+void dispose() {
+  captureTimer?.cancel();
+  audioPlayer.dispose();
+  controller.dispose();
+  super.dispose();
+}
 }

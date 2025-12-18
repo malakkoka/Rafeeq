@@ -1,6 +1,7 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:front/color.dart';
+import 'package:front/component/UserProvider.dart';
 import 'package:front/component/custom_button_auth.dart';
 import 'package:front/component/password.dart';
 import 'package:front/component/textform.dart';
@@ -8,6 +9,7 @@ import 'package:gap/gap.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:provider/provider.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -18,36 +20,55 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final TextEditingController username = TextEditingController();
   final TextEditingController password = TextEditingController();
-  final storage = FlutterSecureStorage();
+  final storage = const FlutterSecureStorage();
 
   Future<Map<String, dynamic>> loginToDjango() async {
-    final url = Uri.parse("http://10.0.2.2:8000/api/account/login/");
+  final url = Uri.parse('http://192.168.52.212:8000/api/account/login/');
 
-    try {
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "username": username.text.trim(), // NEW → Django يحتاج username
-          "password": password.text.trim(), // NEW
-        }),
-      );
+  try {
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "username": username.text.trim(),
+        "password": password.text.trim(),
+      }),
+    );
 
+    debugPrint("LOGIN STATUS: ${response.statusCode}");
+    debugPrint("LOGIN RAW RESPONSE: ${response.body}");
+
+    if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200 && data["access"] != null) {
-        // ✔ تخزين التوكنات
-        await storage.write(key: "access", value: data["access"]); // NEW
-        await storage.write(key: "refresh", value: data["refresh"]); // NEW
-
-        return {"success": true, "data": data};
-      } else {
-        return {"success": false, "message": data};
+      
+        if (data["user"] == null) {
+        return {
+          "success": false,
+          "message": "Invalid response: user is null",
+        };
       }
-    } catch (e) {
-      return {"success": false, "message": e.toString()};
+
+      return {
+        "success": true,
+        "username": data["user"]["username"],
+        "email": data["user"]["email"],
+        "role": data["user"]["user_type"],
+        "token": data["access"],
+      };
+    } else {
+      return {
+        "success": false,
+        "message": response.body.toString(),
+      };
     }
+  } catch (e) {
+    return {
+      "success": false,
+      "message": e.toString(),
+    };
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -125,7 +146,6 @@ class _LoginState extends State<Login> {
                               alignment: Alignment.topRight,
                               child: const Text(
                                 "forgot password?",
-                                textAlign: TextAlign.right,
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w500,
@@ -136,28 +156,43 @@ class _LoginState extends State<Login> {
                             CustomButtonAuth(
                               title: "Login",
                               onPressed: () async {
-                                final result = await loginToDjango(); // NEW
+                                final result = await loginToDjango();
 
                                 if (result["success"] == true) {
+                                  final userProvider =
+                                  Provider.of<UserProvider>(context, listen: false);
 
-                               
+                                  userProvider.setUser(
+                                  name: result["username"],
+                                  email: result["email"],
+                                  role: result["role"] ?? '',
+                                );
 
-                                  if (!mounted) return;
-                                  Navigator.of(
-                                    context,
-                                  ).pushReplacementNamed("homepage");
-                                } else {
-                                  // Error message
-                                  await AwesomeDialog(
-                                    context: context,
-                                    dialogType: DialogType.error,
-                                    title: 'Login Error',
-                                    desc: result["message"].toString(),
-                                    btnOkOnPress: () {},
-                                  ).show();
-                                }
-                              },
-                            ),
+                                if (!mounted) return;
+                                if (result["role"] == "blind") {
+                                Navigator.of(context)
+                                  .pushReplacementNamed("blind");
+                            } else if (result["role"] == "assistant") {
+                              Navigator.of(context)
+                                  .pushReplacementNamed("assistant");
+                            } else if (result["role"] == "volunteer") {
+                              Navigator.of(context)
+                                  .pushReplacementNamed("volunteerpage");
+                            } else if (result["role"] == "deaf") {
+                              Navigator.of(context)
+                                  .pushReplacementNamed("deaf");
+                            } 
+                              } else {
+                                await AwesomeDialog(
+                                  context: context,
+                                  dialogType: DialogType.error,
+                                  title: "Login Error",
+                                  desc: result["message"].toString(),
+                                  btnOkOnPress: () {},
+                                ).show();
+                              }
+                            },
+                          ),
                             const Gap(12),
                             Row(
                               children: const [
@@ -165,7 +200,6 @@ class _LoginState extends State<Login> {
                                   child: Divider(
                                     color: AppColors.yellowButton,
                                     thickness: 1.4,
-                                    endIndent: 10,
                                   ),
                                 ),
                                 Text(
@@ -179,7 +213,6 @@ class _LoginState extends State<Login> {
                                   child: Divider(
                                     color: AppColors.yellowButton,
                                     thickness: 1.4,
-                                    indent: 10,
                                   ),
                                 ),
                               ],
@@ -206,16 +239,15 @@ class _LoginState extends State<Login> {
                             const Gap(12),
                             InkWell(
                               onTap: () {
-                                Navigator.of(
-                                  context,
-                                ).pushReplacementNamed("signup");
+                                Navigator.of(context)
+                                    .pushReplacementNamed("signup");
                               },
                               child: const Center(
                                 child: Text.rich(
                                   TextSpan(
                                     children: [
                                       TextSpan(
-                                        text: "Don't have an account?",
+                                        text: "Don't have an account? ",
                                         style: TextStyle(
                                           fontWeight: FontWeight.w500,
                                           color: AppColors.primary,

@@ -5,10 +5,10 @@ import 'package:front/color.dart';
 /// Reusable dropdown for selecting a role.
 /// Values: Patient, First Assistant, Volunteer
 class RoleDropdown extends StatelessWidget {
-  final String? value; // القيمة المختارة حالياً
-  final ValueChanged<String?> onChanged; // ماذا يحدث عند تغيير الاختيار
-  final String hintText; // نص تلميح عند عدم وجود قيمة
-  final EdgeInsetsGeometry? margin; // (اختياري) هامش خارجي
+  final String? value; 
+  final ValueChanged<String?> onChanged; 
+  final String hintText; 
+  final EdgeInsetsGeometry? margin;
 
   const RoleDropdown({
     super.key,
@@ -20,7 +20,7 @@ class RoleDropdown extends StatelessWidget {
 
   static const List<String> roles = [
     'Patient',
-    'First Assistant',
+    'Assistant',
     'Volunteer',
   ];
 
@@ -47,7 +47,6 @@ class RoleDropdown extends StatelessWidget {
               .toList(),
           onChanged: onChanged,
 
-          // زر الاختيار (نفس أجواء CustomText عندك)
           buttonStyleData: ButtonStyleData(
             height: 48,
             padding: const EdgeInsets.symmetric(horizontal: 16),

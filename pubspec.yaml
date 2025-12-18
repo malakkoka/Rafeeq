@@ -32,6 +32,7 @@ dependencies:
   dropdown_button2: ^2.3.9
   camera: ^0.11.3
   audio_waveforms: ^2.0.0
+  audioplayers: ^5.2.1
   #soundwaive
   avatar_glow: ^3.0.1
   flutter_tts: ^3.6.3
