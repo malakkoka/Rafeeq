@@ -55,6 +55,7 @@ flutter:
     - images/37697d6e01e2feb56ae523e8c486fe82.jpg
     - images/OIP.webp
     - images/googleImage.webp
+    - images/Logo.png
   fonts:
     - family: Caveat
       fonts:

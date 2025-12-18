@@ -4,7 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:front/auth/volunteer/post_model.dart';
 
 class PostService {
-  static const String baseUrl = "http://172.20.10.2:8000";
+  static const String baseUrl =
+      "http://10.0.2.2:8000"; //"http://172.0.2.2:8000";
 
   static Future<List<Post>> getPosts() async {
     print("get posts called");

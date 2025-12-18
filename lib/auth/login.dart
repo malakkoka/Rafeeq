@@ -139,14 +139,8 @@ class _LoginState extends State<Login> {
                                 final result = await loginToDjango(); // NEW
 
                                 if (result["success"] == true) {
-                                  // Success → انتقلي للهوم
-                                  await AwesomeDialog(
-                                    context: context,
-                                    dialogType: DialogType.success,
-                                    title: "Success",
-                                    desc: "Login successful!",
-                                    btnOkOnPress: () {},
-                                  ).show();
+
+                               
 
                                   if (!mounted) return;
                                   Navigator.of(

@@ -1,3 +1,5 @@
+// ignore_for_file: curly_braces_in_flow_control_structures
+
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:front/color.dart';
 import 'dart:convert';
@@ -314,17 +316,11 @@ class _SignupState extends State<Signup> {
 
                                 if (result["success"] == true) {
                                   // Successful
-                                  await AwesomeDialog(
-                                    context: context,
-                                    dialogType: DialogType.success,
-                                    title: "Success",
-                                    desc: "Account created successfully!",
-                                    btnOkOnPress: () {},
-                                  ).show();
+                                  
 
                                   if (!mounted) return;
                                   Navigator.of(context)
-                                      .pushReplacementNamed("login");
+                                      .pushReplacementNamed("homepage");
                                 } else {
                                   // Error from backend
                                   await AwesomeDialog(

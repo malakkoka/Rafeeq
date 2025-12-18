@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:front/auth/volunteer/post_model.dart';
+import 'package:front/auth/volunteer/post_state_badge.dart';
 import 'package:front/color.dart';
+
+
 
 class PostCard extends StatelessWidget {
   final Post post;
-
-  const PostCard({super.key, required this.post});
+  
+  const PostCard({super.key, required this.post,});
 
   @override
   Widget build(BuildContext context) {
@@ -32,16 +35,23 @@ class PostCard extends StatelessWidget {
             Text(
               post.content,
               style: TextStyle(
-                  fontSize: 14.5,
+                  fontSize: 15,
                   color: AppColors.primary,
                   fontWeight: FontWeight.w500),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 14),
             Row(
               children: [
-                Text("State: ${post.state}"),
+                
+                buildStateBadge(post.state ?? 0),
                 Spacer(),
-                Text("Author: ${post.author}"),
+                Text(
+                  "Author: Wala'a",
+                  style: TextStyle(
+                      fontSize: 14.5,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w400),
+                ), //Text("Author: ${post.author}"),
                 Spacer(flex: 2),
               ],
             ),

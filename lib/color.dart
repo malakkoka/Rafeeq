@@ -10,7 +10,8 @@ class AppColors {
   static const Color inputField = Color.fromARGB(255, 255, 255, 255);
   static const Color dialogcolor = Color.fromARGB(255, 255, 252, 246);
   ////////////////////////
-  ///ء
+  ///
+  ///
   static const Color primaryDark = Color(0xFF1F5A4F);
   static const Color text = Color(0xFF0F2C24);
   static const Color googleButton = Color(0xFF1C4E42);

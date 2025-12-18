@@ -1,16 +1,17 @@
+import 'package:front/color.dart';
 import 'package:front/component/customlisttile.dart';
 import '../theme/themeprovider.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:provider/provider.dart';
 
-
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({super.key});
 
-@override
+  @override
   Widget build(BuildContext context) {
     return Drawer(
+      backgroundColor: AppColors.background,
       child: Container(
         padding: const EdgeInsets.all(10),
         child: ListView(
@@ -74,9 +75,7 @@ class CustomDrawer extends StatelessWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 10),
-
             CustomListTile(
               icon: Icons.home,
               color: Colors.grey.shade700,
@@ -85,7 +84,6 @@ class CustomDrawer extends StatelessWidget {
                 Navigator.pop(context);
               },
             ),
-
             ListTile(
               leading: Icon(
                 Icons.dark_mode,
@@ -100,8 +98,7 @@ class CustomDrawer extends StatelessWidget {
                   return Transform.scale(
                     scale: 0.7,
                     child: Switch(
-                      activeTrackColor:
-                          const Color.fromARGB(255, 28, 79, 127),
+                      activeTrackColor: const Color.fromARGB(255, 28, 79, 127),
                       value: themeProvider.isDarkMode,
                       onChanged: (value) {
                         themeProvider.toggleTheme();
@@ -111,7 +108,6 @@ class CustomDrawer extends StatelessWidget {
                 },
               ),
             ),
-
             ListTile(
               leading: Icon(
                 Icons.notifications,
@@ -126,8 +122,7 @@ class CustomDrawer extends StatelessWidget {
                   return Transform.scale(
                     scale: 0.7,
                     child: Switch(
-                      activeTrackColor:
-                          const Color.fromARGB(255, 28, 79, 127),
+                      activeTrackColor: const Color.fromARGB(255, 28, 79, 127),
                       value: false,
                       onChanged: (_) {},
                     ),
@@ -135,42 +130,36 @@ class CustomDrawer extends StatelessWidget {
                 },
               ),
             ),
-
             CustomListTile(
               icon: Icons.location_on_rounded,
               color: Colors.grey.shade700,
               textTitle: "Location",
               onTap: () {},
             ),
-
             CustomListTile(
               icon: Icons.language,
               color: Colors.grey.shade700,
               textTitle: "Language",
               onTap: () {},
             ),
-
             CustomListTile(
               icon: Icons.accessibility,
               color: Colors.grey.shade700,
               textTitle: "Accessibility Tools",
               onTap: () {},
             ),
-
             CustomListTile(
               icon: Icons.feedback,
               color: Colors.grey.shade700,
               textTitle: "Feedback",
               onTap: () {},
             ),
-
             CustomListTile(
               icon: Icons.phone,
               color: Colors.grey.shade700,
               textTitle: "Contact Us",
               onTap: () {},
             ),
-
             ListTile(
               leading: Transform(
                 alignment: Alignment.center,
@@ -195,6 +184,4 @@ class CustomDrawer extends StatelessWidget {
       ),
     );
   }
-  
 }
-

@@ -5,11 +5,12 @@ import 'package:front/auth/blind.dart';
 import 'package:front/auth/editprofile.dart';
 import 'package:front/auth/login.dart';
 import 'package:front/auth/signup.dart';
+import 'package:front/auth/volunteer/volunteerpage.dart';
 import 'package:front/homepage.dart';
 import 'package:front/theme/theme.dart';
 import 'package:front/theme/themeprovider.dart';
 import 'package:provider/provider.dart';
-import 'auth/volunteer/volunteerpage.dart';
+//import 'auth/volunteer/volunteerpage.dart';
 
 //import 'package:front/emergencymode/fall_detector.dart';
 //import 'package:front/emergencymode/user_type.dart';
@@ -61,7 +62,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       // home: FirebaseAuth.instance.currentUser == null ? Login() : Homepage(),
-      home: Login(),
+      home: VolunteerHome(),
 
       routes: {
         "login": (context) => Login(),
