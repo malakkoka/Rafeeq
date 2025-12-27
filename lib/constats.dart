@@ -1,0 +1,3 @@
+const String baseUrl =
+      "http://10.0.2.2:8000"; //"http://172.0.2.2:8000";
+const String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY2ODcyMDgyLCJpYXQiOjE3NjY3ODU2ODIsImp0aSI6IjA1OWM0NDdkMmQ1MjQ2OWFiYzM1ZGIxZTNjZDc2NDczIiwidXNlcl9pZCI6IjMiLCJ1c2VybmFtZSI6IndsYTJtaG1kIiwiZW1haWwiOiJ3bGEybWhtZEBnbWFpbC5jb20iLCJhZ2UiOjIxfQ.av6gogHBizvFlxrOKhe6GWK-uBzU-vYBaaI2X4HuYMg";

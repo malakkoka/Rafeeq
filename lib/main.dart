@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:front/auth/assistant.dart';
+import 'package:front/assistant/assistantpage.dart';
 import 'package:front/auth/blind.dart';
 import 'package:front/auth/deaf.dart';
 import 'package:front/auth/login.dart';
@@ -63,14 +63,13 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       // home: FirebaseAuth.instance.currentUser == null ? Login() : Homepage(),
       home: VolunteerHome(),
-
       routes: {
         "login": (context) => Login(),
         "homepage": (context) => Homepage(),
         "signup": (context) => Signup(),
         "editprofile": (context) => const EditProfile(),
         "blind": (context) => Blind(),
-        "assistant": (context) => Assistent(),
+        "assistant": (context) => AssistantPage(),
         "volunteer": (context) => VolunteerHome(),
         "deaf": (context) => Deaf(),
       },

@@ -9,8 +9,10 @@ class AppColors {
   static const Color yellowButton = Color(0xFFF5C94C);
   static const Color inputField = Color.fromARGB(255, 255, 255, 255);
   static const Color dialogcolor = Color.fromARGB(255, 255, 252, 246);
-  ////////////////////////
-  ///
+  //////////////////////
+  static const Color primaryColor = Color(0xFF0C7C8C);
+  static const Color neutralBg = Color(0xFFF3F4F6);
+  static const Color neutralText = Colors.black54;
   ///
   static const Color primaryDark = Color(0xFF1F5A4F);
   static const Color text = Color(0xFF0F2C24);

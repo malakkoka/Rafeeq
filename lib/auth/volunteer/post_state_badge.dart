@@ -59,7 +59,7 @@ Widget buildStateBadge(
 }
 
 const Map<int, String> postStateLabels = {
-  0: "Help Waiting", 
-  1: "In Help Trip",
-  2: "Finished",
+  0: "Pending",
+  1: "Accepted",
+  2: "Completed",
 };
