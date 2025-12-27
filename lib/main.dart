@@ -9,6 +9,7 @@ import 'package:front/auth/login.dart';
 import 'package:front/auth/signup.dart';
 import 'package:front/component/editprofile.dart';
 import 'package:front/component/UserProvider.dart';
+import 'package:front/component/viewinfo.dart';
 import 'package:front/homepage.dart';
 import 'package:front/theme/theme.dart';
 import 'package:front/theme/themeprovider.dart';
@@ -61,13 +62,14 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Blind(),
+      home: Login(),
 
       routes: {
         "login": (context) => Login(),
         "homepage": (context) => Homepage(),
         "signup": (context) => Signup(),
-        "editprofile": (context) => const EditProfile(),
+        //"editprofile": (context) => const EditProfile( isPatient: true),
+        "viewinfo":(context)=> ViewInfo(),
         "blind": (context) => Blind(),
         "assistant": (context) => Assistent(),
         "volunteer": (context) => VolunteerHome(),

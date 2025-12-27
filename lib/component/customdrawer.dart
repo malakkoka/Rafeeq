@@ -1,5 +1,6 @@
 import 'package:front/component/UserProvider.dart';
 import 'package:front/component/customlisttile.dart';
+import 'package:front/component/viewinfo.dart';
 import '../theme/themeprovider.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
@@ -59,7 +60,7 @@ class CustomDrawer extends StatelessWidget {
                             height: 40,
                             child: MaterialButton(
                               onPressed: () {
-                                Navigator.pushNamed(context, "editprofile");
+                                Navigator.push(context, MaterialPageRoute(builder: (context)=> ViewInfo()));
                               },
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),

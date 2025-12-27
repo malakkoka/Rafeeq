@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:front/color.dart';
 
 class CustomTextFormField extends StatefulWidget {
   const CustomTextFormField({
@@ -9,6 +10,7 @@ class CustomTextFormField extends StatefulWidget {
     this.mycontroller,
     this.iconButton,
     this.isPassword,
+    this.readonly=false, 
   });
 
   final String? hinttext;
@@ -17,6 +19,7 @@ class CustomTextFormField extends StatefulWidget {
   final TextEditingController? mycontroller;
   final IconButton? iconButton;
   final bool? isPassword;
+  final bool readonly;
   @override
   State<CustomTextFormField> createState() => _CustomTextFormFieldState();
 }
@@ -26,30 +29,37 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 20),
+      margin: EdgeInsets.all( 20),
       child: TextFormField(
         obscureText: widget.isPassword ?? false,
         controller: widget.mycontroller,
+        readOnly:widget.readonly,
+        
+        
         decoration: InputDecoration(
             hintText: widget.hinttext,
-            hintStyle: TextStyle(fontSize: 14),
+            hintStyle: TextStyle(fontSize: 16),
             labelStyle: TextStyle(
-                fontSize: 21, fontWeight: FontWeight.bold, color: Colors.black),
+                fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.darkprimary),
             floatingLabelBehavior: FloatingLabelBehavior.always,
             contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 30),
             label: Container(
                 margin: EdgeInsets.symmetric(horizontal: 10),
-                child: Text(widget.labeltext)),
+                child: Text(widget.labeltext,style: TextStyle( color: AppColors.darkprimary),)),
             suffixIcon: widget.iconButton,
             enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide(width: 3, color: Colors.grey)),
+                borderSide: BorderSide(width: 3, color: Color.fromARGB(255, 54, 35, 23))),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18),
               borderSide: BorderSide(
-                  color: const Color.fromARGB(255, 95, 111, 206), width: 3),
-            )),
+                  color: Color.fromARGB(255, 54, 35, 23),
+                  width: 3,
+            ),
+            ),
       ),
+    ),
+    
     );
   }
 }
