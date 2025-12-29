@@ -166,6 +166,8 @@ class _LoginState extends State<Login> {
                                   name: result["username"],
                                   email: result["email"],
                                   role: result["role"] ?? '',
+                                  //userId: result["data"]["id"],
+                                    //id: null,
                                 );
 
                                 if (!mounted) return;

@@ -7,12 +7,14 @@ import 'package:front/auth/deaf.dart';
 import 'package:front/auth/login.dart';
 import 'package:front/auth/signup.dart';
 import 'package:front/auth/volunteer/volunteerpage.dart';
+import 'package:front/color.dart';
 import 'package:front/component/UserProvider.dart';
-import 'package:front/component/editprofile.dart';
+import 'package:front/component/viewinfo.dart';
 import 'package:front/homepage.dart';
 import 'package:front/theme/theme.dart';
 import 'package:front/theme/themeprovider.dart';
 import 'package:provider/provider.dart';
+//import 'component/costomlogo.dart';
 //import 'auth/volunteer/volunteerpage.dart';
 
 // camera
@@ -60,14 +62,16 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      color: AppColors.background,
       debugShowCheckedModeBanner: false,
-      // home: FirebaseAuth.instance.currentUser == null ? Login() : Homepage(),
-      home: VolunteerHome(),
+      home: AssistantPage(),
+
       routes: {
         "login": (context) => Login(),
         "homepage": (context) => Homepage(),
         "signup": (context) => Signup(),
-        "editprofile": (context) => const EditProfile(),
+        //"editprofile": (context) => const EditProfile( isPatient: true),
+        "viewinfo":(context)=> ViewInfo(),
         "blind": (context) => Blind(),
         "assistant": (context) => AssistantPage(),
         "volunteer": (context) => VolunteerHome(),

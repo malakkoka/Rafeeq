@@ -8,7 +8,7 @@ import 'package:avatar_glow/avatar_glow.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
+import 'package:front/color.dart';
 class Blind extends StatefulWidget {
   const Blind({super.key});
 
@@ -148,30 +148,51 @@ class _BlindState extends State<Blind> {
     return Scaffold(
       drawer: CustomDrawer(),
       appBar: AppBar(
-        title: const Text("Blind Interface"),
-        backgroundColor: const Color.fromARGB(255, 35, 85, 82),
+        title: const Text("   Blind Interface", style: TextStyle(
+          color: AppColors.background,
+          //TextAlign.center,
+        ),),
+        backgroundColor:AppColors.primary,
       ),
-      body: Stack(
-        alignment: Alignment.center,
-        children: [
-          isReady
-              ? CameraPreview(controller)
-              : const CircularProgressIndicator(),
-
-          Positioned(
-            bottom: 30,
-            child: AvatarGlow(
-              glowColor: const Color.fromARGB(255, 35, 85, 82),
-              animate: isSpeaking,
-              duration: const Duration(milliseconds: 1500),
-              child: const CircleAvatar(
-                radius: 35,
-                backgroundColor: Color.fromARGB(255, 35, 85, 82),
-                child: Icon(Icons.graphic_eq, color: Colors.white),
-              ),
-            ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+        
+            // ===== الكاميرا =====
+            Container(
+        height: 600,
+        width: MediaQuery.of(context).size.width * 0.9,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color:AppColors.appbar,
+            width:10,
           ),
-        ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(17),
+          child: isReady
+              ? CameraPreview(controller)
+              : const Center(child: CircularProgressIndicator()),
+        ),
+            ),
+        
+            const SizedBox(height: 10),
+        
+            // ===== الصوت =====
+            AvatarGlow(
+        glowColor:AppColors.highlight,
+        animate: isSpeaking,
+        duration: const Duration(milliseconds: 1500),
+        child: const CircleAvatar(
+          radius: 35,
+          backgroundColor: AppColors.appbar,
+          child: Icon(Icons.graphic_eq, color:AppColors.background),
+        ),
+            ),
+          ],
+        ),
       ),
     );
   }
