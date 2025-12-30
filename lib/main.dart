@@ -17,7 +17,7 @@ import 'package:front/theme/theme.dart';
 import 'package:front/theme/themeprovider.dart';
 import 'package:provider/provider.dart';
 //import 'component/costomlogo.dart';
-//import 'auth/volunteer/volunteerpage.dart';
+//import 'auth/volunteer/volunteerpage.  dart';
 
 // camera
 import 'package:camera/camera.dart';
@@ -66,15 +66,19 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       color: AppColors.background,
       debugShowCheckedModeBanner: false,
+<<<<<<< HEAD
       home:Login(),
 
 
+=======
+      home: Login(),
+>>>>>>> 6be44120ecb6f8a7a1d8798e576d653a4cf0be77
       routes: {
         "login": (context) => Login(),
         "homepage": (context) => Homepage(),
         "signup": (context) => Signup(),
         //"editprofile": (context) => const EditProfile( isPatient: true),
-        "viewinfo":(context)=> ViewInfo(),
+        "viewinfo": (context) => ViewInfo(),
         "blind": (context) => Blind(),
         "assistant": (context) => AssistantPage(),
         "volunteer": (context) => VolunteerHome(),
@@ -82,7 +86,6 @@ class _MyAppState extends State<MyApp> {
         "patientsignup": (context) => Patientsignup(),
 
       },
-
       theme: Provider.of<Themeprovider>(context).themeData,
       darkTheme: darkMode,
     );

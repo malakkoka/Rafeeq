@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:front/color.dart';
 
 class Customlogo extends StatelessWidget {
   const Customlogo({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-          alignment: Alignment.center,
-          width: 80,
-          height: 80,
-          padding: EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(70),
-          ),
-          child: Image.asset(
-            "images/Logo.png",
-            width: 50, height: 50, //fit: BoxFit.fill,
-          )),
+    final size = MediaQuery.of(context).size;
+
+    return Container(
+width: double.infinity,
+      height: double.infinity,
+ color: AppColors.background, // غيري اللون براحتك
+      alignment: Alignment.center,
+      child: Image.asset(
+        "images/logologo.png",
+        width: size.width * 1.9,   // كبريها قد ما بدك
+        height: size.height * 1.4, // 👈 هاي المفتاح
+        fit: BoxFit.contain,
+      ),
     );
   }
 }

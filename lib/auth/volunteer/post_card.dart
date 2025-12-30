@@ -100,13 +100,13 @@ void ShowConfirmDialog(BuildContext context) {
           style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: AppColors.primary),
+              color: Colors.black),
         ),
       ),
       content: const Text(
         "Are you sure you want help this person?",
         style: TextStyle(
-          color: AppColors.primary,
+          color: Colors.black,
           fontSize: 16,
           fontWeight: FontWeight.w400,
         ),
