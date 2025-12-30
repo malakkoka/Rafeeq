@@ -15,7 +15,7 @@ import 'package:front/theme/theme.dart';
 import 'package:front/theme/themeprovider.dart';
 import 'package:provider/provider.dart';
 //import 'component/costomlogo.dart';
-//import 'auth/volunteer/volunteerpage.dart';
+//import 'auth/volunteer/volunteerpage.  dart';
 
 // camera
 import 'package:camera/camera.dart';
@@ -64,7 +64,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       color: AppColors.background,
       debugShowCheckedModeBanner: false,
-      home: AssistantPage(),
+      home: VolunteerHome(),
 
       routes: {
         "login": (context) => Login(),

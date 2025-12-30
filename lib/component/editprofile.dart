@@ -1,6 +1,6 @@
 // ignore_for_file: avoid_print, use_build_context_synchronously
 
-import 'dart:convert';
+//import 'dart:convert';
 import 'package:front/color.dart';
 import 'package:front/component/custom_button_auth.dart';
 import 'package:front/component/viewinfo.dart';
@@ -8,7 +8,7 @@ import 'package:gap/gap.dart';
 
 import '../component/customtextformfield.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+//import 'package:http/http.dart' as http;
 
 class EditProfile extends StatefulWidget {
   final bool isPatient;

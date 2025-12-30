@@ -23,52 +23,51 @@ class _LoginState extends State<Login> {
   final storage = const FlutterSecureStorage();
 
   Future<Map<String, dynamic>> loginToDjango() async {
-  final url = Uri.parse('http://192.168.52.212:8000/api/account/login/');
+    final url = Uri.parse('http://192.168.52.212:8000/api/account/login/');
 
-  try {
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "username": username.text.trim(),
-        "password": password.text.trim(),
-      }),
-    );
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "username": username.text.trim(),
+          "password": password.text.trim(),
+        }),
+      );
 
-    debugPrint("LOGIN STATUS: ${response.statusCode}");
-    debugPrint("LOGIN RAW RESPONSE: ${response.body}");
+      debugPrint("LOGIN STATUS: ${response.statusCode}");
+      debugPrint("LOGIN RAW RESPONSE: ${response.body}");
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
         if (data["user"] == null) {
+          return {
+            "success": false,
+            "message": "Invalid response: user is null",
+          };
+        }
+
+        return {
+          "success": true,
+          "username": data["user"]["username"],
+          "email": data["user"]["email"],
+          "role": data["user"]["user_type"],
+          "token": data["access"],
+        };
+      } else {
         return {
           "success": false,
-          "message": "Invalid response: user is null",
+          "message": response.body.toString(),
         };
       }
-
-      return {
-        "success": true,
-        "username": data["user"]["username"],
-        "email": data["user"]["email"],
-        "role": data["user"]["user_type"],
-        "token": data["access"],
-      };
-    } else {
+    } catch (e) {
       return {
         "success": false,
-        "message": response.body.toString(),
+        "message": e.toString(),
       };
     }
-  } catch (e) {
-    return {
-      "success": false,
-      "message": e.toString(),
-    };
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -160,52 +159,53 @@ class _LoginState extends State<Login> {
 
                                 if (result["success"] == true) {
                                   final userProvider =
-                                  Provider.of<UserProvider>(context, listen: false);
+                                      Provider.of<UserProvider>(context,
+                                          listen: false);
 
                                   userProvider.setUser(
-                                  name: result["username"],
-                                  email: result["email"],
-                                  role: result["role"] ?? '',
-                                  //userId: result["data"]["id"],
+                                    name: result["username"],
+                                    email: result["email"],
+                                    role: result["role"] ?? '',
+                                    //userId: result["data"]["id"],
                                     //id: null,
-                                );
+                                  );
 
-                                if (!mounted) return;
-                                if (result["role"] == "blind") {
-                                Navigator.of(context)
-                                  .pushReplacementNamed("blind");
-                            } else if (result["role"] == "assistant") {
-                              Navigator.of(context)
-                                  .pushReplacementNamed("assistant");
-                            } else if (result["role"] == "volunteer") {
-                              Navigator.of(context)
-                                  .pushReplacementNamed("volunteerpage");
-                            } else if (result["role"] == "deaf") {
-                              Navigator.of(context)
-                                  .pushReplacementNamed("deaf");
-                            } 
-                              } else {
-                                await AwesomeDialog(
-                                  context: context,
-                                  dialogType: DialogType.error,
-                                  title: "Login Error",
-                                  desc: result["message"].toString(),
-                                  btnOkOnPress: () {},
-                                ).show();
-                              }
-                            },
-                          ),
+                                  if (!mounted) return;
+                                  if (result["role"] == "blind") {
+                                    Navigator.of(context)
+                                        .pushReplacementNamed("blind");
+                                  } else if (result["role"] == "assistant") {
+                                    Navigator.of(context)
+                                        .pushReplacementNamed("assistant");
+                                  } else if (result["role"] == "volunteer") {
+                                    Navigator.of(context)
+                                        .pushReplacementNamed("volunteerpage");
+                                  } else if (result["role"] == "deaf") {
+                                    Navigator.of(context)
+                                        .pushReplacementNamed("deaf");
+                                  }
+                                } else {
+                                  await AwesomeDialog(
+                                    context: context,
+                                    dialogType: DialogType.error,
+                                    title: "Login Error",
+                                    desc: result["message"].toString(),
+                                    btnOkOnPress: () {},
+                                  ).show();
+                                }
+                              },
+                            ),
                             const Gap(12),
                             Row(
                               children: const [
                                 Expanded(
                                   child: Divider(
                                     color: AppColors.yellowButton,
-                                    thickness: 1.4,
+                                    thickness: 1.3,
                                   ),
                                 ),
                                 Text(
-                                  "OR",
+                                  " OR ",
                                   style: TextStyle(
                                     color: AppColors.primary,
                                     fontWeight: FontWeight.bold,
@@ -214,7 +214,7 @@ class _LoginState extends State<Login> {
                                 Expanded(
                                   child: Divider(
                                     color: AppColors.yellowButton,
-                                    thickness: 1.4,
+                                    thickness: 1.3,
                                   ),
                                 ),
                               ],
