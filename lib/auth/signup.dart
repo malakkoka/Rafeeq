@@ -184,7 +184,7 @@ class _SignupState extends State<Signup> {
               ),
             ),
             Gap(20),
-                    Container(
+                    SizedBox(
                       width: 300,
                       child: CustomButtonAuth(
                                   title: "Sign Up", 
@@ -273,7 +273,7 @@ class _SignupState extends State<Signup> {
     );
   }
 
- /* Widget _labeledField(String label, TextEditingController controller) {
+  /* Widget _labeledField(String label, TextEditingController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

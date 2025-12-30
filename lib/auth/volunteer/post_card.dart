@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:front/auth/volunteer/post_model.dart';
+import 'package:front/auth/volunteer/post_state_badge.dart';
 import 'package:front/color.dart';
 
 class PostCard extends StatelessWidget {
   final Post post;
 
-  const PostCard({super.key, required this.post});
+  const PostCard({
+    super.key,
+    required this.post,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: AppColors.inputField,
+      color: AppColors.dialogcolor,
       margin: const EdgeInsets.only(
         bottom: 12,
       ),
@@ -24,24 +28,26 @@ class PostCard extends StatelessWidget {
             Text(
               post.title,
               style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.primary),
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             SizedBox(height: 6),
             Text(
               post.content,
-              style: TextStyle(
-                  fontSize: 14.5,
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w500),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 14),
             Row(
               children: [
-                Text("State: ${post.state}"),
+                buildStateBadge(post.state ?? 0),
                 Spacer(),
-                Text("Author: ${post.author}"),
+                Text(
+                  "Author: Wala'a",
+                  style: TextStyle(
+                    fontSize: 13.5,
+                  ),
+                ), //Text("Author: ${post.author}"),
                 Spacer(flex: 2),
               ],
             ),
@@ -54,10 +60,8 @@ class PostCard extends StatelessWidget {
                   children: [
                     Text(
                       formatTimeAgoEn(post.created_at),
-                      style: TextStyle(
-                          fontSize: 13,
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w400),
+                      style:
+                          TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
                     ),
                     Spacer(),
                     ElevatedButton(

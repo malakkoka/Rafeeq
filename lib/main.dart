@@ -1,8 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-
-import 'package:front/auth/assistant.dart';
+import 'package:front/assistant/assistantpage.dart';
 import 'package:front/auth/blind.dart';
 import 'package:front/auth/deaf.dart';
 import 'package:front/auth/login.dart';
@@ -10,12 +9,15 @@ import 'package:front/auth/patientsignup.dart';
 import 'package:front/auth/signup.dart';
 //import 'package:front/component/editprofile.dart';
 import 'package:front/component/user_provider.dart';
+import 'package:front/auth/volunteer/volunteerpage.dart';
+import 'package:front/color.dart';
 import 'package:front/component/viewinfo.dart';
 import 'package:front/homepage.dart';
 import 'package:front/theme/theme.dart';
 import 'package:front/theme/themeprovider.dart';
 import 'package:provider/provider.dart';
-import 'auth/volunteer/volunteerpage.dart';
+//import 'component/costomlogo.dart';
+//import 'auth/volunteer/volunteerpage.dart';
 
 // camera
 import 'package:camera/camera.dart';
@@ -62,6 +64,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      color: AppColors.background,
       debugShowCheckedModeBanner: false,
       home:Login(),
 
@@ -73,7 +76,7 @@ class _MyAppState extends State<MyApp> {
         //"editprofile": (context) => const EditProfile( isPatient: true),
         "viewinfo":(context)=> ViewInfo(),
         "blind": (context) => Blind(),
-        "assistant": (context) => Assistent(),
+        "assistant": (context) => AssistantPage(),
         "volunteer": (context) => VolunteerHome(),
         "deaf": (context) => Deaf(),
         "patientsignup": (context) => Patientsignup(),
