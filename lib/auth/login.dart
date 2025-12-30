@@ -5,6 +5,7 @@ import 'package:front/component/UserProvider.dart';
 import 'package:front/component/custom_button_auth.dart';
 import 'package:front/component/password.dart';
 import 'package:front/component/textform.dart';
+import 'package:front/constats.dart';
 import 'package:gap/gap.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -23,7 +24,7 @@ class _LoginState extends State<Login> {
   final storage = const FlutterSecureStorage();
 
   Future<Map<String, dynamic>> loginToDjango() async {
-    final url = Uri.parse('http://192.168.52.212:8000/api/account/login/');
+    final url = Uri.parse('$baseUrl/api/account/login/');
 
     try {
       final response = await http.post(

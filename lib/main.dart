@@ -64,20 +64,18 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       color: AppColors.background,
       debugShowCheckedModeBanner: false,
-      home: VolunteerHome(),
-
+      home: Login(),
       routes: {
         "login": (context) => Login(),
         "homepage": (context) => Homepage(),
         "signup": (context) => Signup(),
         //"editprofile": (context) => const EditProfile( isPatient: true),
-        "viewinfo":(context)=> ViewInfo(),
+        "viewinfo": (context) => ViewInfo(),
         "blind": (context) => Blind(),
         "assistant": (context) => AssistantPage(),
         "volunteer": (context) => VolunteerHome(),
         "deaf": (context) => Deaf(),
       },
-
       theme: Provider.of<Themeprovider>(context).themeData,
       darkTheme: darkMode,
     );
