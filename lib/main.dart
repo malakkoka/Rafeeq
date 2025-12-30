@@ -6,9 +6,10 @@ import 'package:front/auth/assistant.dart';
 import 'package:front/auth/blind.dart';
 import 'package:front/auth/deaf.dart';
 import 'package:front/auth/login.dart';
+import 'package:front/auth/patientsignup.dart';
 import 'package:front/auth/signup.dart';
-import 'package:front/component/editprofile.dart';
-import 'package:front/component/UserProvider.dart';
+//import 'package:front/component/editprofile.dart';
+import 'package:front/component/user_provider.dart';
 import 'package:front/component/viewinfo.dart';
 import 'package:front/homepage.dart';
 import 'package:front/theme/theme.dart';
@@ -62,7 +63,8 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Login(),
+      home:Login(),
+
 
       routes: {
         "login": (context) => Login(),
@@ -74,6 +76,7 @@ class _MyAppState extends State<MyApp> {
         "assistant": (context) => Assistent(),
         "volunteer": (context) => VolunteerHome(),
         "deaf": (context) => Deaf(),
+        "patientsignup": (context) => Patientsignup(),
 
       },
 
@@ -82,3 +85,4 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
+  

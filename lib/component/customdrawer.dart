@@ -1,4 +1,4 @@
-import 'package:front/component/UserProvider.dart';
+import 'package:front/component/user_provider.dart';
 import 'package:front/component/customlisttile.dart';
 import 'package:front/component/viewinfo.dart';
 import '../theme/themeprovider.dart';

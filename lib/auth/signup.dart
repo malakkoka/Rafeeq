@@ -1,6 +1,7 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:front/auth/patientsignup.dart';
 import 'package:front/color.dart';
-import 'package:front/component/UserProvider.dart';
+import 'package:front/component/user_provider.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -112,6 +113,7 @@ class _SignupState extends State<Signup> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: AppColors.dialogcolor, 
       body: SafeArea(
         child: Column(
@@ -127,123 +129,120 @@ class _SignupState extends State<Signup> {
                           ),
                         ),
                         Gap(10),
-            Container(
-              height: MediaQuery.of(context).size.height *0.75,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              
-              child: Card(
-                child: Container(
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    color: AppColors.background,
-                  ),
-                  child: ListView(
-                    
-                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                    
-                    children: [
-                      Row(
-                    children: [
-                      Expanded(child: _labeledField("First Name", firstName)),
-                      const SizedBox(width: 12),
-                      Expanded(child: _labeledField("Last Name", lastName)),
-                    ],
-                  ),
-                  _section("Email", email),
-                  _section("Username", username),
-                  _passwordSection("Password", password),
-                  _confirmPasswordSection(),
-                  _section("Phone Number", phone),
-                  Gap(16),
-                  const Text(
-                    "Your Role",
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
+                child: Card(
+                  child: Container(
+                  
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      color: AppColors.background,
                     ),
-                  ),
-                  Gap(8),
-                  RoleDropdown(
-                    value: selectedRole,
-                    onChanged: (v) =>
-                        setState(() => selectedRole = v),
-                  ),
-                  Gap(12),
-                  RoleFields(
-                    selectedRole: selectedRole,
-                    assistantnumber: assistantnumber,
-                    patientAge: patientAge,
-                    assistage: assistage,
-                    volunteerage: volunteerage,
-                  ),
-                  Gap(20),
-                  CustomButtonAuth(
-                              title: "Sign Up", 
-                              onPressed: () async { 
-                                final result = await registerOnDjango();
-                                if (result["success"] == true)
-                                  { Provider.of<UserProvider>( context,
-                                  listen: false, ).setUser( 
-                                    name: username.text,
-                                    email: email.text,
-                                      role: selectedRole ?? '', 
-                                      //userId: result["data"]["id"], 
-                                      //id: null, 
-                                      );
-                                      if (!mounted) return;
-                                            if ( selectedRole == "Patient"&&disability == "blind")
-                                            { Navigator.of(context) .pushReplacementNamed("blind"); }
-                                            else if (selectedRole == "Assistant")
-                                            { Navigator.of(context) .pushReplacementNamed("assistant");
-                                            } else if (selectedRole =="Patient"&&disability == "deaf")
-                                            { Navigator.of(context) .pushReplacementNamed("deaf");
-                                            }else { Navigator.of(context) .pushReplacementNamed("volunteerpage"); 
-                                          } } 
-                                            else { await AwesomeDialog( context: context,
-                                            dialogType: DialogType.error,
-                                            title: "Sign Up Error",
-                                            desc: result["message"].toString(),
-                                              btnOkOnPress: () {}, ).show(); } }, ),
-                                          const Gap(12),
-                            InkWell(
-                              onTap: () =>
-                                  Navigator.of(context).pushReplacementNamed("login"),
-                              child: const Center(
-                                child: Text.rich(
-                                  TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text: "Already have an account? ",
-                                        style: TextStyle(
-                                          fontSize: 14.7,
-                                          fontWeight: FontWeight.w500,
-                                          color: AppColors.primary,
-                                        ),
-                                      ),
-                                      TextSpan(
-                                        text: "Login",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: AppColors.accent,
-                                          fontWeight: FontWeight.w900,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const Gap(12),
-                  
-                  
-                    ],
+                    child: ListView(
+                      
+                      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                      
+                      children: [
+                    _section("Username", username),
+                    _section("Email", email),
+                    _passwordSection("Password", password),
+                    _confirmPasswordSection(),
+                    _section("Phone Number", phone),
+                    Gap(16),
+                    const Text(
+                      "Your Role",
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Gap(8),
+                    RoleDropdown(
+                      value: selectedRole,
+                      onChanged: (v) =>
+                          setState(() => selectedRole = v),
+                    ),
+                    Gap(12),
+                    RoleFields(
+                      selectedRole: selectedRole,
+                      assistantnumber: assistantnumber,
+                      patientAge: patientAge,
+                      assistage: assistage,
+                      volunteerage: volunteerage,
+                    ),
+                    
+                    
+                    
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
+            Gap(20),
+                    Container(
+                      width: 300,
+                      child: CustomButtonAuth(
+                                  title: "Sign Up", 
+                                  onPressed: () async { 
+                                    final result = await registerOnDjango();
+                                    if (result["success"] == true)
+                                      { Provider.of<UserProvider>( context,
+                                      listen: false, ).setUser( 
+                                        name: username.text,
+                                        email: email.text,
+                                          role: selectedRole ?? '', 
+                                          //userId: result["data"]["id"], 
+                                          //id: null, 
+                                          );
+                                          if (!mounted) return;
+                                                if (selectedRole == "Assistant")
+                                                {
+                                                Navigator.of(context).pushReplacement(
+                                                  MaterialPageRoute(builder: (_) => const Patientsignup()),
+                                                );
+                                              }else { Navigator.of(context) .pushReplacementNamed("volunteerpage"); 
+                                              } } 
+                                                else { await AwesomeDialog( context: context,
+                                                dialogType: DialogType.error,
+                                                title: "Sign Up Error",
+                                                desc: result["message"].toString(),
+                                                  btnOkOnPress: () {}, ).show(); } }, ),
+                    ),
+                                            const Gap(12),
+                              InkWell(
+                                onTap: () =>
+                                    Navigator.of(context).pushReplacementNamed("login"),
+                                child: const Center(
+                                  child: Text.rich(
+                                    TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text: "Already have an account? ",
+                                          style: TextStyle(
+                                            fontSize: 14.7,
+                                            fontWeight: FontWeight.w500,
+                                            color: AppColors.primary,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: "Login",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: AppColors.accent,
+                                            fontWeight: FontWeight.w900,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const Gap(12),
           ],
         ),
       ),
@@ -260,12 +259,13 @@ class _SignupState extends State<Signup> {
           label,
           style: const TextStyle(
             color: AppColors.primary,
-            fontSize: 17,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
         const Gap(8),
         CustomText(
+
           hinttext: "enter your ${label.toLowerCase()}",
           mycontroller: controller,
         ),
@@ -273,7 +273,7 @@ class _SignupState extends State<Signup> {
     );
   }
 
-  Widget _labeledField(String label, TextEditingController controller) {
+ /* Widget _labeledField(String label, TextEditingController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -292,7 +292,7 @@ class _SignupState extends State<Signup> {
         ),
       ],
     );
-  }
+  }*/
 
   Widget _passwordSection(
       String label, TextEditingController controller) {
@@ -304,7 +304,7 @@ class _SignupState extends State<Signup> {
           label,
           style: const TextStyle(
             color: AppColors.primary,
-            fontSize: 17,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -329,7 +329,7 @@ class _SignupState extends State<Signup> {
           "Confirm Password",
           style: TextStyle(
             color: AppColors.primary,
-            fontSize: 17,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),

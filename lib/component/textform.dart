@@ -36,14 +36,15 @@ class CustomText extends StatelessWidget {
         ),
         contentPadding: EdgeInsets.symmetric(vertical: 4, horizontal: 20),
         filled: true,
-        fillColor: AppColors.background,
+        fillColor: AppColors.dialogcolor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
-          borderSide: BorderSide(color: AppColors.background),
+          borderSide: BorderSide(color: AppColors.c1),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: AppColors.background),
+          borderSide: BorderSide(color: AppColors.c1),
+          
         ),
       ),
     );

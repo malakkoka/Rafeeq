@@ -1,7 +1,7 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:front/color.dart';
-import 'package:front/component/UserProvider.dart';
+import 'package:front/component/user_provider.dart';
 import 'package:front/component/custom_button_auth.dart';
 import 'package:front/component/password.dart';
 import 'package:front/component/textform.dart';

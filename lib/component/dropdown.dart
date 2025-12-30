@@ -19,7 +19,6 @@ class RoleDropdown extends StatelessWidget {
   });
 
   static const List<String> roles = [
-    'Patient',
     'Assistant',
     'Volunteer',
   ];
@@ -51,13 +50,13 @@ class RoleDropdown extends StatelessWidget {
             height: 48,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: AppColors.background,
+              color: AppColors.dialogcolor,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.background),
+              border: Border.all(color: AppColors.c1),
             ),
           ),
 
-          // قائمة الخيارات
+         
           dropdownStyleData: DropdownStyleData(
             maxHeight: 220,
             decoration: BoxDecoration(
@@ -66,13 +65,13 @@ class RoleDropdown extends StatelessWidget {
             ),
           ),
 
-          // عنصر داخل القائمة
+          
           menuItemStyleData: const MenuItemStyleData(
             height: 44,
             padding: EdgeInsets.symmetric(horizontal: 16),
           ),
 
-          // الأيقونة
+         
           iconStyleData: const IconStyleData(
             icon: Icon(
               Icons.keyboard_arrow_down_rounded,

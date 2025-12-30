@@ -31,14 +31,14 @@ class _PasswordFieldState extends State<PasswordField> {
         hintStyle: const TextStyle(fontSize: 16, color: AppColors.primary),
         contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 20),
         filled: true,
-        fillColor: AppColors.background,
+        fillColor: AppColors.dialogcolor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
-          borderSide: BorderSide(color: AppColors.background),
+          borderSide: BorderSide(color: AppColors.c1),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: AppColors.background),
+          borderSide: BorderSide(color: AppColors.c1),
         ),
         suffixIcon: IconButton(
           icon: Icon(
