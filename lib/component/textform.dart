@@ -31,19 +31,19 @@ class CustomText extends StatelessWidget {
         hintText: hinttext,
         hintStyle: TextStyle(
           fontSize: 15.5,
-          color: AppColors.primary,
+          color: Colors.black,
           fontWeight: FontWeight.w400,
         ),
         contentPadding: EdgeInsets.symmetric(vertical: 4, horizontal: 20),
         filled: true,
         fillColor: AppColors.dialogcolor,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: BorderSide(color: AppColors.c1),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: AppColors.n1),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: AppColors.c1),
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide(color: AppColors.n1),
           
         ),
       ),

@@ -233,7 +233,7 @@ class _ViewInfoState extends State<ViewInfo> {
                   ? "Edit My Profile"
                   : "Edit Patient Profile",
               onPressed: () {
-          Navigator.push(
+          Navigator.pushReplacement(
   context,
   MaterialPageRoute(
     builder: (_) => EditProfile(

@@ -36,7 +36,7 @@ class RoleDropdown extends StatelessWidget {
           hint: Text(hintText,
               style: const TextStyle(
                 fontSize: 15,
-                color: AppColors.primary,
+                color:Colors.black,
               )),
           items: roles
               .map((item) => DropdownMenuItem(
@@ -51,12 +51,12 @@ class RoleDropdown extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
               color: AppColors.dialogcolor,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.c1),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: AppColors.n1),
             ),
           ),
 
-         
+          
           dropdownStyleData: DropdownStyleData(
             maxHeight: 220,
             decoration: BoxDecoration(

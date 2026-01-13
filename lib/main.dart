@@ -3,21 +3,22 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:front/assistant/assistantpage.dart';
 import 'package:front/auth/blind.dart';
-import 'package:front/auth/deaf.dart';
+import 'package:front/auth/deaf/deaf.dart';
+import 'package:front/auth/deaf/switcher.dart';
+
 import 'package:front/auth/login.dart';
 import 'package:front/auth/patientsignup.dart';
 import 'package:front/auth/signup.dart';
-//import 'package:front/component/editprofile.dart';
-import 'package:front/component/user_provider.dart';
 import 'package:front/auth/volunteer/volunteerpage.dart';
+import 'package:front/component/user_provider.dart';
+
 import 'package:front/color.dart';
 import 'package:front/component/viewinfo.dart';
 import 'package:front/homepage.dart';
 import 'package:front/theme/theme.dart';
 import 'package:front/theme/themeprovider.dart';
 import 'package:provider/provider.dart';
-//import 'component/costomlogo.dart';
-//import 'auth/volunteer/volunteerpage.  dart';
+
 
 // camera
 import 'package:camera/camera.dart';
@@ -66,26 +67,24 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       color: AppColors.background,
       debugShowCheckedModeBanner: false,
-<<<<<<< HEAD
-      home:Login(),
+      home:Signup(),   
 
 
-=======
-      home: Login(),
->>>>>>> 6be44120ecb6f8a7a1d8798e576d653a4cf0be77
       routes: {
         "login": (context) => Login(),
         "homepage": (context) => Homepage(),
         "signup": (context) => Signup(),
         //"editprofile": (context) => const EditProfile( isPatient: true),
-        "viewinfo": (context) => ViewInfo(),
+        "viewinfo":(context)=> ViewInfo(),
         "blind": (context) => Blind(),
         "assistant": (context) => AssistantPage(),
-        "volunteer": (context) => VolunteerHome(),
+        "volunteer": (context) => VolunteerHome(), 
         "deaf": (context) => Deaf(),
+        "switcher": (context) => Switcher(),
         "patientsignup": (context) => Patientsignup(),
 
       },
+
       theme: Provider.of<Themeprovider>(context).themeData,
       darkTheme: darkMode,
     );

@@ -14,11 +14,12 @@ class CustomButtonAuth extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: double.infinity,
+      width:  MediaQuery.of(context).size.height*0.32,
+      
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          backgroundColor: AppColors.yellowButton,
+        padding: const EdgeInsets.all( 6),
+          backgroundColor:AppColors.n10,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
@@ -27,9 +28,9 @@ class CustomButtonAuth extends StatelessWidget {
         child: Text(
           title,
           style: const TextStyle(
-            color: AppColors.primary,
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
+            color: AppColors.dialogcolor,
+            fontSize: 26,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),

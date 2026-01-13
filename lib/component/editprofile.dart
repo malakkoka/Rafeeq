@@ -143,7 +143,7 @@ class _EditprofileState extends State<EditProfile> {
                   padding: const EdgeInsets.symmetric(horizontal:100, vertical: 10),
                   child: CustomButtonAuth(title:   "save Changes",
                     onPressed: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=> ViewInfo()));
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> ViewInfo()));
                       
                     }),
                 )

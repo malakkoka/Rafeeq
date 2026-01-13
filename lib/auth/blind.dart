@@ -146,53 +146,60 @@ class _BlindState extends State<Blind> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       drawer: CustomDrawer(),
       appBar: AppBar(
-        title: const Text("   Blind Interface", style: TextStyle(
+        title: const Text("   Blind Page", style: TextStyle(
           color: AppColors.background,
           //TextAlign.center,
         ),),
-        backgroundColor:AppColors.primary,
+        backgroundColor:AppColors.n4,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-        
-            // ===== الكاميرا =====
-            Container(
-        height: 600,
-        width: MediaQuery.of(context).size.width * 0.9,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color:AppColors.appbar,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+      
+          // ===== الكاميرا =====
+          Positioned(
+            top: 30,
+            left:MediaQuery.of(context).size.width * 0.05,
+            child: Container(
+                  height: 600,
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+            color:AppColors.n1,
             width:10,
-          ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(17),
-          child: isReady
+                    ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(17),
+                    child: isReady
               ? CameraPreview(controller)
               : const Center(child: CircularProgressIndicator()),
-        ),
+                  ),
             ),
-        
-            const SizedBox(height: 10),
-        
-            // ===== الصوت =====
-            AvatarGlow(
-        glowColor:AppColors.highlight,
-        animate: isSpeaking,
-        duration: const Duration(milliseconds: 1500),
-        child: const CircleAvatar(
-          radius: 35,
-          backgroundColor: AppColors.appbar,
-          child: Icon(Icons.graphic_eq, color:AppColors.background),
-        ),
+          ),
+      
+          const SizedBox(height: 10),
+      
+          // ===== الصوت =====
+          Positioned(
+            bottom:10,
+            left:MediaQuery.of(context).size.width * 0.40,
+            child: AvatarGlow(
+                  glowColor:AppColors.n1,
+                  animate: isSpeaking,
+                  duration: const Duration(milliseconds: 1500),
+                  child: const CircleAvatar(
+                    radius: 35,
+                    backgroundColor: AppColors.n4,
+                    child: Icon(Icons.graphic_eq, color:AppColors.background),
+                  ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

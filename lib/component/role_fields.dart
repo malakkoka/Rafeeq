@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:front/color.dart';
 import 'package:gap/gap.dart';
 import 'package:front/component/textform.dart';
 
@@ -55,12 +56,16 @@ String? _validateAdult(String? v) {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              "age",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              "Age",
+              style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: Colors.black,
+        ),
             ),
             const Gap(8),
             CustomText(
-              hinttext: "enter your age",
+              hinttext: "Enter your age",
               mycontroller: widget.assistage,
               validator: _validateAdult,
               autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -76,12 +81,16 @@ String? _validateAdult(String? v) {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              "age",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              "Age",
+              style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: Colors.black,
+        ),
             ),
             const Gap(8),
             CustomText(
-              hinttext: "enter your age",
+              hinttext: "Enter your age",
               mycontroller: widget.assistage,
               validator: _validateAdult,
               autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -92,13 +101,20 @@ String? _validateAdult(String? v) {
             const Gap(12),
             const Text(
               "Driver's license",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: Colors.black,
+        ),
             ),
             const Gap(8),
             Container(
               decoration: BoxDecoration(
-              color: Colors.grey[200],
+              color:AppColors.dialogcolor,
               borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color:AppColors.n1
+              )
               ),
               
               child: Row(
@@ -106,9 +122,10 @@ String? _validateAdult(String? v) {
                   Expanded(
                     child: 
                     RadioListTile<String>(
-                    title: const Text("yes"),
+                    title: const Text("Yes"),
                     value: "yes",
                     groupValue: driverslicense,
+                    activeColor: AppColors.n10,
                     onChanged: (val) {
                     setState(() => driverslicense = val);
                     },
@@ -117,9 +134,10 @@ String? _validateAdult(String? v) {
 
                   Expanded(
                     child: RadioListTile<String>(
-                      title: const Text("no"),
+                      title: const Text("No"),
                       value: "no",
                       groupValue: driverslicense,
+                      activeColor: AppColors.n10,
                       onChanged: (val) {
                         setState(() => driverslicense = val);
                       },

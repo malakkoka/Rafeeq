@@ -1,7 +1,9 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:front/assistant/assistantpage.dart';
 import 'package:front/auth/patientsignup.dart';
 import 'package:front/color.dart';
 import 'package:front/component/user_provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -58,19 +60,19 @@ class _SignupState extends State<Signup> {
 
   // API
   Future<Map<String, dynamic>> registerOnDjango() async {
-    final url = Uri.parse('http://192.168.52.212:8000/api/account/register/');
+    final url = Uri.parse('http://138.68.104.187/api/account/register/');
     int age = 0;
 
     if (selectedRole == "Patient") {
       age = int.tryParse(patientAge.text.trim()) ?? 0;
-    } else if (selectedRole == "First Assistant") {
+    } else if (selectedRole == "Assistant") {
       age = int.tryParse(assistage.text.trim()) ?? 0;
     } else if (selectedRole == "Volunteer") {
       age = int.tryParse(volunteerage.text.trim()) ?? 0;
     }
 
     String userType = "blind";
-    if (selectedRole == "First Assistant") {
+    if (selectedRole == "Assistant") {
       userType = "assistant";
     } else if (selectedRole == "Volunteer") {
       userType = "volunteer";
@@ -118,17 +120,17 @@ class _SignupState extends State<Signup> {
       body: SafeArea(
         child: Column(
           children: [
-            const Center(
-                          child: Text(
-                            "Sign Up",
-                            style: TextStyle(
-                              fontSize: 38,
-                              color: AppColors.accent,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        Gap(10),
+              Center(
+                child: Text(
+                  "Sign Up",
+                  style: GoogleFonts.poppins(
+                  fontSize: 38,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.n1,
+                ),
+              ),
+            ),
+            Gap(10),
             Expanded(
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -155,9 +157,9 @@ class _SignupState extends State<Signup> {
                     const Text(
                       "Your Role",
                       style: TextStyle(
-                        color: AppColors.primary,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
                       ),
                     ),
                     Gap(8),
@@ -203,7 +205,7 @@ class _SignupState extends State<Signup> {
                                                 if (selectedRole == "Assistant")
                                                 {
                                                 Navigator.of(context).pushReplacement(
-                                                  MaterialPageRoute(builder: (_) => const Patientsignup()),
+                                                  MaterialPageRoute(builder: (_) => const AssistantPage()),
                                                 );
                                               }else { Navigator.of(context) .pushReplacementNamed("volunteerpage"); 
                                               } } 
@@ -225,16 +227,16 @@ class _SignupState extends State<Signup> {
                                           text: "Already have an account? ",
                                           style: TextStyle(
                                             fontSize: 14.7,
-                                            fontWeight: FontWeight.w500,
-                                            color: AppColors.primary,
+                                            fontWeight: FontWeight.w400,
+                                            color: Colors.black,
                                           ),
                                         ),
                                         TextSpan(
                                           text: "Login",
                                           style: TextStyle(
                                             fontSize: 16,
-                                            color: AppColors.accent,
-                                            fontWeight: FontWeight.w900,
+                                            color: AppColors.n1,
+                                            fontWeight: FontWeight.w700,
                                           ),
                                         ),
                                       ],
@@ -257,16 +259,16 @@ class _SignupState extends State<Signup> {
         const Gap(16),
         Text(
           label,
-          style: const TextStyle(
-            color: AppColors.primary,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: Colors.black,
         ),
+      ),
         const Gap(8),
         CustomText(
 
-          hinttext: "enter your ${label.toLowerCase()}",
+          hinttext: "Enter your ${label.toLowerCase()}",
           mycontroller: controller,
         ),
       ],
@@ -302,15 +304,15 @@ class _SignupState extends State<Signup> {
         const Gap(16),
         Text(
           label,
-          style: const TextStyle(
-            color: AppColors.primary,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: Colors.black,
+        ),
         ),
         const Gap(8),
         PasswordField(
-          phint: "enter your password",
+          phint: "Enter your password",
           mycontroller: controller,
           validator: (v) =>
               v == null || v.isEmpty ? "Password is required" : null,
@@ -328,14 +330,14 @@ class _SignupState extends State<Signup> {
         const Text(
           "Confirm Password",
           style: TextStyle(
-            color: AppColors.primary,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: Colors.black,
+        ),
         ),
         const Gap(8),
         PasswordField(
-          phint: "enter your password again",
+          phint: "Enter your password again",
           mycontroller: repassword,
           validator: (v) {
             if (v == null || v.isEmpty) return "Please confirm your password";
