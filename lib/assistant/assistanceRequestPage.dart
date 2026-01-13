@@ -53,20 +53,83 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
   }
 
   Future<void> _pickDateTime() async {
-    //  اختيار التاريخ
+    // ===== Date Picker =====
     final pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.n1, // اليوم المختار + الهيدر
+              onPrimary: Colors.white, // نص الهيدر
+              onSurface: Colors.black, // أيام الشهر
+              background: AppColors.background,
+            ),
+            dialogBackgroundColor: AppColors.dialogcolor,
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (pickedDate == null) return;
 
-    //  اختيار الوقت
+    // ===== Time Picker =====
     final pickedTime = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.n1, // اللون النشط (PM)
+              onPrimary: Colors.white, // النص فوقه
+              onSurface: AppColors.n1, // النصوص
+            ),
+            timePickerTheme: TimePickerThemeData(
+              backgroundColor: AppColors.dialogcolor,
+
+              // الساعة والدقائق
+              hourMinuteColor: MaterialStateColor.resolveWith((states) {
+                if (states.contains(MaterialState.selected)) {
+                  return Colors.black.withOpacity(0.2);
+                }
+                return AppColors.dialogcolor;
+              }),
+              hourMinuteTextColor: MaterialStateColor.resolveWith((states) {
+                if (states.contains(MaterialState.selected)) {
+                  return AppColors.n1;
+                }
+                return Colors.black87;
+              }),
+
+              // AM / PM (النقطة اللي بالصورة)
+              dayPeriodColor: MaterialStateColor.resolveWith((states) {
+                if (states.contains(MaterialState.selected)) {
+                  return AppColors.n1; // PM
+                }
+                return AppColors.n1.withOpacity(0.12); // AM
+              }),
+              dayPeriodTextColor: MaterialStateColor.resolveWith((states) {
+                if (states.contains(MaterialState.selected)) {
+                  return Colors.white;
+                }
+                return AppColors.n1;
+              }),
+
+              // عقرب الساعة
+              dialHandColor: AppColors.n1,
+              dialBackgroundColor: Colors.black.withOpacity(0.08),
+
+              entryModeIconColor: AppColors.n1,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (pickedTime == null) return;
@@ -142,8 +205,7 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
     /// BODY (مشترك بين Create و Edit)
     final body = {
       "title": "Assistance Request",
-      "content": "Patient Condition: $patientCondition\n"
-          "Type: $typesText\n"
+      "content": "Type: $typesText\n"
           "Location: $selectedLocationLabel\n"
           "Date & Time: $selectedDateTimeLabel\n"
           "Notes: ${notesController.text}",
@@ -187,13 +249,23 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        //title: Text(widget.isEdit ? 'Edit Request' : 'Assistance Request'),
+        //centerTitle: true,
         backgroundColor: AppColors.background,
-        title: Text(widget.isEdit ? 'Edit Request' : 'Assistance Request'),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
+        elevation: 0,
+        iconTheme: IconThemeData(color: AppColors.n1),
+        actions: [
+          IconButton(
+            icon: isSubmitting
+                ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.check, size: 28),
+            onPressed: isSubmitting ? null : _submitRequest,
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -230,54 +302,64 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const _SectionTitle(title: 'Type of Assistance'),
-                  CheckboxListTile(
-                    title: const Text('Companion Support'),
+
+                  _buildCheckItem(
+                    label: 'Companion Support',
                     value: selectedTypes.contains('Companion Support'),
                     onChanged: (v) {
                       setState(() {
-                        v!
+                        v
                             ? selectedTypes.add('Companion Support')
                             : selectedTypes.remove('Companion Support');
                       });
                     },
                   ),
-                  CheckboxListTile(
-                    title: const Text('Reading/Writing Help'),
+
+                  _buildCheckItem(
+                    label: 'Reading/Writing Help',
                     value: selectedTypes.contains('Reading/Writing Help'),
                     onChanged: (v) {
                       setState(() {
-                        v!
+                        v
                             ? selectedTypes.add('Reading/Writing Help')
                             : selectedTypes.remove('Reading/Writing Help');
                       });
                     },
                   ),
-                  CheckboxListTile(
-                    title: const Text('Other'),
+
+                  _buildCheckItem(
+                    label: 'Other',
                     value: selectedTypes.contains('Other'),
                     onChanged: (v) {
                       setState(() {
-                        v!
+                        v
                             ? selectedTypes.add('Other')
                             : selectedTypes.remove('Other');
                       });
                     },
                   ),
+
+                  // ===== Other TextField (Clean & Close) =====
+                  if (selectedTypes.contains('Other'))
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: TextField(
+                        controller: otherTypeController,
+                        decoration: InputDecoration(
+                          hintText: 'Please specify the type of assistance',
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
-
-            if (selectedTypes.contains('Other'))
-              Padding(
-                padding: const EdgeInsets.only(left: 16, top: 8, right: 16),
-                child: TextField(
-                  controller: otherTypeController,
-                  decoration: const InputDecoration(
-                    hintText: 'Please specify the type of assistance',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
 
             const SizedBox(height: 10),
 
@@ -301,7 +383,7 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.location_on, color: AppColors.accent),
+                          Icon(Icons.location_on, color: AppColors.n1),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -323,8 +405,8 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
                     height: 46,
                     child: OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.accent,
-                        side: BorderSide(color: AppColors.accent),
+                        foregroundColor: AppColors.n1,
+                        side: BorderSide(color: AppColors.n1),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -463,4 +545,27 @@ class _SectionTitle extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget _buildCheckItem({
+  required String label,
+  required bool value,
+  required Function(bool) onChanged,
+}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 2),
+    child: Row(
+      children: [
+        Checkbox(
+          value: value,
+          visualDensity: VisualDensity.compact,
+          onChanged: (v) => onChanged(v!),
+        ),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 16),
+        ),
+      ],
+    ),
+  );
 }

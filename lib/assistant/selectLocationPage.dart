@@ -3,8 +3,6 @@
 //ينحط Pin
 //لما يضغط Confirm Location نرجّع الإحداثيات
 
-
-
 // ignore_for_file: file_names
 import 'package:flutter/material.dart';
 import 'package:front/color.dart';
@@ -49,11 +47,11 @@ class _SelectLocationPageState extends State<SelectLocationPage> {
           ),
           Positioned(
             bottom: 20,
-            left: 16,
-            right: 16,
+            left: 55,
+            right: 55,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accent,
+                backgroundColor: AppColors.n1,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),

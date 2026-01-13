@@ -2,7 +2,6 @@ import 'package:front/color.dart';
 import 'package:front/component/user_provider.dart';
 import 'package:front/component/customlisttile.dart';
 import 'package:front/component/viewinfo.dart';
-import '../theme/themeprovider.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:provider/provider.dart';
@@ -88,52 +87,6 @@ class CustomDrawer extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
               },
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.dark_mode,
-                color: Colors.grey.shade700,
-              ),
-              title: const Text(
-                "Theme",
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-              ),
-              trailing: Consumer<Themeprovider>(
-                builder: (context, themeProvider, child) {
-                  return Transform.scale(
-                    scale: 0.7,
-                    child: Switch(
-                      activeTrackColor: const Color.fromARGB(255, 28, 79, 127),
-                      value: themeProvider.isDarkMode,
-                      onChanged: (value) {
-                        themeProvider.toggleTheme();
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.notifications,
-                color: Colors.grey.shade700,
-              ),
-              title: const Text(
-                "Notifications",
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-              ),
-              trailing: Consumer<Themeprovider>(
-                builder: (context, provider, child) {
-                  return Transform.scale(
-                    scale: 0.7,
-                    child: Switch(
-                      activeTrackColor: const Color.fromARGB(255, 28, 79, 127),
-                      value: false,
-                      onChanged: (_) {},
-                    ),
-                  );
-                },
-              ),
             ),
             CustomListTile(
               icon: Icons.location_on_rounded,

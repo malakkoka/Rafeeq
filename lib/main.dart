@@ -1,23 +1,18 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:front/assistant/assistantpage.dart';
+import 'package:front/assistant/assistantMainPage.dart';
 import 'package:front/auth/blind.dart';
 import 'package:front/auth/deaf.dart';
 import 'package:front/auth/login.dart';
 import 'package:front/auth/patientsignup.dart';
 import 'package:front/auth/signup.dart';
-//import 'package:front/component/editprofile.dart';
 import 'package:front/component/user_provider.dart';
 import 'package:front/auth/volunteer/volunteerpage.dart';
 import 'package:front/color.dart';
 import 'package:front/component/viewinfo.dart';
 import 'package:front/homepage.dart';
-import 'package:front/theme/theme.dart';
-import 'package:front/theme/themeprovider.dart';
 import 'package:provider/provider.dart';
-//import 'component/costomlogo.dart';
-//import 'auth/volunteer/volunteerpage.  dart';
 
 // camera
 import 'package:camera/camera.dart';
@@ -33,7 +28,6 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => Themeprovider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
       ],
       child: const MyApp(),
@@ -66,13 +60,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       color: AppColors.background,
       debugShowCheckedModeBanner: false,
-<<<<<<< HEAD
-      home:Login(),
-
-
-=======
-      home: Login(),
->>>>>>> 6be44120ecb6f8a7a1d8798e576d653a4cf0be77
+      home: Login(),  //Assistantmainpage(),
       routes: {
         "login": (context) => Login(),
         "homepage": (context) => Homepage(),
@@ -80,15 +68,12 @@ class _MyAppState extends State<MyApp> {
         //"editprofile": (context) => const EditProfile( isPatient: true),
         "viewinfo": (context) => ViewInfo(),
         "blind": (context) => Blind(),
-        "assistant": (context) => AssistantPage(),
+        "assistant": (context) => Assistantmainpage(),
         "volunteer": (context) => VolunteerHome(),
         "deaf": (context) => Deaf(),
         "patientsignup": (context) => Patientsignup(),
-
       },
-      theme: Provider.of<Themeprovider>(context).themeData,
-      darkTheme: darkMode,
+      
     );
   }
 }
-  
