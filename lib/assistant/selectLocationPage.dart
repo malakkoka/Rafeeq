@@ -24,7 +24,9 @@ class _SelectLocationPageState extends State<SelectLocationPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.background,
-        title: const Text('Select Location'),
+        title: const Text(
+          'Select Location',
+        ),
         centerTitle: true,
       ),
       body: Stack(
@@ -65,7 +67,7 @@ class _SelectLocationPageState extends State<SelectLocationPage> {
               },
               child: const Text(
                 'Confirm Location',
-                style: TextStyle(fontSize: 17),
+                style: TextStyle(fontSize: 17, color: AppColors.background),
               ),
             ),
           ),

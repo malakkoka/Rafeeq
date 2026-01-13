@@ -48,9 +48,4 @@ class AppColors {
   static const Color background = Color.fromARGB(255, 255, 248, 235);
   static const Color n3 = Color(0xFFF0E2D7);
 
-  ///
-  static const Color primaryDark = Color(0xFF1F5A4F);
-  static const Color text = Color(0xFF0F2C24);
-  static const Color googleButton = Color(0xFF1C4E42);
-  static const Color divider = Color.fromRGBO(85, 106, 71, 1);
 }
