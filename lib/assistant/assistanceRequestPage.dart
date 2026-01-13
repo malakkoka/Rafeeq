@@ -2,9 +2,11 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:front/assistant/assistantMainPage.dart';
+import 'package:front/assistant/mainNavBar.dart';
 import 'package:front/assistant/selectLocationPage.dart';
+import 'package:front/component/viewinfo.dart';
 import 'package:front/constats.dart';
+import 'package:front/services/token_sevice.dart';
 import 'package:http/http.dart' as http;
 import 'package:front/color.dart';
 
@@ -62,7 +64,7 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
     super.dispose();
   }
 
-  /// ================= DATE & TIME =================
+  ///  DATE & TIME
   Future<void> _pickDateTime() async {
     final pickedDate = await showDatePicker(
       context: context,
@@ -118,9 +120,10 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
     });
   }
 
-  /// ================= SUBMIT =================
+  /// SUBMIT
   Future<void> _submitRequest() async {
     setState(() => isSubmitting = true);
+    final token = await TokenService.getToken();
 
     if (selectedType == null) {
       _showSnack('Please select assistance type');
@@ -178,9 +181,11 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => Assistantmainpage()),
-        );
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  const MainNavigationPage(role: UserRole.volunteer),
+            ));
       }
     } catch (e) {
       debugPrint('Submit error: $e');
@@ -194,7 +199,6 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
     setState(() => isSubmitting = false);
   }
 
-  /// ================= UI =================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -324,7 +328,7 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
     );
   }
 
-  /// ================= COMPONENTS =================
+  /// COMPONENTS
   Widget _card({required Widget child}) {
     return Card(
       color: AppColors.dialogcolor,

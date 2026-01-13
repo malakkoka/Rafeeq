@@ -15,16 +15,17 @@ class PostCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       color: AppColors.dialogcolor,
-      margin: const EdgeInsets.only(
-        bottom: 12,
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 3,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            /// Title
             Text(
               post.title,
               style: const TextStyle(
@@ -32,26 +33,36 @@ class PostCard extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(height: 6),
+
+            const SizedBox(height: 6),
+
+            /// Content
             Text(
               post.content,
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
+              ),
             ),
-            SizedBox(height: 14),
+
+            const SizedBox(height: 14),
+
+            /// State + Author
             Row(
               children: [
                 buildStateBadge(post.state ?? 0),
-                Spacer(),
-                Text(
+                const Spacer(),
+                const Text(
                   "Author: Wala'a",
-                  style: TextStyle(
-                    fontSize: 13.5,
-                  ),
-                ), //Text("Author: ${post.author}"),
-                Spacer(flex: 2),
+                  style: TextStyle(fontSize: 13.5),
+                ),
+                const Spacer(flex: 2),
               ],
             ),
-            SizedBox(height: 12),
+
+            const SizedBox(height: 12),
+
+            /// Time + Action Button
             Align(
               alignment: Alignment.centerRight,
               child: Padding(
@@ -60,23 +71,34 @@ class PostCard extends StatelessWidget {
                   children: [
                     Text(
                       formatTimeAgoEn(post.created_at),
-                      style:
-                          TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
-                    Spacer(),
-                    ElevatedButton(
+                    const Spacer(),
+
+                    /// يظهر فقط إذا الحالة pending
+                    if (post.state == 0)
+                      ElevatedButton(
                         style: ButtonStyle(
-                            shape: WidgetStatePropertyAll(
-                                RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(13))),
-                            backgroundColor:
-                                WidgetStatePropertyAll(AppColors.accent)),
+                          shape: WidgetStatePropertyAll(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(13),
+                            ),
+                          ),
+                          backgroundColor: WidgetStatePropertyAll(
+                            AppColors.accent,
+                          ),
+                        ),
                         onPressed: () {
                           ShowConfirmDialog(context);
                         },
-                        child: Text(
+                        child: const Text(
                           "I can help",
-                        )),
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -88,19 +110,20 @@ class PostCard extends StatelessWidget {
   }
 }
 
+/// ================= CONFIRM DIALOG =================
 void ShowConfirmDialog(BuildContext context) {
   showDialog(
     context: context,
     builder: (_) => AlertDialog(
-      //icon: Icon(Icons.add_to_photos_sharp),
       backgroundColor: AppColors.dialogcolor,
-      title: Center(
-        child: const Text(
+      title: const Center(
+        child: Text(
           "Ready to help?",
           style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Colors.black),
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
+          ),
         ),
       ),
       content: const Text(
@@ -117,29 +140,32 @@ void ShowConfirmDialog(BuildContext context) {
           children: [
             TextButton(
               style: ButtonStyle(
-                  backgroundColor: WidgetStatePropertyAll(
-                      const Color.fromARGB(255, 230, 226, 220))),
+                backgroundColor: WidgetStatePropertyAll(
+                  Color.fromARGB(255, 230, 226, 220),
+                ),
+              ),
               onPressed: () => Navigator.pop(context),
               child: const Text(
                 "  Cancel  ",
-                style: TextStyle(color: Color.fromARGB(255, 120, 120, 120)),
+                style: TextStyle(
+                  color: Color.fromARGB(255, 120, 120, 120),
+                ),
               ),
             ),
-            SizedBox(
-              width: 10,
-            ),
+            const SizedBox(width: 10),
             ElevatedButton(
               style: ButtonStyle(
-                  backgroundColor: WidgetStatePropertyAll(
-                      const Color.fromARGB(255, 52, 132, 145))),
+                backgroundColor: WidgetStatePropertyAll(
+                  Color.fromARGB(255, 52, 132, 145),
+                ),
+              ),
               onPressed: () {
-                Navigator.pop(
-                    context); ///////////////............. انتبهيلها .............
-                //هون بعدين رح استدعي ال endpoint تبع المساعدة
+                Navigator.pop(context);
+                //  استدعاء endpoint تبع المساعدة
               },
               child: const Text(
                 "Yes, I'll help",
-                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+                style: TextStyle(color: Colors.white),
               ),
             ),
           ],
@@ -149,10 +175,10 @@ void ShowConfirmDialog(BuildContext context) {
   );
 }
 
+/// ================= TIME FORMAT =================
 String formatTimeAgoEn(String dateString) {
   final DateTime createdAt = DateTime.parse(dateString);
   final DateTime now = DateTime.now();
-
   final Duration difference = now.difference(createdAt);
 
   if (difference.inSeconds < 60) {

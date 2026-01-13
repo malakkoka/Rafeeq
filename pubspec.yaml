@@ -19,11 +19,8 @@ dependencies:
   http: ^1.5.0
   sensors_plus: ^3.0.0
   google_maps_flutter: ^2.6.0
-<<<<<<< HEAD
   curved_navigation_bar: ^1.0.6
-=======
   google_fonts: ^6.1.0
->>>>>>> 544d610f6721af09a68ac3ebdb0e60b28829d7ce
 
   firebase_core: ^3.6.0
   firebase_analytics: ^11.2.1
@@ -67,16 +64,13 @@ flutter:
     - images/logologo.png
     - images/googleImage.webp
     - images/OIP.webp
-<<<<<<< HEAD
     - images/profilepatient.jpg
     - images/profileimg.png
     - images/images.png
     - images/refeeqlogo.jpeg
-=======
     - images/google.png
     - images/googlelogo.png
     
->>>>>>> 544d610f6721af09a68ac3ebdb0e60b28829d7ce
   fonts:
     - family: Caveat
       fonts:

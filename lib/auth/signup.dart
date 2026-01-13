@@ -1,8 +1,10 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
-import 'package:front/assistant/assistantpage.dart';
-import 'package:front/auth/patientsignup.dart';
+import 'package:front/assistant/mainNavBar.dart';
+//import 'package:front/auth/patientsignup.dart';
 import 'package:front/color.dart';
 import 'package:front/component/user_provider.dart';
+import 'package:front/component/viewinfo.dart';
+import 'package:front/constats.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -60,7 +62,7 @@ class _SignupState extends State<Signup> {
 
   // API
   Future<Map<String, dynamic>> registerOnDjango() async {
-    final url = Uri.parse('http://138.68.104.187/api/account/register/');
+    final url = Uri.parse('$baseUrl/api/account/register/');
     int age = 0;
 
     if (selectedRole == "Patient") {
@@ -205,9 +207,12 @@ class _SignupState extends State<Signup> {
                                                 if (selectedRole == "Assistant")
                                                 {
                                                 Navigator.of(context).pushReplacement(
-                                                  MaterialPageRoute(builder: (_) => const AssistantPage()),
+                                                  MaterialPageRoute(builder: (_) => const MainNavigationPage(
+    role: UserRole.assistant,
+  ),
+),
                                                 );
-                                              }else { Navigator.of(context) .pushReplacementNamed("volunteerpage"); 
+                                              }else { Navigator.of(context) .pushReplacementNamed("volunteer"); 
                                               } } 
                                                 else { await AwesomeDialog( context: context,
                                                 dialogType: DialogType.error,

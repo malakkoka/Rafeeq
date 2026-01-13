@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:front/assistant/assistanceRequestPage.dart';
 import 'package:front/color.dart';
 import 'package:front/constats.dart';
+import 'package:front/services/token_sevice.dart';
 import 'package:http/http.dart' as http;
 
 class AssistantPage extends StatefulWidget {
@@ -17,18 +18,35 @@ class AssistantPage extends StatefulWidget {
 class _AssistantPageState extends State<AssistantPage> {
   bool isLoading = false;
 
-  /// لاحقًا من الباك
-  String assistedUserName = 'Ahmad Mohsin';
+  /// بيانات المريض الحقيقي
+  Map<String, dynamic>? patient;
 
   List<Map<String, String>> recentRequests = [];
 
   @override
   void initState() {
     super.initState();
+    _loadPatientFromStorage();
     _refreshData();
   }
 
-  // ================== API LOGIC ==================
+
+
+  Future<void> _loadPatientFromStorage() async {
+  final user = await TokenService.getUser();
+
+  if (!mounted) return;
+
+  setState(() {
+    if (user != null && user['patient'] != null) {
+      patient = user['patient'];
+    } else {
+      patient = null;
+    }
+  });
+}
+
+
 
   Future<void> _handleDelete(Map<String, String> request) async {
     final status = request['status'];
@@ -44,6 +62,8 @@ class _AssistantPageState extends State<AssistantPage> {
   }
 
   Future<void> _deletePostHard(String postId) async {
+    final token = await TokenService.getToken();
+
     final response = await http.delete(
       Uri.parse('$baseUrl/api/account/posts/$postId/'),
       headers: {'Authorization': 'Bearer $token'},
@@ -55,6 +75,8 @@ class _AssistantPageState extends State<AssistantPage> {
   }
 
   Future<void> _archivePost(String postId) async {
+    final token = await TokenService.getToken();
+
     final response = await http.patch(
       Uri.parse('$baseUrl/api/account/posts/$postId/'),
       headers: {
@@ -82,7 +104,7 @@ class _AssistantPageState extends State<AssistantPage> {
     ).then((_) => _refreshData());
   }
 
-  // ================== UI ==================
+  
 
   @override
   Widget build(BuildContext context) {
@@ -90,27 +112,22 @@ class _AssistantPageState extends State<AssistantPage> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.background,
-        scrolledUnderElevation: 0, //  هادا المهم
-        surfaceTintColor: Colors.transparent, // بيمنع تغيير اللون
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         title: const Text(
           'My Patient',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
         ),
         iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+      body: patient == null
+          ? const Center(child: Text('No patient assigned'))
           : Column(
               children: [
-                // --------------- الجزء الثابت -------
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -120,21 +137,15 @@ class _AssistantPageState extends State<AssistantPage> {
                       const SizedBox(height: 32),
                       const Text(
                         'Recent Help Requests',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 12),
                     ],
                   ),
                 ),
-
-                // ===== البوستات (السكروول) =====
                 Expanded(
                   child: Container(
-                    margin:
-                        const EdgeInsets.only(bottom: 90), // ⭐ يرفع حدّ الليست
+                    margin: const EdgeInsets.only(bottom: 90),
                     child: RefreshIndicator(
                       onRefresh: _refreshData,
                       child: ListView.builder(
@@ -152,7 +163,7 @@ class _AssistantPageState extends State<AssistantPage> {
     );
   }
 
-  // ================== WIDGETS ==================
+  //WIDGETS 
 
   Widget _buildProfileHeader() {
     return Row(
@@ -166,7 +177,7 @@ class _AssistantPageState extends State<AssistantPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              assistedUserName,
+              patient?['username'] ?? '',
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 6),
@@ -176,12 +187,9 @@ class _AssistantPageState extends State<AssistantPage> {
                 color: AppColors.n1.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Text(
-                'Blind User',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
+              child: Text(
+                patient?['user_type'] == 'blind' ? 'Blind User' : 'Deaf User',
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
               ),
             ),
           ],
@@ -194,15 +202,13 @@ class _AssistantPageState extends State<AssistantPage> {
     return Card(
       color: AppColors.dialogcolor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+      child: const Padding(
+        padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text(
-              'Patient Status',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
+          children: [
+            Text('Patient Status',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
             Row(
               children: [
@@ -217,161 +223,23 @@ class _AssistantPageState extends State<AssistantPage> {
     );
   }
 
-  Widget _buildRequestCard(Map<String, String> request) {
-    final status = request['status']!;
-    final color = _statusColor(status);
+  //SORT
 
-    return Card(
-      color: AppColors.dialogcolor,
-      margin: const EdgeInsets.only(bottom: 10),
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 5,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(14),
-                bottomLeft: Radius.circular(14),
-              ),
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 17,
-                        backgroundColor: color.withOpacity(0.15),
-                        child: Icon(
-                          _statusIcon(status),
-                          color: color,
-                          size: 18,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          _extractType(request['content']!),
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      _buildStatusChip(status),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  _buildInfoRow(
-                    Icons.location_on_outlined,
-                    _extractLine(request['content']!, 'Location'),
-                  ),
-                  _buildInfoRow(
-                    Icons.schedule,
-                    _extractLine(request['content']!, 'Date & Time'),
-                  ),
-                  const SizedBox(height: 6),
-                  if (_extractLine(request['content']!, 'Notes').isNotEmpty)
-                    Text(
-                      _extractLine(request['content']!, 'Notes'),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      if (status == 'Pending')
-                        IconButton(
-                          icon: const Icon(Icons.edit_outlined, size: 20),
-                          onPressed: () => _goToEditRequest(request),
-                        ),
-                      IconButton(
-                        icon: Icon(
-                          status == 'Pending'
-                              ? Icons.delete_outline
-                              : Icons.archive_outlined,
-                          size: 20,
-                        ),
-                        onPressed: () => _handleDelete(request),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+  void _sortRequests() {
+    const order = {'Pending': 0, 'Accepted': 1, 'Completed': 2};
+
+    recentRequests.sort((a, b) {
+      final aOrder = order[a['status']] ?? 3;
+      final bOrder = order[b['status']] ?? 3;
+      return aOrder.compareTo(bOrder);
+    });
   }
 
-  Widget _buildInfoRow(IconData icon, String text) {
-    if (text.isEmpty || text == 'null') return const SizedBox();
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: Colors.grey),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(fontSize: 13),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatusChip(String status) {
-    final color = _statusColor(status);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        status,
-        style: TextStyle(color: color, fontWeight: FontWeight.w600),
-      ),
-    );
-  }
-
-  Color _statusColor(String status) {
-    switch (status) {
-      case 'Completed':
-        return Colors.green;
-      case 'Accepted':
-        return Colors.blue;
-      default:
-        return Colors.orange;
-    }
-  }
-
-  IconData _statusIcon(String status) {
-    switch (status) {
-      case 'Completed':
-        return Icons.check_circle;
-      case 'Accepted':
-        return Icons.handshake;
-      default:
-        return Icons.hourglass_bottom;
-    }
-  }
-
-  // ================== FETCH DATA ==================
+  //FETCH POSTS
 
   Future<void> _refreshData() async {
+    final token = await TokenService.getToken();
+
     final response = await http.get(
       Uri.parse('$baseUrl/api/account/posts/'),
       headers: {'Authorization': 'Bearer $token'},
@@ -380,21 +248,28 @@ class _AssistantPageState extends State<AssistantPage> {
     if (response.statusCode == 200) {
       final List data = json.decode(response.body);
 
-      if (!mounted) return; // ⭐⭐⭐ الحل الذهبي
+      if (!mounted) return;
 
       setState(() {
-        recentRequests = data.map<Map<String, String>>((item) {
-          return {
-            'id': item['id'].toString(),
-            'content': item['content'] ?? '',
-            'status': _mapStateToStatus(item['state']),
-          };
-        }).toList();
+        recentRequests = data
+            .where((item) =>
+                item['content'] != null &&
+                item['content'].toString().isNotEmpty &&
+                item['state'] != null)
+            .map<Map<String, String>>((item) => {
+                  'id': item['id'].toString(),
+                  'content': item['content'],
+                  'status': _mapStateToStatus(item['state']),
+                })
+            .where((item) => item['status'] != 'Unknown')
+            .toList();
+
+        _sortRequests();
       });
     }
   }
 
-// ================== HELPERS ==================
+  // HELPERS
 
   String _mapStateToStatus(dynamic state) {
     switch (state) {
@@ -421,8 +296,135 @@ class _AssistantPageState extends State<AssistantPage> {
     }
   }
 
-  String _extractType(String content) {
-    final type = _extractLine(content, 'Type');
-    return type.isNotEmpty ? type : 'Assistance Request';
+  Widget _buildRequestCard(Map<String, String> request) {
+    final status = request['status']!;
+    final color = _statusColor(status);
+
+    final type = _extractLine(request['content'] ?? '', 'Type');
+    final location = _extractLine(request['content'] ?? '', 'Location');
+    final dateTime = _extractLine(request['content'] ?? '', 'Date & Time');
+    final notes = _extractLine(request['content'] ?? '', 'Notes');
+
+    return Card(
+      color: AppColors.dialogcolor,
+      margin: const EdgeInsets.only(bottom: 10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      child: Row(
+        children: [
+          Container(
+            width: 5,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(14),
+                bottomLeft: Radius.circular(14),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 17,
+                        backgroundColor: color.withOpacity(0.15),
+                        child: Icon(_statusIcon(status), color: color, size: 18),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          type.isNotEmpty ? type : 'Assistance Request',
+                          style: const TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      _buildStatusChip(status),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  if (location.isNotEmpty)
+                    _buildInfoRow(Icons.location_on_outlined, location),
+                  if (dateTime.isNotEmpty)
+                    _buildInfoRow(Icons.schedule, dateTime),
+                  if (notes.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text(notes,
+                          style:
+                              const TextStyle(fontSize: 13, color: Colors.grey)),
+                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (status == 'Pending')
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined),
+                          onPressed: () => _goToEditRequest(request),
+                        ),
+                      IconButton(
+                        icon: Icon(status == 'Pending'
+                            ? Icons.delete_outline
+                            : Icons.archive_outlined),
+                        onPressed: () => _handleDelete(request),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String text) {
+    if (text.isEmpty || text == 'null') return const SizedBox();
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: Colors.grey),
+        const SizedBox(width: 6),
+        Expanded(child: Text(text, style: const TextStyle(fontSize: 13))),
+      ],
+    );
+  }
+
+  Widget _buildStatusChip(String status) {
+    final color = _statusColor(status);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child:
+          Text(status, style: TextStyle(color: color, fontWeight: FontWeight.w600)),
+    );
+  }
+
+  Color _statusColor(String status) {
+    switch (status) {
+      case 'Completed':
+        return Colors.green;
+      case 'Accepted':
+        return Colors.blue;
+      default:
+        return Colors.orange;
+    }
+  }
+
+  IconData _statusIcon(String status) {
+    switch (status) {
+      case 'Completed':
+        return Icons.check_circle;
+      case 'Accepted':
+        return Icons.handshake;
+      default:
+        return Icons.hourglass_bottom;
+    }
   }
 }

@@ -3,11 +3,10 @@ import 'package:front/auth/volunteer/post_model.dart';
 import 'package:front/auth/volunteer/post_service.dart';
 import 'package:front/auth/volunteer/post_card.dart';
 import 'package:front/color.dart';
-import 'package:front/component/customdrawer.dart';
 
 class VolunteerHome extends StatefulWidget {
   const VolunteerHome({super.key});
-  
+
   @override
   State<VolunteerHome> createState() => _VolunteerHomeState();
 }
@@ -20,6 +19,21 @@ class _VolunteerHomeState extends State<VolunteerHome> {
   String selectedCondition = 'All';
   String selectedCity = 'All';
   bool newestFirst = true;
+
+  // ===== Cities list =====
+  final List<String> cities = [
+    'Amman',
+    'Irbid',
+    'Zarqa',
+    'Aqaba',
+    'Salt',
+    'Madaba',
+    'Karak',
+    'Tafilah',
+    'Ma\'an',
+    'Ajloun',
+    'Jerash',
+  ];
 
   @override
   void initState() {
@@ -36,9 +50,6 @@ class _VolunteerHomeState extends State<VolunteerHome> {
           .where((p) => _mapStateToStatus(p.state) == selectedStatus)
           .toList();
     }
-
-    // ⚠️ مبدئياً الكونديشن والمدينة مش موجودين بالـ Post model
-    // فبنخليهم UI فقط (جاهزين لما يضافوا لاحقاً بالباك)
 
     filtered.sort((a, b) => newestFirst
         ? b.created_at.compareTo(a.created_at)
@@ -136,7 +147,7 @@ class _VolunteerHomeState extends State<VolunteerHome> {
 
                     const SizedBox(height: 20),
 
-                    /// 🔹 City
+                    /// 🔹 City (من List)
                     const _SectionTitle('City'),
                     Wrap(
                       spacing: 8,
@@ -147,23 +158,13 @@ class _VolunteerHomeState extends State<VolunteerHome> {
                           Colors.blueGrey,
                           () => setModalState(() => selectedCity = 'All'),
                         ),
-                        _filterChip(
-                          'Amman',
-                          selectedCity == 'Amman',
-                          Colors.green,
-                          () => setModalState(() => selectedCity = 'Amman'),
-                        ),
-                        _filterChip(
-                          'Irbid',
-                          selectedCity == 'Irbid',
-                          Colors.green,
-                          () => setModalState(() => selectedCity = 'Irbid'),
-                        ),
-                        _filterChip(
-                          'Zarqa',
-                          selectedCity == 'Zarqa',
-                          Colors.green,
-                          () => setModalState(() => selectedCity = 'Zarqa'),
+                        ...cities.map(
+                          (city) => _filterChip(
+                            city,
+                            selectedCity == city,
+                            Colors.green,
+                            () => setModalState(() => selectedCity = city),
+                          ),
                         ),
                       ],
                     ),
@@ -219,7 +220,10 @@ class _VolunteerHomeState extends State<VolunteerHome> {
                             setState(() {});
                             Navigator.pop(context);
                           },
-                          child: const Text('Apply'),
+                          child: const Text(
+                            'Apply',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
                       ],
                     ),
@@ -252,7 +256,6 @@ class _VolunteerHomeState extends State<VolunteerHome> {
           ),
         ],
       ),
-      drawer: CustomDrawer(),
       body: FutureBuilder<List<Post>>(
         future: futurePosts,
         builder: (context, snapshot) {
@@ -291,31 +294,19 @@ Widget _filterChip(
     showCheckmark: false,
     selected: selected,
     onSelected: (_) => onTap(),
-
-    // 🔹 الخلفية لما تكون مختارة
     selectedColor: color.withOpacity(0.20),
-
-    // 🔹 الخلفية لما تكون مش مختارة
     backgroundColor: AppColors.background,
-
-    // 🔹 الشكل الخارجي
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(19),
       side: BorderSide(
-        color: selected ? color : AppColors.background, // AppColors.background,
+        color: selected ? color : AppColors.background,
       ),
     ),
-
-    // 🔹 المحتوى (أيقونة + نص)
     label: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         if (selected) ...[
-          Icon(
-            Icons.check,
-            size: 16,
-            color: color, // ✅ لون الصح نفس لون الكلمة
-          ),
+          Icon(Icons.check, size: 16, color: color),
           const SizedBox(width: 4),
         ],
         Text(

@@ -1,29 +1,30 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
-//import 'package:flutter_svg/flutter_svg.dart';
+import 'package:front/assistant/mainNavBar.dart';
 import 'package:front/color.dart';
 import 'package:front/component/user_provider.dart';
 import 'package:front/component/custom_button_auth.dart';
 import 'package:front/component/password.dart';
 import 'package:front/component/textform.dart';
+import 'package:front/component/viewinfo.dart';
 import 'package:front/constats.dart';
+import 'package:front/services/token_sevice.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
+
   @override
   State<Login> createState() => _LoginState();
 }
 
 class _LoginState extends State<Login> {
-  final TextEditingController username = TextEditingController(); 
+  final TextEditingController username = TextEditingController();
   final TextEditingController password = TextEditingController();
-  final storage = const FlutterSecureStorage();
 
   Future<Map<String, dynamic>> loginToDjango() async {
     final url = Uri.parse('$baseUrl/api/account/login/');
@@ -53,10 +54,8 @@ class _LoginState extends State<Login> {
 
         return {
           "success": true,
-          "username": data["user"]["username"],
-          "email": data["user"]["email"],
-          "role": data["user"]["user_type"],
           "token": data["access"],
+          "user": data["user"], // user كامل مع patient
         };
       } else {
         return {
@@ -105,15 +104,15 @@ class _LoginState extends State<Login> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              
-                                Center(
-                                child:Text('Login',
-                                      style: GoogleFonts.poppins(
-                                          fontSize: 38,
-                                          fontWeight: FontWeight.w600,
-                                          color: AppColors.n1,
-                                      ),
-                                    )
+                              Center(
+                                child: Text(
+                                  'Login',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 38,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.n1,
+                                  ),
+                                ),
                               ),
                               const Gap(16),
                               const Text(
@@ -144,7 +143,8 @@ class _LoginState extends State<Login> {
                                 mycontroller: password,
                               ),
                               Container(
-                                margin: const EdgeInsets.only(top: 5, bottom: 20),
+                                margin:
+                                    const EdgeInsets.only(top: 5, bottom: 20),
                                 alignment: Alignment.topRight,
                                 child: const Text(
                                   "forgot password?",
@@ -160,31 +160,54 @@ class _LoginState extends State<Login> {
                                   title: ("Login"),
                                   onPressed: () async {
                                     final result = await loginToDjango();
-                                        
+
                                     if (result["success"] == true) {
+                                      // 🔐 حفظ التوكين
+                                      await TokenService.saveToken(
+                                          result["token"]);
+
+                                      // ⭐ خزّني user كامل (assistant + patient)
+                                      await TokenService.saveUser(
+                                          result["user"]);
+
+                                      final role = result["user"]["user_type"];
+
+                                      // 👤 حفظ بيانات المستخدم (زي ما كان عندك)
                                       final userProvider =
                                           Provider.of<UserProvider>(context,
                                               listen: false);
-                                        
+
                                       userProvider.setUser(
-                                        name: result["username"],
-                                        email: result["email"],
-                                        role: result["role"] ?? '',
-                                        //userId: result["data"]["id"],
-                                        //id: null,
+                                        name: result["user"]["username"],
+                                        email: result["user"]["email"],
+                                        role: role ?? '',
                                       );
-                                        
+
                                       if (!mounted) return;
-                                      if (result["role"] == "blind") {
+
+                                      // 🚦 التوجيه حسب الدور
+                                      if (role == "blind") {
                                         Navigator.of(context)
                                             .pushReplacementNamed("blind");
-                                      } else if (result["role"] == "assistant") {
-                                        Navigator.of(context)
-                                            .pushReplacementNamed("assistant");
-                                      } else if (result["role"] == "volunteer") {
-                                        Navigator.of(context)
-                                            .pushReplacementNamed("volunteerpage");
-                                      } else if (result["role"] == "deaf") {
+                                      } else if (role == "assistant") {
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (_) => const MainNavigationPage(
+        role: UserRole.assistant,
+      ),
+    ),
+  );
+                                      } else if (role == "volunteer") {
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (_) => const MainNavigationPage(
+        role: UserRole.volunteer,
+      ),
+    ),
+  );
+                                      } else if (role == "deaf") {
                                         Navigator.of(context)
                                             .pushReplacementNamed("deaf");
                                       }
@@ -202,27 +225,33 @@ class _LoginState extends State<Login> {
                               ),
                               const Gap(12),
                               Row(
-                                children: const [
-                                  Expanded(
+                                children: [
+                                  const Expanded(
                                     child: Divider(
                                       color: AppColors.n1,
                                       thickness: 1.3,
                                     ),
                                   ),
-                                  Text(
+                                  const Text(
                                     " OR ",
                                     style: TextStyle(
                                       color: Colors.black,
                                       fontWeight: FontWeight.w400,
                                     ),
                                   ),
-                                  Expanded(
+                                  const Expanded(
                                     child: Divider(
                                       color: AppColors.n1,
                                       thickness: 1.3,
                                     ),
                                   ),
+                                  
+                              
+                                  
+
                                 ],
+                                
+
                               ),
                               const Gap(12),
                               Center(
@@ -254,7 +283,6 @@ class _LoginState extends State<Login> {
                                 ),
                                                             ),
                               ),
-                            
                               const Gap(12),
                               InkWell(
                                 onTap: () {
