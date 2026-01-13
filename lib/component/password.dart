@@ -28,22 +28,22 @@ class _PasswordFieldState extends State<PasswordField> {
       obscureText: !_isVisible,
       decoration: InputDecoration(
         hintText: widget.phint,
-        hintStyle: const TextStyle(fontSize: 16, color: AppColors.primary),
+        hintStyle: const TextStyle(fontSize: 16, color:Colors.black,),
         contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 20),
         filled: true,
         fillColor: AppColors.dialogcolor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
-          borderSide: BorderSide(color: AppColors.c1),
+          borderSide: BorderSide(color: AppColors.n1),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: AppColors.c1),
+          borderSide: BorderSide(color: AppColors.n1),
         ),
         suffixIcon: IconButton(
           icon: Icon(
             _isVisible ? Icons.visibility : Icons.visibility_off,
-            color: AppColors.accent,
+            color: AppColors.n1,
           ),
           onPressed: () {
             setState(() {

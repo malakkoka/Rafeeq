@@ -5,7 +5,6 @@ class AppColors {
   static const Color accent = Color.fromARGB(255, 8, 119, 144);
   static const Color primaryButton = Color.fromARGB(255, 239, 193, 130);
   static const Color highlight = Color.fromARGB(255, 230, 186, 119);
-  static const Color yellowButton = Color(0xFFF5C94C);
   static const Color inputField = Color.fromARGB(255, 255, 255, 255);
 
   //////////////////////
@@ -30,6 +29,7 @@ class AppColors {
   static const Color c7 = Color.fromARGB(255, 231, 185, 120);
   static const Color c8 = Color.fromARGB(255, 243, 234, 200);
 
+<<<<<<< HEAD
   ///new
   static const Color n2 = Color(0xFFE1A5AA);
   static const Color n5 = Color(0xFFE6D2CE);
@@ -48,4 +48,38 @@ class AppColors {
   static const Color background = Color.fromARGB(255, 255, 248, 235);
   static const Color n3 = Color(0xFFF0E2D7);
 
+=======
+  ///new 
+    static const Color n2 = Color(0xFFE1A5AA);
+    static const Color n5 = Color(0xFFE6D2CE);
+    static const Color n6 = Color(0xFFF0B9B3);
+    static const Color n7 = Color(0xFFFACFAA);
+    static const Color n8 = Color(0xFFD27873);
+    static const Color n9 = Color(0xFFA79898);
+    
+    static const Color n11 = Color.fromARGB(255, 248, 229, 214);
+    
+//=============final =====================
+    static const Color n1 = Color(0xFF23AAC3);
+    static const Color n4 = Color(0xFF5387B9);
+    static const Color n10 = Color.fromARGB(255, 244, 145, 59);
+    static const Color dialogcolor = Color.fromARGB(255, 255, 252, 246);
+    static const Color background = Color.fromARGB(255, 255, 248, 235);
+    static const Color n3 = Color(0xFFF0E2D7);
+    static const Color yellowButton = Color.fromARGB(255, 252, 209, 91);
+
+
+
+
+
+
+
+
+
+  ///
+  static const Color primaryDark = Color(0xFF1F5A4F);
+  static const Color text = Color(0xFF0F2C24);
+  static const Color googleButton = Color(0xFF1C4E42);
+  static const Color divider = Color.fromRGBO(85, 106, 71, 1);
+>>>>>>> 544d610f6721af09a68ac3ebdb0e60b28829d7ce
 }

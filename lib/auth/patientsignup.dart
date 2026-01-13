@@ -5,6 +5,7 @@ import 'package:front/component/custom_button_auth.dart';
 import 'package:front/component/password.dart';
 import 'package:front/component/textform.dart';
 import 'package:gap/gap.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class Patientsignup extends StatefulWidget {
   const Patientsignup({super.key});
@@ -42,11 +43,11 @@ class _PatientsignupState extends State<Patientsignup> {
           children: [
               Gap(20),
               Text(
-                "Sign Up",
-                style: TextStyle(
-                  fontSize: 40,
-                  color: AppColors.accent,
-                  fontWeight: FontWeight.w600, 
+                "Patient Sign Up",
+                style: GoogleFonts.poppins(
+                  fontSize: 36,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.n1,
                 ),
               ),
               Gap(10),
@@ -77,11 +78,11 @@ class _PatientsignupState extends State<Patientsignup> {
                     Text(
                       "Patient Type",
                       style: TextStyle(
-                        color: AppColors.primary,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold
-                      ),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
                     ),
+                  ),
                     Gap(8),
                     Row(
                       children: [
@@ -90,6 +91,7 @@ class _PatientsignupState extends State<Patientsignup> {
                           title: const Text("Blind"),
                           value: "blind",
                           groupValue: disability,
+                          activeColor: AppColors.n10,
                           onChanged: (v){
                             setState(() {
                               disability = v;
@@ -102,6 +104,7 @@ class _PatientsignupState extends State<Patientsignup> {
                           title: const Text("Deaf"),
                           value: "deaf",
                           groupValue: disability,
+                          activeColor: AppColors.n10,
                           onChanged: (v){
                             setState(() {
                               disability = v;
@@ -118,9 +121,9 @@ class _PatientsignupState extends State<Patientsignup> {
                         Text(
                         "can read and write ? ",
                         style: TextStyle(
-                        color: AppColors.primary,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
                       ),
                     ),
                     Row(
@@ -130,6 +133,7 @@ class _PatientsignupState extends State<Patientsignup> {
                           title: const Text("Yes"),
                           value: true,
                           groupValue: readandwrite,
+                          activeColor: AppColors.n10,
                           onChanged: (v){
                             setState(() {
                               readandwrite=v;
@@ -142,6 +146,7 @@ class _PatientsignupState extends State<Patientsignup> {
                           title: const Text("No"),
                           value: false,
                           groupValue: readandwrite,
+                          activeColor: AppColors.n10,
                           onChanged: (v){
                             setState(() {
                               readandwrite=v;
@@ -159,12 +164,12 @@ class _PatientsignupState extends State<Patientsignup> {
                         ),
                       ),
                     ),
-                    Gap(40),
+                    Gap(20),
                     Container(
                       padding: const EdgeInsets.only(left:10,right:10),
-                      width: 300,
+                      width: 250,
                       child: CustomButtonAuth(
-                              title: "Sign Up for patient", 
+                              title: "Sign Up", 
                               onPressed: () async {},),
                     ),
                       Gap(60),
@@ -181,16 +186,16 @@ Widget _section(String label, TextEditingController controller) {
         const Gap(16),
         Text(
           label,
-          style: const TextStyle(
-            color: AppColors.primary,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: Colors.black,
+        ),
         ),
         const Gap(8),
         CustomText(
 
-          hinttext: "enter your ${label.toLowerCase()}",
+          hinttext: "Enter ${label.toLowerCase()}",
           mycontroller: controller,
         ),
       ],
@@ -226,15 +231,15 @@ Widget _section(String label, TextEditingController controller) {
         const Gap(16),
         Text(
           label,
-          style: const TextStyle(
-            color: AppColors.primary,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: Colors.black,
+        ),
         ),
         const Gap(8),
         PasswordField(
-          phint: "enter your password",
+          phint: "Enter password",
           mycontroller: controller,
           validator: (v) =>
               v == null || v.isEmpty ? "Password is required" : null,
@@ -252,14 +257,14 @@ Widget _section(String label, TextEditingController controller) {
         const Text(
           "Confirm Password",
           style: TextStyle(
-            color: AppColors.primary,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: Colors.black,
+        ),
         ),
         const Gap(8),
         PasswordField(
-          phint: "enter your password again",
+          phint: "Enter password again",
           mycontroller: repassword,
           validator: (v) {
             if (v == null || v.isEmpty) return "Please confirm your password";

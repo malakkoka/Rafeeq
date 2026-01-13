@@ -204,6 +204,7 @@ class _ViewInfoState extends State<ViewInfo> {
               hinttext: currentData["email"],
               readonly: true,
             ),
+<<<<<<< HEAD
           if (currentMode == ProfileMode.patient) ...[
             CustomTextFormField(
               labeltext: "Age",
@@ -236,6 +237,49 @@ class _ViewInfoState extends State<ViewInfo> {
                   ),
                 ),
               );
+=======
+
+            if (currentMode == ProfileMode.assistant)
+              CustomTextFormField(
+                labeltext: "Email",
+                hinttext: currentData["email"],
+                readonly: true,
+              ),
+
+            if (currentMode == ProfileMode.patient) ...[
+              CustomTextFormField(
+                labeltext: "Age",
+                hinttext: currentData["age"],
+                readonly: true,
+              ),
+              CustomTextFormField(
+                labeltext: "Phone",
+                hinttext: currentData["phone"],
+                readonly: true,
+              ),
+              CustomTextFormField(
+                labeltext: "Address",
+                hinttext: currentData["address"],
+                readonly: true,
+              ),
+            ],
+
+            const SizedBox(height: 20),
+            CustomButtonAuth(
+              title: currentMode == ProfileMode.assistant
+                  ? "Edit My Profile"
+                  : "Edit Patient Profile",
+              onPressed: () {
+          Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(
+    builder: (_) => EditProfile(
+      userRole: userRole, 
+      isPatient: currentMode == ProfileMode.patient,
+    ),
+  ),
+);
+>>>>>>> 544d610f6721af09a68ac3ebdb0e60b28829d7ce
             },
           ),
         ]),
