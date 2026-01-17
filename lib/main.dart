@@ -15,8 +15,7 @@ import 'package:front/component/user_provider.dart';
 import 'package:front/color.dart';
 import 'package:front/component/viewinfo.dart';
 import 'package:front/homepage.dart';
-import 'package:front/theme/theme.dart';
-import 'package:front/theme/themeprovider.dart';
+
 import 'package:provider/provider.dart';
 
 
@@ -34,7 +33,6 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => Themeprovider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
       ],
       child: const MyApp(),
@@ -67,7 +65,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       color: AppColors.background,
       debugShowCheckedModeBanner: false,
-      home:Signup(),   
+      home: Login(),   
 
 
       routes: {
@@ -85,8 +83,7 @@ class _MyAppState extends State<MyApp> {
 
       },
 
-      theme: Provider.of<Themeprovider>(context).themeData,
-      darkTheme: darkMode,
+      
     );
   }
 }

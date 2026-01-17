@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:gap/gap.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -125,116 +126,130 @@ class _SpeakerState extends State<Speaker> {
         title: const Text(
           "Speaker Page",
           style: TextStyle(
-            color: AppColors.background
+            color: AppColors.background,
+            fontWeight: FontWeight.w500,
           ),),
           backgroundColor: AppColors.n1,
       ),
-      drawer: CustomDrawer(),
-      body: Column(
-        children: [
-          Gap(10),
-          Text("type or speak",
-          style: TextStyle(
-            color: AppColors.n4, 
-            fontSize: 24,
-            fontWeight: FontWeight.bold
+      
+      body:SafeArea(
+        child: Column(
+          children: [
+            Gap(10),
+            Text("type or speak",
+            style: GoogleFonts.poppins(
+              fontSize: 26,
+              fontWeight: FontWeight.w600,
+              color: AppColors.n1,
             ),
-            ),
-            Container(
-              padding: EdgeInsets.all(20),
-              height:100,
-              child: TextField(
-                controller: textController,
-                decoration: InputDecoration(
-                  hintText: "type here ...",
-                  filled: true,
-                  fillColor: AppColors.inputField,
-                  border: 
-                  OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(
-                      color:  AppColors.n10,
-                    )
+              ),
+              Container(
+                padding: EdgeInsets.all(20),
+                height:100,
+                child: TextField(
+                  controller: textController,
+                  decoration: InputDecoration(
+                    hintText: "type here ...",
+                    filled: true,
+                    fillColor: AppColors.inputField,
+                    border: 
+                    OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(
+                        color:  AppColors.n10,
+                        width: 8
+                      ),
+                    ),
                     
-                  ),
-                  suffixIcon: IconButton(
-                  icon: Icon(
-                    recording ?  Icons.stop : Icons.mic,
-                    color : recording ? AppColors.n10: AppColors.n10
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      recording=!recording;
-                    });
-                    if (recording)
-                    {startRecording();}
-                    else{
-                      stopRecording();
-                    }
-                  },)
-                ),),
+            enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: AppColors.n10),
+        
             ),
-          Container(
-            alignment:Alignment.center,
-            width: 320,
-            //padding: const EdgeInsets.all(5),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
+            focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: AppColors.n10),
+            ),
+          
+                    suffixIcon: IconButton(
+                    icon: Icon(
+                      recording ?  Icons.stop : Icons.mic,
+                      color : recording ? AppColors.n10: AppColors.n10
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        recording=!recording;
+                      });
+                      if (recording)
+                      {startRecording();}
+                      else{
+                        stopRecording();
+                      }
+                    },)
+                  ),),
+              ),
+            Container(
+              alignment:Alignment.center,
+              width: 320,
+              //padding: const EdgeInsets.all(5),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed:(){}, 
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.n10,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadiusGeometry.circular(14),
+                        ),
+                        //padding: EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: Text(
+                        "translate",
+                        style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+              
+                Gap(15),
+              
                 Expanded(
-                  child: ElevatedButton(
-                    onPressed:(){}, 
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.n10,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadiusGeometry.circular(14),
+                  
+                    child: ElevatedButton(
+                      onPressed:(){}, 
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.n1,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadiusGeometry.circular(14),
+                        ),
+                        //padding: EdgeInsets.symmetric(vertical: 12),
                       ),
-                      //padding: EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: Text(
-                      "translate",
-                      style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold),
+                      child: Text(
+                        "clear",
+                        style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ),
-                ),
-            
-              Gap(15),
-            
-              Expanded(
-                
-                  child: ElevatedButton(
-                    onPressed:(){}, 
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryButton,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadiusGeometry.circular(14),
-                      ),
-                      //padding: EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: Text(
-                      "clear",
-                      style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          
-          Container(
-            margin : EdgeInsets.all(20),
-            height: MediaQuery.of(context).size.height*.5,
-            width: MediaQuery.of(context).size.width*0.9,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.n4,width: 6),
+                ],
+              ),
             ),
             
-          ),
-        ],
+            
+            Container(
+              margin : EdgeInsets.all(20),
+              height: MediaQuery.of(context).size.height*.5,
+              width: MediaQuery.of(context).size.width*0.9,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.n1,width: 6),
+              ),
+              
+            ),
+          ],
+        ),
       )
     );
   }

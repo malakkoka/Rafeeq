@@ -25,19 +25,19 @@ import 'package:gap/gap.dart';
     @override
     Widget build (BuildContext context){
       return Scaffold(
-        backgroundColor: const Color(0xFFF0E2D7),
+        backgroundColor: AppColors.background,
         body:
           isdeaf? Deaf() : Speaker(),
           floatingActionButton: FloatingActionButton(
             elevation: 0,
-            backgroundColor: AppColors.n10,
+            backgroundColor: AppColors.n4,
             shape: CircleBorder(),
             child: AnimatedRotation(
               turns: _turns,
               duration: Duration(milliseconds: 500),
               curve: Curves.easeInOut,
               child: Icon(Icons.sync,
-              color:AppColors.n3,),
+              color:AppColors.background,),
             ),
             onPressed: () {
               setState(() {
@@ -52,7 +52,7 @@ import 'package:gap/gap.dart';
           bottomNavigationBar: SizedBox(
             height: 55,
             child: BottomAppBar(
-              color: AppColors.n10,
+              color: AppColors.n4,
               shape: CircularNotchedRectangle(),
               elevation: 0,
               notchMargin: 2,
@@ -63,7 +63,7 @@ import 'package:gap/gap.dart';
                   IconButton(
                     padding: EdgeInsets.only(left:50),
                     icon: Icon(Icons.person,
-                    color:AppColors.n3,),
+                    color:AppColors.background,),
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -75,7 +75,7 @@ import 'package:gap/gap.dart';
                   IconButton(
                     padding: EdgeInsets.only(right:50),
                     icon: Icon(Icons.video_call,
-                    color:AppColors.n3,),
+                    color:AppColors.background,),
                     onPressed: () {
                      // Navigator.push(context, )
                     },

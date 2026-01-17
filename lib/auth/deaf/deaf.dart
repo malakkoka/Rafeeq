@@ -116,25 +116,24 @@ void dispose() {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text(
-          "Deaf Page",
+          "   Deaf Page",
           style: TextStyle(
             color: AppColors.background,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w500
           ),),
-          backgroundColor: AppColors.n10,
+          backgroundColor: AppColors.n4,
       ),
-      drawer: CustomDrawer(),
       body: Column(
         children: [
           
           Container(
             margin : EdgeInsets.all(20),
-            height: MediaQuery.of(context).size.height*.54,
+            height: MediaQuery.of(context).size.height*.6,
             width: MediaQuery.of(context).size.height*.5,
 
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color.fromARGB(255, 245, 164, 106),width: 6),
+              border: Border.all(color: AppColors.n4,width: 6),
             ),
             child: ClipRRect(
               borderRadius: BorderRadiusGeometry.circular(15),
@@ -143,37 +142,64 @@ void dispose() {
               : const Center(child:CircularProgressIndicator()),
             ),
           ),
-          //Gap(10),
-          Container(
-            padding: EdgeInsets.all(16),
-            
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.circular(16),
-              border :Border.all(color : AppColors.n7,width: 2),
-            ),
-            child: Text(translatedText,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: AppColors.n9,
-            )),
+          Gap(10),
+          Row(
+            children: [
+              Gap(20),
+              Container(
+                padding: EdgeInsets.all(16),
+                
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(16),
+                  border :Border.all(color : AppColors.n7,width: 2),
+                ),
+                child: Text(translatedText,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.n9,
+                )),
+              ),
+              Gap(10),
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.n10,
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                
+                
+                child: IconButton(
+                  onPressed:(){},
+                  icon:Icon(speaking? Icons.volume_up : Icons.play_arrow,
+                  color: AppColors.background,
+                            ),),
+              )
+          ,
+            ],
           ),
           Gap(16),
-          ElevatedButton.icon(
+          /*ElevatedButton.icon(
             onPressed: playaudio,
             icon: Icon(speaking? Icons.volume_up : Icons.play_arrow,
             ),
-            label: Text("play voice translation",
-            style: TextStyle(color: AppColors.background,fontSize: 18),),
+            label: Text("",style: TextStyle(color: AppColors.background,fontSize: 18),),
             style:  ElevatedButton.styleFrom(
-              backgroundColor: AppColors.n1,
+              backgroundColor: AppColors.n10,
               iconSize: 30,
               iconColor: AppColors.background,
               padding: EdgeInsets.symmetric(horizontal: 25,vertical: 12),
             ),
-          ),
+            label: Text("play voice translation",
+            style: TextStyle(color: AppColors.background,fontSize: 18),),
+            style:  ElevatedButton.styleFrom(
+              backgroundColor: AppColors.n10,
+              iconSize: 30,
+              iconColor: AppColors.background,
+              padding: EdgeInsets.symmetric(horizontal: 25,vertical: 12),
+            ),
+          ),*/
           Gap(15)
         ],
       )

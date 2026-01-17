@@ -75,7 +75,7 @@ class _BlindState extends State<Blind> {
 
       final request = http.MultipartRequest(
       'POST',
-      Uri.parse('http://192.168.52.212:8000/api/account/vision/')
+      Uri.parse('http://138.68.104.187/api/account/vision/')
 
 
     );
@@ -94,8 +94,8 @@ class _BlindState extends State<Blind> {
         final audioPath = data['audio_file'];
 
         if (audioPath != null) {
-          final audioUrl = "http://192.168.52.212:8000$audioPath";
-          audioQueue.add(audioUrl);
+          final audioUrl = "http://138.68.104.187/audio$audioPath";
+                            //http://138.68.104.187/audio/audio_1767917718945.mp3
           
           if (audioQueue.length > 5) {
           audioQueue.removeAt(0); 
@@ -139,7 +139,14 @@ class _BlindState extends State<Blind> {
   playAudio(nextAudio);
 
 }
-
+//=========عشان اطفي الكاميرا ==========
+    @override
+void dispose() {
+  captureTimer?.cancel();
+  audioPlayer.dispose();
+  controller.dispose();
+  super.dispose();
+}
 
   // ================= UI =================
 
@@ -147,7 +154,7 @@ class _BlindState extends State<Blind> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      drawer: CustomDrawer(),
+      
       appBar: AppBar(
         title: const Text("   Blind Page", style: TextStyle(
           color: AppColors.background,
@@ -165,11 +172,12 @@ class _BlindState extends State<Blind> {
             left:MediaQuery.of(context).size.width * 0.05,
             child: Container(
                   height: 600,
+                  
                   width: MediaQuery.of(context).size.width * 0.9,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-            color:AppColors.n1,
+            color:AppColors.n4,
             width:10,
                     ),
                   ),
@@ -204,11 +212,5 @@ class _BlindState extends State<Blind> {
     );
   }
 
-  @override
-void dispose() {
-  captureTimer?.cancel();
-  audioPlayer.dispose();
-  controller.dispose();
-  super.dispose();
-}
+
 }

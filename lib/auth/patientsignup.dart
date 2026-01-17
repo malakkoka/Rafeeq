@@ -1,14 +1,22 @@
 //import 'package:awesome_dialog/awesome_dialog.dart';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:front/assistant/assistantpage.dart';
 import 'package:front/color.dart';
 import 'package:front/component/custom_button_auth.dart';
 import 'package:front/component/password.dart';
 import 'package:front/component/textform.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 
 class Patientsignup extends StatefulWidget {
   const Patientsignup({super.key});
+  
+
 
   @override
   State<Patientsignup> createState() => _PatientsignupState();
@@ -20,11 +28,13 @@ class _PatientsignupState extends State<Patientsignup> {
   final TextEditingController phone = TextEditingController();
   final TextEditingController password = TextEditingController();
   final TextEditingController repassword = TextEditingController();
-
+  final TextEditingController patientAgeController = TextEditingController();
   String? disability; // blind | deaf
+  String? gender ;
   bool? readandwrite;
   @override
   void dispose() {
+    patientAgeController.dispose();
     username.dispose();
     email.dispose();
     phone.dispose();
@@ -32,6 +42,53 @@ class _PatientsignupState extends State<Patientsignup> {
     repassword.dispose();
     super.dispose();
   }
+
+  Future<Map<String, dynamic>> registerPatient() async {
+  final assistantId = await const FlutterSecureStorage().read(key: "assistant_id");
+    debugPrint("READ ASSISTANT ID = $assistantId");
+  //final token = await const FlutterSecureStorage().read(key: "token");
+
+  final url = Uri.parse('http://138.68.104.187/api/account/register/');
+
+  final age = int.tryParse(patientAgeController.text) ?? 0;
+
+  try {
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        //"Authorization": "Bearer $token",
+      },
+      body: jsonEncode({
+        "username": username.text.trim(),
+        "email": email.text.trim(),
+        "phone": phone.text.trim(),
+        "password": password.text.trim(),
+        "user_type": disability, // blind | deaf
+        "can_write": readandwrite ?? false,
+        "can_speak_with_sign_language": disability == "deaf",
+        "assistant": int.parse(assistantId!),
+        "age": age,
+        "address": "default",
+        "gender": gender,
+        "is_active": true,
+      }),
+    );
+
+   // final data = jsonDecode(response.body);
+    debugPrint("STATUS = ${response.statusCode}");
+    debugPrint("BODY = ${response.body}");
+
+    if (response.statusCode == 201) {
+      return {"success": true};
+    } else {
+      return {"success": false, "message": response.body,};
+    }
+  } catch (e) {
+    return {"success": false, "message": e.toString()};
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -55,112 +112,157 @@ class _PatientsignupState extends State<Patientsignup> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: AppColors.background,
+                child: ListView(
+                  keyboardDismissBehavior: 
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                  children: [
+                _section("Username", username),
+                _section("Email", email),
+                _passwordSection("Password", password),
+                _confirmPasswordSection(),
+                _section("Phone Number", phone),
+                const Text(
+              "Age",
+              style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: Colors.black,
+        ),
+            ),
+            const Gap(8),
+            CustomText(
+              hinttext: "Enter your age",
+              mycontroller:patientAgeController,
+              
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            ),
+                Gap(16),
+                Text(
+                  "Patient Type",
+                  style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                ),
+                                ),
+                Gap(8),
+                Row(
+                  children: [
+                    Expanded(child:
+                    RadioListTile(
+                      title: const Text("Blind"),
+                      value: "blind",
+                      groupValue: disability,
+                      activeColor: AppColors.n10,
+                      onChanged: (v){
+                        setState(() {
+                          disability = v;
+                        });
+                      },
                     ),
-                    child: ListView(
-                      keyboardDismissBehavior: 
-                        ScrollViewKeyboardDismissBehavior.onDrag,
-                      children: [
-                    _section("Username", username),
-                    _section("Email", email),
-                    _passwordSection("Password", password),
-                    _confirmPasswordSection(),
-                    _section("Phone Number", phone),
-                    Gap(16),
+                    ),
+                    Expanded(child:
+                    RadioListTile(
+                      title: const Text("Deaf"),
+                      value: "deaf",
+                      groupValue: disability,
+                      activeColor: AppColors.n10,
+                      onChanged: (v){
+                        setState(() {
+                          disability = v;
+                        });
+                      },
+                    ),
+                    ),
+                  ],
+                ),
+                Gap(16),
+                Text(
+                  "Gender",
+                  style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                ),
+                                ),
+                Gap(8),
+                Row(
+                  children: [
+                    Expanded(child:
+                    RadioListTile(
+                      title: const Text("Male"),
+                      value: "male",
+                      groupValue: gender,
+                      activeColor: AppColors.n10,
+                      onChanged: (v){
+                        setState(() {
+                          gender = v;
+                        });
+                      },
+                    ),
+                    ),
+                    Expanded(child:
+                    RadioListTile(
+                      title: const Text("Female"),
+                      value: "female",
+                      groupValue: gender,
+                      activeColor: AppColors.n10,
+                      onChanged: (v){
+                        setState(() {
+                          gender = v;
+                        });
+                      },
+                    ),
+                    ),
+                  ],
+                ),
+                
+                if (disability=="deaf")...
+                  [
+                    Gap(12),
                     Text(
-                      "Patient Type",
-                      style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black,
-                    ),
+                    "can read and write ? ",
+                    style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
                   ),
-                    Gap(8),
-                    Row(
-                      children: [
-                        Expanded(child:
-                        RadioListTile(
-                          title: const Text("Blind"),
-                          value: "blind",
-                          groupValue: disability,
-                          activeColor: AppColors.n10,
-                          onChanged: (v){
-                            setState(() {
-                              disability = v;
-                            });
-                          },
-                        ),
-                        ),
-                        Expanded(child:
-                        RadioListTile(
-                          title: const Text("Deaf"),
-                          value: "deaf",
-                          groupValue: disability,
-                          activeColor: AppColors.n10,
-                          onChanged: (v){
-                            setState(() {
-                              disability = v;
-                            });
-                          },
-                        ),
-                        ),
-                      ],
+                ),
+                Row(
+                  children: [
+                    Expanded(child: 
+                    RadioListTile(
+                      title: const Text("Yes"),
+                      value: true,
+                      groupValue: readandwrite,
+                      activeColor: AppColors.n10,
+                      onChanged: (v){
+                        setState(() {
+                          readandwrite=v;
+                        });
+                      },
                     ),
-                    
-                    if (disability=="deaf")...
-                      [
-                        Gap(12),
-                        Text(
-                        "can read and write ? ",
-                        style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black,
-                      ),
                     ),
-                    Row(
-                      children: [
-                        Expanded(child: 
-                        RadioListTile(
-                          title: const Text("Yes"),
-                          value: true,
-                          groupValue: readandwrite,
-                          activeColor: AppColors.n10,
-                          onChanged: (v){
-                            setState(() {
-                              readandwrite=v;
-                            });
-                          },
-                        ),
-                        ),
-                        Expanded(child:
-                        RadioListTile(
-                          title: const Text("No"),
-                          value: false,
-                          groupValue: readandwrite,
-                          activeColor: AppColors.n10,
-                          onChanged: (v){
-                            setState(() {
-                              readandwrite=v;
-                            }
-                            );
-                          },
-                        ),
-                        ),
-                      ],
-                    )
-                      ],
-                              ],
-                            ),
-                          ),
+                    Expanded(child:
+                    RadioListTile(
+                      title: const Text("No"),
+                      value: false,
+                      groupValue: readandwrite,
+                      activeColor: AppColors.n10,
+                      onChanged: (v){
+                        setState(() {
+                          readandwrite=v;
+                        }
+                        );
+                      },
+                    ),
+                    ),
+                  ],
+                )
+                  ],
+                          ],
                         ),
                       ),
                     ),
@@ -170,7 +272,19 @@ class _PatientsignupState extends State<Patientsignup> {
                       width: 250,
                       child: CustomButtonAuth(
                               title: "Sign Up", 
-                              onPressed: () async {},),
+                              onPressed: () async {
+                                final result = await registerPatient();
+                                if (result["success"] == true) {
+                                  Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute(builder: (_) => const AssistantPage()),
+                                    );
+                                  } else{
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(result["message"].toString())),
+                                    );
+                                  }
+                                },
+                                ),
                     ),
                       Gap(60),
                       ],
