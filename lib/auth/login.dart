@@ -146,14 +146,27 @@ class _LoginState extends State<Login> {
                               Container(
                                 margin: const EdgeInsets.only(top: 5, bottom: 20),
                                 alignment: Alignment.topRight,
-                                child: const Text(
+                                child: InkWell(
+                                  child: Text("forgot password?",
+                                  style:TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w300,
+                                    color: Colors.black,
+                                    ),
+                                    ),
+                                    onTap: () {
+                                      Navigator.of(context)
+                                      .pushReplacementNamed("forgot");
+                                    },
+                                )
+                                /*const Text(
                                   "forgot password?",
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w300,
                                     color: Colors.black,
                                   ),
-                                ),
+                                ),*/
                               ),
                               Center(
                                 child: CustomButtonAuth(

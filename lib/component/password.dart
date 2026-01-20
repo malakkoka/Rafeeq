@@ -40,6 +40,12 @@ class _PasswordFieldState extends State<PasswordField> {
           borderRadius: BorderRadius.circular(15),
           borderSide: BorderSide(color: AppColors.n1),
         ),
+        focusedBorder:OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(18),
+                                borderSide: BorderSide(
+                                color: AppColors.n1,
+                                width: 2.5),
+                              ),
         suffixIcon: IconButton(
           icon: Icon(
             _isVisible ? Icons.visibility : Icons.visibility_off,

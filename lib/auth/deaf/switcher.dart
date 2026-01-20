@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:front/auth/deaf/deaf.dart';
 import 'package:front/auth/deaf/speaker.dart';
+import 'package:front/auth/call/vediocall.dart';
 import 'package:front/color.dart';
 import 'package:front/component/viewinfo.dart';
 import 'package:gap/gap.dart';
@@ -18,6 +19,13 @@ import 'package:gap/gap.dart';
     double _turns =0;
 
     bool isdeaf = true;
+
+    final List<Widget> pages = [
+    Deaf(),
+    Speaker(),
+    Vediocall(),
+    ViewInfo()
+  ];
 
     //FloatingActionButtonLocation:FloatingActionButtonLocation.centerdocked
 
@@ -77,7 +85,10 @@ import 'package:gap/gap.dart';
                     icon: Icon(Icons.video_call,
                     color:AppColors.background,),
                     onPressed: () {
-                     // Navigator.push(context, )
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_)=>Vediocall()),
+                      );
                     },
                   )
                 ],

@@ -4,10 +4,15 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:front/assistant/assistantpage.dart';
 import 'package:front/auth/blind.dart';
 import 'package:front/auth/deaf/deaf.dart';
+import 'package:front/auth/call/livecall.dart';
 import 'package:front/auth/deaf/switcher.dart';
+import 'package:front/auth/call/vediocall.dart';
+import 'package:front/auth/repass/forgot.dart';
 
 import 'package:front/auth/login.dart';
 import 'package:front/auth/patientsignup.dart';
+import 'package:front/auth/repass/getcode.dart';
+import 'package:front/auth/repass/reset.dart';
 import 'package:front/auth/signup.dart';
 import 'package:front/auth/volunteer/volunteerpage.dart';
 import 'package:front/component/user_provider.dart';
@@ -65,7 +70,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       color: AppColors.background,
       debugShowCheckedModeBanner: false,
-      home: Login(),   
+      home:   Livecall(),   
 
 
       routes: {
@@ -80,6 +85,11 @@ class _MyAppState extends State<MyApp> {
         "deaf": (context) => Deaf(),
         "switcher": (context) => Switcher(),
         "patientsignup": (context) => Patientsignup(),
+        "forgot": (context) => Forgot(),
+        "getcode": (context) => Getcode(),
+        "reset": (context) => Reset(),
+        "Vediocall": (context) => Vediocall(),
+        "livecall": (context) => Livecall(),
 
       },
 

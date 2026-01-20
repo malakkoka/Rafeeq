@@ -1,9 +1,9 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:front/assistant/assistantpage.dart';
+
 import 'package:front/auth/patientsignup.dart';
 import 'package:front/color.dart';
-import 'package:front/component/user_provider.dart';
+
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -14,7 +14,7 @@ import 'package:front/component/role_fields.dart';
 import 'package:front/component/password.dart';
 import 'package:front/component/textform.dart';
 import 'package:front/component/custom_button_auth.dart';
-import 'package:provider/provider.dart';
+
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -167,56 +167,58 @@ class _SignupState extends State<Signup> {
             ),
             Gap(10),
             Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                decoration: BoxDecoration(
-                  
-                ),
-                child: Container(
-                
-                  padding: const EdgeInsets.all(20),
+              child: Container(padding: const EdgeInsets.symmetric(horizontal: 20),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    color: AppColors.background,
                     
                   ),
-                  child: ListView(
-                    
-                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                    
-                    children: [
-                  _section("Username", username),
-                  _section("Email", email),
-                  _passwordSection("Password", password),
-                  _confirmPasswordSection(),
-                  _section("Phone Number", phone),
-                  Gap(16),
-                  const Text(
-                    "Your Role",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black,
+                child: Card(
+                  
+                  child: Container(
+                  
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      color: AppColors.background,
+                      
                     ),
-                  ),
-                  Gap(8),
-                  RoleDropdown(
-                    value: selectedRole,
-                    onChanged: (v) =>
-                        setState(() => selectedRole = v),
-                  ),
-                  Gap(12),
-                  RoleFields(
-                    selectedRole: selectedRole,
-                    assistantnumber: assistantnumber,
-                    patientAge: patientAge,
-                    assistage: assistage,
-                    volunteerage: volunteerage,
-                  ),
-                  
-                  
-                  
-                    ],
+                    child: ListView(
+                      
+                      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                      
+                      children: [
+                    _section("Username", username),
+                    _section("Email", email),
+                    _passwordSection("Password", password),
+                    _confirmPasswordSection(),
+                    _section("Phone Number", phone),
+                    Gap(16),
+                    const Text(
+                      "Your Role",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Gap(8),
+                    RoleDropdown(
+                      value: selectedRole,
+                      onChanged: (v) =>
+                          setState(() => selectedRole = v),
+                    ),
+                    Gap(12),
+                    RoleFields(
+                      selectedRole: selectedRole,
+                      assistantnumber: assistantnumber,
+                      patientAge: patientAge,
+                      assistage: assistage,
+                      volunteerage: volunteerage,
+                    ),
+                    
+                    
+                    
+                      ],
+                    ),
                   ),
                 ),
               ),

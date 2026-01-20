@@ -112,158 +112,173 @@ class _PatientsignupState extends State<Patientsignup> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 
-                child: ListView(
-                  keyboardDismissBehavior: 
-                    ScrollViewKeyboardDismissBehavior.onDrag,
-                  children: [
-                _section("Username", username),
-                _section("Email", email),
-                _passwordSection("Password", password),
-                _confirmPasswordSection(),
-                _section("Phone Number", phone),
-                const Text(
-              "Age",
-              style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-          color: Colors.black,
-        ),
-            ),
-            const Gap(8),
-            CustomText(
-              hinttext: "Enter your age",
-              mycontroller:patientAgeController,
-              
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            ),
-                Gap(16),
-                Text(
-                  "Patient Type",
-                  style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black,
-                ),
-                                ),
-                Gap(8),
-                Row(
-                  children: [
-                    Expanded(child:
-                    RadioListTile(
-                      title: const Text("Blind"),
-                      value: "blind",
-                      groupValue: disability,
-                      activeColor: AppColors.n10,
-                      onChanged: (v){
-                        setState(() {
-                          disability = v;
-                        });
-                      },
+                child: Card(
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      color: AppColors.background,
+                      
                     ),
-                    ),
-                    Expanded(child:
-                    RadioListTile(
-                      title: const Text("Deaf"),
-                      value: "deaf",
-                      groupValue: disability,
-                      activeColor: AppColors.n10,
-                      onChanged: (v){
-                        setState(() {
-                          disability = v;
-                        });
-                      },
-                    ),
-                    ),
-                  ],
-                ),
-                Gap(16),
-                Text(
-                  "Gender",
-                  style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black,
-                ),
-                                ),
-                Gap(8),
-                Row(
-                  children: [
-                    Expanded(child:
-                    RadioListTile(
-                      title: const Text("Male"),
-                      value: "male",
-                      groupValue: gender,
-                      activeColor: AppColors.n10,
-                      onChanged: (v){
-                        setState(() {
-                          gender = v;
-                        });
-                      },
-                    ),
-                    ),
-                    Expanded(child:
-                    RadioListTile(
-                      title: const Text("Female"),
-                      value: "female",
-                      groupValue: gender,
-                      activeColor: AppColors.n10,
-                      onChanged: (v){
-                        setState(() {
-                          gender = v;
-                        });
-                      },
-                    ),
-                    ),
-                  ],
-                ),
-                
-                if (disability=="deaf")...
-                  [
-                    Gap(12),
+                    child: ListView(
+                      keyboardDismissBehavior: 
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                      children: [
+                    _section("Username", username),
+                    _section("Email", email),
+                    _passwordSection("Password", password),
+                    _confirmPasswordSection(),
+                    _section("Phone Number", phone),
+                    
+                    Gap(16),
                     Text(
-                    "can read and write ? ",
-                    style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black,
+                      "Patient Type",
+                      style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                    ),
+                                    ),
+                                    Row(
+                      children: [
+                        Expanded(child:
+                        RadioListTile(
+                          title: const Text("Blind"),
+                          value: "blind",
+                          groupValue: disability,
+                          activeColor: AppColors.n10,
+                          onChanged: (v){
+                            setState(() {
+                              disability = v;
+                            });
+                          },
+                        ),
+                        ),
+                        Expanded(child:
+                        RadioListTile(
+                          title: const Text("Deaf"),
+                          value: "deaf",
+                          groupValue: disability,
+                          activeColor: AppColors.n10,
+                          onChanged: (v){
+                            setState(() {
+                              disability = v;
+                            });
+                          },
+                        ),
+                        ),
+                      ],
+                    ),
+                    Gap(8),
+                    if (disability=="deaf")...
+                      [
+                        Gap(12),
+                        Text(
+                        "can read and write ? ",
+                        style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Expanded(child: 
+                        RadioListTile(
+                          title: const Text("Yes"),
+                          value: true,
+                          groupValue: readandwrite,
+                          activeColor: AppColors.n10,
+                          onChanged: (v){
+                            setState(() {
+                              readandwrite=v;
+                            });
+                          },
+                        ),
+                        ),
+                        Expanded(child:
+                        RadioListTile(
+                          title: const Text("No"),
+                          value: false,
+                          groupValue: readandwrite,
+                          activeColor: AppColors.n10,
+                          onChanged: (v){
+                            setState(() {
+                              readandwrite=v;
+                            }
+                            );
+                          },
+                        ),
+                        ),
+                      ],
+                    )
+                      ],
+                    Gap(8),
+                    const Text(
+                                  "Age",
+                                  style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
+                            ),
+                                ),
+                                const Gap(8),
+                                CustomText(
+                                  hinttext: "Enter your age",
+                                  mycontroller:patientAgeController,
+                                  
+                                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                ),
+                                Gap(8),
+                    
+                    Gap(16),
+                    Text(
+                      "Gender",
+                      style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                    ),
+                                    ),
+                    Gap(8),
+                    Row(
+                      children: [
+                        Expanded(child:
+                        RadioListTile(
+                          title: const Text("Male"),
+                          value: "male",
+                          groupValue: gender,
+                          activeColor: AppColors.n10,
+                          onChanged: (v){
+                            setState(() {
+                              gender = v;
+                            });
+                          },
+                        ),
+                        ),
+                        Expanded(child:
+                        RadioListTile(
+                          title: const Text("Female"),
+                          value: "female",
+                          groupValue: gender,
+                          activeColor: AppColors.n10,
+                          onChanged: (v){
+                            setState(() {
+                              gender = v;
+                            });
+                          },
+                        ),
+                        ),
+                      ],
+                    ),
+                    
+                    
+                              ],
+                            ),
                   ),
                 ),
-                Row(
-                  children: [
-                    Expanded(child: 
-                    RadioListTile(
-                      title: const Text("Yes"),
-                      value: true,
-                      groupValue: readandwrite,
-                      activeColor: AppColors.n10,
-                      onChanged: (v){
-                        setState(() {
-                          readandwrite=v;
-                        });
-                      },
-                    ),
-                    ),
-                    Expanded(child:
-                    RadioListTile(
-                      title: const Text("No"),
-                      value: false,
-                      groupValue: readandwrite,
-                      activeColor: AppColors.n10,
-                      onChanged: (v){
-                        setState(() {
-                          readandwrite=v;
-                        }
-                        );
-                      },
-                    ),
-                    ),
-                  ],
-                )
-                  ],
-                          ],
-                        ),
                       ),
                     ),
                     Gap(20),
@@ -311,6 +326,7 @@ Widget _section(String label, TextEditingController controller) {
 
           hinttext: "Enter ${label.toLowerCase()}",
           mycontroller: controller,
+          
         ),
       ],
     );

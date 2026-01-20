@@ -42,10 +42,15 @@ class CustomText extends StatelessWidget {
           borderSide: BorderSide(color: AppColors.n1),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(15),
           borderSide: BorderSide(color: AppColors.n1),
-          
         ),
+        focusedBorder:OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(18),
+                                borderSide: BorderSide(
+                                color: AppColors.n1,
+                                width: 2.5),
+                              )
       ),
     );
   }

@@ -2,7 +2,6 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:front/main.dart';
-import 'package:front/component/customdrawer.dart';
 import 'package:avatar_glow/avatar_glow.dart';
 //import 'package:flutter_tts/flutter_tts.dart';
 import 'dart:async';
@@ -32,6 +31,12 @@ class _BlindState extends State<Blind> {
     super.initState();
     initCamera();
 
+  audioPlayer.onPlayerComplete.listen((event) {
+      setState(() {
+        isSpeaking = false;
+      });
+      playNextIfIdle();
+    });
 
       //Future.delayed(const Duration(seconds: 2), () {
     //tts.speak("Text to speech is working");
@@ -62,66 +67,119 @@ class _BlindState extends State<Blind> {
     );
   }
 
+  /*Future<bool> waitForAudio(
+  String url, {
+  int retries = 5,
+  Duration delay = const Duration(milliseconds: 700),
+}) async {
+  for (int i = 0; i < retries; i++) {
+    try {
+      final res = await http.head(Uri.parse(url));
+      if (res.statusCode == 200) return true;
+    } catch (_) {}
+    await Future.delayed(delay);
+  }
+  return false;
+}
+
+Future<bool> checkAudioExists(String url) async {
+  final res = await http.head(Uri.parse(url));
+  return res.statusCode == 200;
+}*/
+
 //==================captureAndSend =================
 
   Future<void> captureAndSend() async {
-    if (!controller.value.isInitialized) return;
-    if (isSending) return;
+  debugPrint("CAPTURE STARTED");
 
-    try {
-      isSending = true;
+  if (!controller.value.isInitialized) return;
+  if (isSending) return;
+  if (isSpeaking) return; // مهم
 
-      final XFile image = await controller.takePicture();
+  try {
+    isSending = true;
 
-      final request = http.MultipartRequest(
+    final XFile image = await controller.takePicture();
+
+    final request = http.MultipartRequest(
       'POST',
-      Uri.parse('http://138.68.104.187/api/account/vision/')
-
-
+      Uri.parse('http://138.68.104.187/api/account/vision/'),
     );
 
-      request.files.add(
-        await http.MultipartFile.fromPath('image', image.path),
-      );
+    request.files.add(
+      await http.MultipartFile.fromPath('image', image.path),
+    );
 
-      final response = await request.send();
+    final response = await request.send();
+    debugPrint("STATUS CODE: ${response.statusCode}");
 
-      if (response.statusCode == 200) {
-        final body = await response.stream.bytesToString();
-        debugPrint("SERVER RAW RESPONSE: $body");
-        final data = jsonDecode(body);
-        debugPrint("SERVER DECODED: $data");
-        final audioPath = data['audio_file'];
+    final body = await response.stream.bytesToString();
+    debugPrint("RAW BODY: $body");
 
-        if (audioPath != null) {
-          final audioUrl = "http://138.68.104.187/audio$audioPath";
-                            //http://138.68.104.187/audio/audio_1767917718945.mp3
-          
-          if (audioQueue.length > 5) {
-          audioQueue.removeAt(0); 
-        }
-        if (audioUrl != lastPlayedAudio) {
+    if (response.statusCode != 200) return;
+
+    final data = jsonDecode(body);
+
+    if (data['success'] == true && data['audio_file'] != null) {
+      final audioUrl = "http://138.68.104.187${data['audio_file']}";
+      debugPrint("AUDIO URL: $audioUrl");
+
+      if (audioUrl != lastPlayedAudio) {
+          await Future.delayed(const Duration(seconds: 1));
           audioQueue.add(audioUrl);
           playNextIfIdle();
-        }
-        }
-        
+        } } else {
+        debugPrint("NO AUDIO: ${data['message']}");
       }
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint("ERROR: $e");
     } finally {
       isSending = false;
     }
   }
+      /*if (audioUrl != lastPlayedAudio) {
+       // final ready = await waitForAudio(audioUrl);
+
+          if (ready) {
+      audioQueue.add(audioUrl);
+      playNextIfIdle();
+    } else {
+      debugPrint("AUDIO NEVER BECAME READY: $audioUrl");
+    }
+      }
+    } else {
+      debugPrint("NO AUDIO: ${data['message']}");
+    }
+
+  } catch (e) {
+    debugPrint("ERROR: $e");
+  } finally {
+    isSending = false;
+  }
+}
+*/
+  
+  
 /// ================= AUDIO PLAYER =================d
   Future<void> playAudio(String url) async {
   if (isSpeaking) return;
+
   lastPlayedAudio = url;
   setState(() {
     isSpeaking = true;
   });
-  
-  await audioPlayer.play(UrlSource(url));
+
+  try {
+    await audioPlayer.stop();
+
+   
+    audioPlayer.play(UrlSource(url));
+  } catch (e) {
+    debugPrint("AUDIO ERROR: $e");
+    setState(() => isSpeaking = false);
+  }
+}
+  /*await audioPlayer.play(UrlSource(url));
   audioPlayer.onPlayerComplete.listen((event) {
     setState(() {
       isSpeaking = false;
@@ -129,7 +187,7 @@ class _BlindState extends State<Blind> {
     playNextIfIdle();
     //if (isSpeaking) return;
   });
-}
+}*/
 //================== QUEUE HANDLER =================
     void playNextIfIdle() {
   if (isSpeaking) return;
@@ -157,10 +215,10 @@ void dispose() {
       
       appBar: AppBar(
         title: const Text("   Blind Page", style: TextStyle(
-          color: AppColors.background,
+          color: AppColors.background, fontWeight: FontWeight.w500
           //TextAlign.center,
         ),),
-        backgroundColor:AppColors.n4,
+        backgroundColor:AppColors.n10,
       ),
       body: Stack(
         fit: StackFit.expand,
@@ -172,15 +230,17 @@ void dispose() {
             left:MediaQuery.of(context).size.width * 0.05,
             child: Container(
                   height: 600,
-                  
+                  //color: AppColors.c7,
                   width: MediaQuery.of(context).size.width * 0.9,
                   decoration: BoxDecoration(
+                    color:  Color.fromARGB(255, 251, 187, 131),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-            color:AppColors.n4,
-            width:10,
+                    color:  Color.fromARGB(255, 251, 187, 131),
+                    width:10,
                     ),
                   ),
+                  //#
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(17),
                     child: isReady
@@ -194,16 +254,18 @@ void dispose() {
       
           // ===== الصوت =====
           Positioned(
-            bottom:10,
+            bottom:15,
             left:MediaQuery.of(context).size.width * 0.40,
             child: AvatarGlow(
-                  glowColor:AppColors.n1,
+                  glowColor:Color.fromARGB(255, 251, 187, 131),
                   animate: isSpeaking,
                   duration: const Duration(milliseconds: 1500),
                   child: const CircleAvatar(
                     radius: 35,
-                    backgroundColor: AppColors.n4,
-                    child: Icon(Icons.graphic_eq, color:AppColors.background),
+                    backgroundColor: AppColors.n10,
+                    child: Icon(Icons.graphic_eq,
+                    color:AppColors.background,
+                    size: 30,),
                   ),
             ),
           ),

@@ -29,7 +29,7 @@ android {
 
 flutter { source = "../.." }
 
-// اتركِي قسم dependencies فارغًا من Firebase تمامًا
+
 dependencies {
-    // (هنا لا تضعي أي Firebase)
+    implementation("androidx.core:core-ktx:1.12.0")
 }
