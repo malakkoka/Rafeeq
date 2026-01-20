@@ -271,10 +271,13 @@ class _VolunteerHomeState extends State<VolunteerHome> {
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(12),
-            itemCount: filteredPosts.length,
-            itemBuilder: (_, i) => PostCard(post: filteredPosts[i]),
+          return Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            child: ListView.builder(
+              padding: const EdgeInsets.all(12),
+              itemCount: filteredPosts.length,
+              itemBuilder: (_, i) => PostCard(post: filteredPosts[i]),
+            ),
           );
         },
       ),

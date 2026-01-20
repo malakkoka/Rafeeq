@@ -1,4 +1,4 @@
-// ignore_for_file: file_names
+/*
 
 import 'package:flutter/material.dart';
 class UserProvider with ChangeNotifier {
@@ -19,4 +19,4 @@ class UserProvider with ChangeNotifier {
     //this.userId = userId;
     notifyListeners();
   }
-}
+}*/

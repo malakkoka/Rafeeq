@@ -30,23 +30,19 @@ class _AssistantPageState extends State<AssistantPage> {
     _refreshData();
   }
 
-
-
   Future<void> _loadPatientFromStorage() async {
-  final user = await TokenService.getUser();
+    final user = await TokenService.getUser();
 
-  if (!mounted) return;
+    if (!mounted) return;
 
-  setState(() {
-    if (user != null && user['patient'] != null) {
-      patient = user['patient'];
-    } else {
-      patient = null;
-    }
-  });
-}
-
-
+    setState(() {
+      if (user != null && user['patient'] != null) {
+        patient = user['patient'];
+      } else {
+        patient = null;
+      }
+    });
+  }
 
   Future<void> _handleDelete(Map<String, String> request) async {
     final status = request['status'];
@@ -104,8 +100,6 @@ class _AssistantPageState extends State<AssistantPage> {
     ).then((_) => _refreshData());
   }
 
-  
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,7 +121,8 @@ class _AssistantPageState extends State<AssistantPage> {
           : Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -137,7 +132,8 @@ class _AssistantPageState extends State<AssistantPage> {
                       const SizedBox(height: 32),
                       const Text(
                         'Recent Help Requests',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 12),
                     ],
@@ -163,14 +159,14 @@ class _AssistantPageState extends State<AssistantPage> {
     );
   }
 
-  //WIDGETS 
+  //WIDGETS
 
   Widget _buildProfileHeader() {
     return Row(
       children: [
         const CircleAvatar(
-          radius: 34,
-          backgroundImage: AssetImage('images/OIP.webp'),
+          radius: 40,
+          backgroundImage: AssetImage('images/deafpic.webp'),
         ),
         const SizedBox(width: 14),
         Column(
@@ -189,7 +185,8 @@ class _AssistantPageState extends State<AssistantPage> {
               ),
               child: Text(
                 patient?['user_type'] == 'blind' ? 'Blind User' : 'Deaf User',
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                style:
+                    const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
               ),
             ),
           ],
@@ -263,7 +260,7 @@ class _AssistantPageState extends State<AssistantPage> {
                 })
             .where((item) => item['status'] != 'Unknown')
             .toList();
-
+ 
         _sortRequests();
       });
     }
@@ -300,6 +297,9 @@ class _AssistantPageState extends State<AssistantPage> {
     final status = request['status']!;
     final color = _statusColor(status);
 
+    final locationType =
+        _extractLine(request['content'] ?? '', 'Location Type');
+
     final type = _extractLine(request['content'] ?? '', 'Type');
     final location = _extractLine(request['content'] ?? '', 'Location');
     final dateTime = _extractLine(request['content'] ?? '', 'Date & Time');
@@ -332,7 +332,8 @@ class _AssistantPageState extends State<AssistantPage> {
                       CircleAvatar(
                         radius: 17,
                         backgroundColor: color.withOpacity(0.15),
-                        child: Icon(_statusIcon(status), color: color, size: 18),
+                        child:
+                            Icon(_statusIcon(status), color: color, size: 18),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
@@ -346,7 +347,9 @@ class _AssistantPageState extends State<AssistantPage> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  if (location.isNotEmpty)
+                  if (locationType == 'Home')
+                    _buildInfoRow(Icons.home_outlined, 'Patient Home'),
+                  if (locationType == 'Custom' && location.isNotEmpty)
                     _buildInfoRow(Icons.location_on_outlined, location),
                   if (dateTime.isNotEmpty)
                     _buildInfoRow(Icons.schedule, dateTime),
@@ -354,8 +357,8 @@ class _AssistantPageState extends State<AssistantPage> {
                     Padding(
                       padding: const EdgeInsets.only(top: 6),
                       child: Text(notes,
-                          style:
-                              const TextStyle(fontSize: 13, color: Colors.grey)),
+                          style: const TextStyle(
+                              fontSize: 13, color: Colors.grey)),
                     ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -401,8 +404,8 @@ class _AssistantPageState extends State<AssistantPage> {
         color: color.withOpacity(0.15),
         borderRadius: BorderRadius.circular(12),
       ),
-      child:
-          Text(status, style: TextStyle(color: color, fontWeight: FontWeight.w600)),
+      child: Text(status,
+          style: TextStyle(color: color, fontWeight: FontWeight.w600)),
     );
   }
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:front/color.dart';
-import 'package:front/component/user_provider.dart';
 import 'package:front/component/viewinfo.dart';
+import 'package:front/provider/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'dart:math' as math;
 

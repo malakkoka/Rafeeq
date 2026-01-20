@@ -70,7 +70,9 @@ flutter:
     - images/refeeqlogo.jpeg
     - images/google.png
     - images/googlelogo.png
-    
+    - images/deafpic.webp
+    - images/blind.png
+    - images/sign_language.png
   fonts:
     - family: Caveat
       fonts:

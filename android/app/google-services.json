@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "267852891853",
-    "project_id": "kokafire-73908",
-    "storage_bucket": "kokafire-73908.firebasestorage.app"
+    "project_number": "170374007689",
+    "project_id": "rafeeq-7cc08",
+    "storage_bucket": "rafeeq-7cc08.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:267852891853:android:18d331cff96d9f29760b84",
+        "mobilesdk_app_id": "1:170374007689:android:f0a82be3506c6ad99def58",
         "android_client_info": {
           "package_name": "com.example.koka"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDtYOE_IWpwyoFnwSf-dilStAnTTGoxb-o"
+          "current_key": "AIzaSyDYWAunrHEriIIvnq3YtHDH334iUEoAqYk"
         }
       ],
       "services": {

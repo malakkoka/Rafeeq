@@ -2,9 +2,7 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:front/assistant/mainNavBar.dart';
 import 'package:front/assistant/selectLocationPage.dart';
-import 'package:front/component/viewinfo.dart';
 import 'package:front/constats.dart';
 import 'package:front/services/token_sevice.dart';
 import 'package:http/http.dart' as http;
@@ -32,6 +30,7 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
   // بس لما نربط الباك بعدين، رح نغيّر أنواع المساعدة
   // حسب نوع المريض بدون ما نغيّر الواجهة
   String? selectedType;
+  String? patientType; // blind / deaf
 
   /// LOCATION
   String? selectedLocationLabel;
@@ -49,9 +48,69 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
 
   bool isSubmitting = false;
 
+  List<Map<String, dynamic>> get assistanceTypes {
+    if (patientType == 'blind') {
+      return [
+        {
+          'icon': Icons.menu_book,
+          'label': 'Reading',
+          'value': 'Reading',
+          'color': Colors.blue,
+        },
+        {
+          'icon': Icons.map_outlined,
+          'label': 'Navigation',
+          'value': 'Navigation',
+          'color': Colors.green,
+        },
+        {
+          'icon': Icons.people,
+          'label': 'Companion',
+          'value': 'Companion',
+          'color': Colors.orange,
+        },
+        {
+          'icon': Icons.more_horiz,
+          'label': 'Other',
+          'value': 'Other',
+          'color': Colors.purple,
+        },
+      ];
+    }
+
+    // deaf
+    return [
+      {
+        'icon': Icons.sign_language,
+        'label': 'Sign Language',
+        'value': 'Sign Language',
+        'color': Colors.blue,
+      },
+      {
+        'icon': Icons.chat,
+        'label': 'Communication',
+        'value': 'Communication',
+        'color': Colors.green,
+      },
+      {
+        'icon': Icons.people,
+        'label': 'Companion',
+        'value': 'Companion',
+        'color': Colors.orange,
+      },
+      {
+        'icon': Icons.more_horiz,
+        'label': 'Other',
+        'value': 'Other',
+        'color': Colors.purple,
+      },
+    ];
+  }
+
   @override
   void initState() {
     super.initState();
+    _loadPatientType();
     if (widget.isEdit && widget.initialContent != null) {
       notesController.text = widget.initialContent!;
     }
@@ -62,6 +121,16 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
     notesController.dispose();
     otherTypeController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadPatientType() async {
+    final user = await TokenService.getUser();
+
+    if (!mounted) return;
+
+    setState(() {
+      patientType = user?['patient']?['user_type'];
+    });
   }
 
   ///  DATE & TIME
@@ -100,9 +169,11 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
               onSurface: AppColors.n1,
             ),
             timePickerTheme: TimePickerThemeData(
-              backgroundColor: AppColors.dialogcolor,
+              backgroundColor: AppColors.inputField,
               dialHandColor: AppColors.n1,
               entryModeIconColor: AppColors.n1,
+              dayPeriodColor: AppColors.n1,
+              dayPeriodTextColor: Colors.black,
             ),
           ),
           child: child!,
@@ -180,12 +251,7 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
             );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) =>
-                  const MainNavigationPage(role: UserRole.volunteer),
-            ));
+        _showSnack('Request submitted successfully');
       }
     } catch (e) {
       debugPrint('Submit error: $e');
@@ -227,35 +293,20 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const _SectionTitle(title: 'Type of Assistance'),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _typeIcon(
-                    icon: Icons.menu_book,
-                    label: 'Reading',
-                    value: 'Reading',
-                    color: Colors.blue,
-                  ),
-                  _typeIcon(
-                    icon: Icons.map_outlined,
-                    label: 'Navigation',
-                    value: 'Navigation',
-                    color: Colors.green,
-                  ),
-                  _typeIcon(
-                    icon: Icons.people,
-                    label: 'Companion',
-                    value: 'Companion',
-                    color: Colors.orange,
-                  ),
-                  _typeIcon(
-                    icon: Icons.more_horiz,
-                    label: 'Other',
-                    value: 'Other',
-                    color: Colors.purple,
-                  ),
-                ],
-              ),
+              if (patientType == null)
+                const Center(child: CircularProgressIndicator())
+              else
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: assistanceTypes.map((type) {
+                    return _typeIcon(
+                      icon: type['icon'],
+                      label: type['label'],
+                      value: type['value'],
+                      color: type['color'],
+                    );
+                  }).toList(),
+                ),
               if (selectedType == 'Other')
                 Padding(
                   padding: const EdgeInsets.only(top: 12),
