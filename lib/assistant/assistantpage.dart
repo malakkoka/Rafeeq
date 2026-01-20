@@ -7,6 +7,7 @@ import 'package:front/component/customdrawer.dart';
 import 'package:front/constats.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:jwt_decode/jwt_decode.dart';
 
 class AssistantPage extends StatefulWidget {
   const AssistantPage({super.key});
@@ -20,6 +21,12 @@ class _AssistantPageState extends State<AssistantPage> {
   void initState() {
     super.initState();
     _refreshData();
+  }
+
+  String exractusertype(String token){
+    Map<String , dynamic> payload = Jwt.parseJwt(token);
+
+    return payload["user"]["user_type"];
   }
 
   Future<void> _handleDelete(Map<String, String> request) async {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:gap/gap.dart';
+import 'package:geolocator/geolocator.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -8,6 +9,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:front/color.dart';
 import 'package:front/component/customdrawer.dart';
 import 'package:front/main.dart';
+import 'package:jwt_decode/jwt_decode.dart';
 
 class Deaf extends StatefulWidget {
   const Deaf({super.key});
@@ -60,6 +62,12 @@ void dispose() {
     );
   }
 
+  String exractusertype(String token){
+    Map<String , dynamic> payload = Jwt.parseJwt(token);
+
+    return payload["user"]["user_type"];
+  }
+
  ///===============frames sending ======================
   Future<void> captureAndSend() async {
     if (!controller.value.isInitialized || issending) return;
@@ -99,6 +107,27 @@ void dispose() {
       issending = false;
     }
   }
+  ///==========location===============
+  Future<bool>locationreq()async{
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied){
+      permission = await Geolocator.requestPermission();
+    }
+
+    if (permission == LocationPermission.deniedForever){
+      return false;
+    }
+
+    return permission == LocationPermission.always || permission == LocationPermission.whileInUse;
+  }
+
+  ///=========current location========
+  Future<Position>currentlocation()async {
+    return await Geolocator.getCurrentPosition(
+    desiredAccuracy:  LocationAccuracy.high,
+    );
+  }
+
   ///=============audio===============
   Future<void>playaudio()async{
     if (audiourl==null|| speaking)return;

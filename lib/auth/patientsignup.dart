@@ -29,6 +29,7 @@ class _PatientsignupState extends State<Patientsignup> {
   final TextEditingController password = TextEditingController();
   final TextEditingController repassword = TextEditingController();
   final TextEditingController patientAgeController = TextEditingController();
+  final TextEditingController homelocation = TextEditingController();
   String? disability; // blind | deaf
   String? gender ;
   bool? readandwrite;
@@ -36,6 +37,7 @@ class _PatientsignupState extends State<Patientsignup> {
   void dispose() {
     patientAgeController.dispose();
     username.dispose();
+    homelocation.dispose();
     email.dispose();
     phone.dispose();
     password.dispose();
@@ -69,9 +71,10 @@ class _PatientsignupState extends State<Patientsignup> {
         "can_speak_with_sign_language": disability == "deaf",
         "assistant": int.parse(assistantId!),
         "age": age,
-        "address": "default",
+        "address": homelocation,
         "gender": gender,
         "is_active": true,
+        
       }),
     );
 
@@ -125,10 +128,47 @@ class _PatientsignupState extends State<Patientsignup> {
                         ScrollViewKeyboardDismissBehavior.onDrag,
                       children: [
                     _section("Username", username),
+
                     _section("Email", email),
                     _passwordSection("Password", password),
                     _confirmPasswordSection(),
                     _section("Phone Number", phone),
+                    Gap(16),
+                    Text("Home Location",
+                    style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
+                            ),),
+                    Gap(16),
+                    TextFormField(
+                      controller: homelocation,
+                      decoration: InputDecoration(
+                        hintText: "Enter your url home location",
+                        hintStyle: TextStyle(
+                          fontSize: 15.5,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        contentPadding: EdgeInsets.symmetric(vertical: 4, horizontal: 20),
+                        filled: true,
+                        fillColor: AppColors.dialogcolor,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: AppColors.n1),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: BorderSide(color: AppColors.n1),
+                        ),
+                        focusedBorder:OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(18),
+                                borderSide: BorderSide(
+                                color: AppColors.n1,
+                                width: 2.5),
+                              )
+                      ),
+                    ),
                     
                     Gap(16),
                     Text(
@@ -332,7 +372,7 @@ Widget _section(String label, TextEditingController controller) {
     );
   }
 
- /* Widget _labeledField(String label, TextEditingController controller) {
+/* Widget _labeledField(String label, TextEditingController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

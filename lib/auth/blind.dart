@@ -8,6 +8,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:front/color.dart';
+import 'package:jwt_decode/jwt_decode.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 class Blind extends StatefulWidget {
   const Blind({super.key});
 
@@ -42,6 +44,20 @@ class _BlindState extends State<Blind> {
     //tts.speak("Text to speech is working");
   //});
   }
+//===========get usertype by token =============
+  String exractusertype(String token){
+    Map<String , dynamic> payload = Jwt.parseJwt(token);
+
+    return payload["user"]["user_type"];
+  }
+
+//===========save usertype===================
+Future<void> saveusertype(String token) async {
+  final prefs = await SharedPreferences.getInstance();
+
+  String usertype = exractusertype(token);
+  await prefs.setString('user_type', usertype);
+}
 
   // ================= CAMERA =================
 
