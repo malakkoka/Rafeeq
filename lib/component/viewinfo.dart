@@ -7,7 +7,9 @@ import 'package:front/component/editprofile.dart';
 //import 'package:gap/gap.dart';
 
 enum ProfileMode { assistant, patient }
+
 enum UserRole { assistant, volunteer }
+
 bool hasDrivingLicense = false;
 
 class ViewInfo extends StatefulWidget {
@@ -66,9 +68,7 @@ class _ViewInfoState extends State<ViewInfo> {
       return volunteerData;
     }
 
-    return currentMode == ProfileMode.assistant
-        ? assistantData
-        : patientData;
+    return currentMode == ProfileMode.assistant ? assistantData : patientData;
   }
 
   //================== BUILD TABS ==================
@@ -190,15 +190,18 @@ class _ViewInfoState extends State<ViewInfo> {
           color: AppColors.background,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            buildTabs(), 
-            const SizedBox(height: 20),
-
+        child: ListView(padding: const EdgeInsets.all(16), children: [
+          buildTabs(),
+          const SizedBox(height: 20),
+          CustomTextFormField(
+            labeltext: "User Name",
+            hinttext: currentData["username"],
+            readonly: true,
+          ),
+          if (currentMode == ProfileMode.assistant)
             CustomTextFormField(
-              labeltext: "User Name",
-              hinttext: currentData["username"],
+              labeltext: "Email",
+              hinttext: currentData["email"],
               readonly: true,
             ),
 
@@ -244,11 +247,10 @@ class _ViewInfoState extends State<ViewInfo> {
 );
             },
           ),
-          ]
+        ]),
       ),
-    ),
     );
-  } 
+  }
 
   //================== BUILD ==================
 

@@ -1,11 +1,15 @@
 import 'dart:convert';
 //import 'package:flutter/material.dart';
 import 'package:front/constats.dart';
+import 'package:front/services/token_sevice.dart';
 import 'package:http/http.dart' as http;
 import 'package:front/auth/volunteer/post_model.dart';
 
 class PostService {
   static Future<List<Post>> getPosts() async {
+final token = await TokenService.getToken();
+
+
     print("get posts called");
     final response = await http.get(
       Uri.parse("$baseUrl/api/account/posts/"),

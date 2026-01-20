@@ -13,72 +13,156 @@ class PostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    /// ===== TEMP DATA (UNTIL BACKEND) =====
+    final String city = 'Amman'; //TODO: backend
+    final String patientType = 'Deaf'; // TODO: backend
+    final String serviceType = 'Sign Language'; // TODO: backend
+
+    final String imagePath = 'images/sign_language.png';
+    // TODO: change image based on patientTyp
+
     return Card(
-      color: AppColors.dialogcolor,
-      margin: const EdgeInsets.only(
-        bottom: 12,
-      ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: AppColors.inputField,
+      margin: const EdgeInsets.only(bottom: 16),
       elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
+        padding: const EdgeInsets.all(14),
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              post.title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
+
+            //CONTENT
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /// TITLE
+                  const Text(
+                    "Assistance Request",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  /// CHIPS
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      _chip(Icons.sign_language, serviceType, Colors.blue),
+                      _chip(
+                        Icons.hearing_disabled,
+                        patientType,
+                        Colors.orange,
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  /// CITY
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.location_on,
+                        size: 16,
+                        color: Colors.red,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(city),
+                    ],
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  /// DATE
+                  Row(
+                    children: [
+                      const Icon(Icons.calendar_today, size: 15),
+                      const SizedBox(width: 4),
+                      Text(
+                        post.created_at,
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  /// STATUS + AUTHOR
+                  Row(
+                    children: [
+                      buildStateBadge(post.state ?? 0),
+                      const Spacer(),
+                      const Text(
+                        "Author: Wala'a",
+                        // TODO: backend
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  /// TIME + BUTTON
+                  Row(
+                    children: [
+                      Text(
+                        formatTimeAgoEn(post.created_at),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.black45,
+                        ),
+                      ),
+                      const Spacer(),
+                      const Spacer(),
+                      if (post.state == 0)
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.accent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
+                          ),
+                          onPressed: () {
+                            showConfirmDialog(context);
+                          },
+                          child: const Text(
+                            "I can help",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: 6),
-            Text(
-              post.content,
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
-            ),
-            SizedBox(height: 14),
-            Row(
-              children: [
-                buildStateBadge(post.state ?? 0),
-                Spacer(),
-                Text(
-                  "Author: Wala'a",
-                  style: TextStyle(
-                    fontSize: 13.5,
-                  ),
-                ), //Text("Author: ${post.author}"),
-                Spacer(flex: 2),
-              ],
-            ),
-            SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 5),
-                child: Row(
-                  children: [
-                    Text(
-                      formatTimeAgoEn(post.created_at),
-                      style:
-                          TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
-                    ),
-                    Spacer(),
-                    ElevatedButton(
-                        style: ButtonStyle(
-                            shape: WidgetStatePropertyAll(
-                                RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(13))),
-                            backgroundColor:
-                                WidgetStatePropertyAll(AppColors.accent)),
-                        onPressed: () {
-                          ShowConfirmDialog(context);
-                        },
-                        child: Text(
-                          "I can help",
-                        )),
-                  ],
-                ),
+
+            const SizedBox(width: 12),
+
+            /// ================= RIGHT IMAGE =================
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.22,
+              child: Image.asset(
+                imagePath,
+                fit: BoxFit.contain,
               ),
             ),
           ],
@@ -86,86 +170,64 @@ class PostCard extends StatelessWidget {
       ),
     );
   }
+
+  /// ===== CHIP WIDGET =====
+  Widget _chip(IconData icon, String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: TextStyle(
+              color: color,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-void ShowConfirmDialog(BuildContext context) {
+/// ================= CONFIRM DIALOG =================
+void showConfirmDialog(BuildContext context) {
   showDialog(
     context: context,
     builder: (_) => AlertDialog(
-      //icon: Icon(Icons.add_to_photos_sharp),
-      backgroundColor: AppColors.dialogcolor,
-      title: Center(
-        child: const Text(
-          "Ready to help?",
-          style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Colors.black),
-        ),
-      ),
-      content: const Text(
-        "Are you sure you want help this person?",
-        style: TextStyle(
-          color: Colors.black,
-          fontSize: 16,
-          fontWeight: FontWeight.w400,
-        ),
-      ),
+      title: const Text("Ready to help?"),
+      content: const Text("Are you sure you want help this person?"),
       actions: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextButton(
-              style: ButtonStyle(
-                  backgroundColor: WidgetStatePropertyAll(
-                      const Color.fromARGB(255, 230, 226, 220))),
-              onPressed: () => Navigator.pop(context),
-              child: const Text(
-                "  Cancel  ",
-                style: TextStyle(color: Color.fromARGB(255, 120, 120, 120)),
-              ),
-            ),
-            SizedBox(
-              width: 10,
-            ),
-            ElevatedButton(
-              style: ButtonStyle(
-                  backgroundColor: WidgetStatePropertyAll(
-                      const Color.fromARGB(255, 52, 132, 145))),
-              onPressed: () {
-                Navigator.pop(
-                    context); ///////////////............. انتبهيلها .............
-                //هون بعدين رح استدعي ال endpoint تبع المساعدة
-              },
-              child: const Text(
-                "Yes, I'll help",
-                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-              ),
-            ),
-          ],
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("Cancel"),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("Yes, I'll help"),
         ),
       ],
     ),
   );
 }
 
+/// ================= TIME FORMAT =================
 String formatTimeAgoEn(String dateString) {
   final DateTime createdAt = DateTime.parse(dateString);
-  final DateTime now = DateTime.now();
+  final Duration diff = DateTime.now().difference(createdAt);
 
-  final Duration difference = now.difference(createdAt);
-
-  if (difference.inSeconds < 60) {
-    return "Just now";
-  } else if (difference.inMinutes < 60) {
-    return "${difference.inMinutes} minutes ago";
-  } else if (difference.inHours < 24) {
-    return "${difference.inHours} hours ago";
-  } else if (difference.inDays == 1) {
-    return "Yesterday";
-  } else if (difference.inDays < 7) {
-    return "${difference.inDays} days ago";
-  } else {
-    return "${createdAt.day}/${createdAt.month}/${createdAt.year}";
-  }
+  if (diff.inSeconds < 60) return "Just now";
+  if (diff.inMinutes < 60) return "${diff.inMinutes} minutes ago";
+  if (diff.inHours < 24) return "${diff.inHours} hours ago";
+  if (diff.inDays == 1) return "Yesterday";
+  if (diff.inDays < 7) return "${diff.inDays} days ago";
+  return "${createdAt.day}/${createdAt.month}/${createdAt.year}";
 }

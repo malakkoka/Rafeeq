@@ -1,9 +1,18 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
+<<<<<<< HEAD
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:front/auth/patientsignup.dart';
 import 'package:front/color.dart';
 
+=======
+import 'package:front/assistant/mainNavBar.dart';
+//import 'package:front/auth/patientsignup.dart';
+import 'package:front/color.dart';
+import 'package:front/component/viewinfo.dart';
+import 'package:front/constats.dart';
+import 'package:front/provider/user_provider.dart';
+>>>>>>> 75b0c82e998049800bdeb0548d38ed20d83cc671
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -64,7 +73,7 @@ class _SignupState extends State<Signup> {
 
   // API
   Future<Map<String, dynamic>> registerOnDjango() async {
-    final url = Uri.parse('http://138.68.104.187/api/account/register/');
+    final url = Uri.parse('$baseUrl/api/account/register/');
     int age = 0;
 
 
@@ -263,6 +272,7 @@ class _SignupState extends State<Signup> {
                                         }
                                         else{
                                           if (!mounted) return;
+<<<<<<< HEAD
                                           Navigator.of(context).pushReplacementNamed("volunteerpage");
                                         }
                                       }else{
@@ -274,6 +284,23 @@ class _SignupState extends State<Signup> {
                                           ).show();
                                       }
                                       }, ),
+=======
+                                                if (selectedRole == "Assistant")
+                                                {
+                                                Navigator.of(context).pushReplacement(
+                                                  MaterialPageRoute(builder: (_) => const MainNavigationPage(
+    role: UserRole.assistant,
+  ),
+),
+                                                );
+                                              }else { Navigator.of(context) .pushReplacementNamed("volunteer"); 
+                                              } } 
+                                                else { await AwesomeDialog( context: context,
+                                                dialogType: DialogType.error,
+                                                title: "Sign Up Error",
+                                                desc: result["message"].toString(),
+                                                  btnOkOnPress: () {}, ).show(); } }, ),
+>>>>>>> 75b0c82e998049800bdeb0548d38ed20d83cc671
                     ),
                                             const Gap(12),
                               InkWell(

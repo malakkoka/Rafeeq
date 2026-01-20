@@ -14,7 +14,7 @@ width: double.infinity,
  color: AppColors.background, // غيري اللون براحتك
       alignment: Alignment.center,
       child: Image.asset(
-        "images/logologo.png",
+        "images/refeeqlogo.jpeg",
         width: size.width * 1.9,   // كبريها قد ما بدك
         height: size.height * 1.4, // 👈 هاي المفتاح
         fit: BoxFit.contain,

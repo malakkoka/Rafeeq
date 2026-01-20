@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:front/assistant/selectLocationPage.dart';
 import 'package:front/constats.dart';
+import 'package:front/services/token_sevice.dart';
 import 'package:http/http.dart' as http;
 import 'package:front/color.dart';
 
@@ -24,49 +25,160 @@ class AssistanceRequestPage extends StatefulWidget {
 }
 
 class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
-  String selectedReason = '';
-  List<String> selectedTypes = [];
-  String patientCondition = '';
+  // ملاحظة:
+  // حالياً عم نعتبر إنو المريض كفيف، عشان الباك إند لسه مش مربوط
+  // بس لما نربط الباك بعدين، رح نغيّر أنواع المساعدة
+  // حسب نوع المريض بدون ما نغيّر الواجهة
+  String? selectedType;
+  String? patientType; // blind / deaf
 
-//Location
-  String? selectedLocationLabel; // مثال: "Amman - Abdoun, Building 12"
+  /// LOCATION
+  String? selectedLocationLabel;
   double? selectedLat;
-  double? selectedLng; // هيك صار عندي اسم المكان واللحداثيات
+  double? selectedLng;
 
-//Date&Time
+  /// DATE & TIME
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
   String selectedDateTimeLabel = 'Select date & time';
 
-  TextEditingController notesController = TextEditingController();
-  TextEditingController otherTypeController = TextEditingController();
+  /// CONTROLLERS
+  final TextEditingController notesController = TextEditingController();
+  final TextEditingController otherTypeController = TextEditingController();
 
   bool isSubmitting = false;
+
+  List<Map<String, dynamic>> get assistanceTypes {
+    if (patientType == 'blind') {
+      return [
+        {
+          'icon': Icons.menu_book,
+          'label': 'Reading',
+          'value': 'Reading',
+          'color': Colors.blue,
+        },
+        {
+          'icon': Icons.map_outlined,
+          'label': 'Navigation',
+          'value': 'Navigation',
+          'color': Colors.green,
+        },
+        {
+          'icon': Icons.people,
+          'label': 'Companion',
+          'value': 'Companion',
+          'color': Colors.orange,
+        },
+        {
+          'icon': Icons.more_horiz,
+          'label': 'Other',
+          'value': 'Other',
+          'color': Colors.purple,
+        },
+      ];
+    }
+
+    // deaf
+    return [
+      {
+        'icon': Icons.sign_language,
+        'label': 'Sign Language',
+        'value': 'Sign Language',
+        'color': Colors.blue,
+      },
+      {
+        'icon': Icons.chat,
+        'label': 'Communication',
+        'value': 'Communication',
+        'color': Colors.green,
+      },
+      {
+        'icon': Icons.people,
+        'label': 'Companion',
+        'value': 'Companion',
+        'color': Colors.orange,
+      },
+      {
+        'icon': Icons.more_horiz,
+        'label': 'Other',
+        'value': 'Other',
+        'color': Colors.purple,
+      },
+    ];
+  }
 
   @override
   void initState() {
     super.initState();
-
+    _loadPatientType();
     if (widget.isEdit && widget.initialContent != null) {
       notesController.text = widget.initialContent!;
     }
   }
 
+  @override
+  void dispose() {
+    notesController.dispose();
+    otherTypeController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadPatientType() async {
+    final user = await TokenService.getUser();
+
+    if (!mounted) return;
+
+    setState(() {
+      patientType = user?['patient']?['user_type'];
+    });
+  }
+
+  ///  DATE & TIME
   Future<void> _pickDateTime() async {
-    //  اختيار التاريخ
     final pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.n1,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+            dialogBackgroundColor: AppColors.dialogcolor,
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (pickedDate == null) return;
 
-    //  اختيار الوقت
     final pickedTime = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.n1,
+              onPrimary: Colors.white,
+              onSurface: AppColors.n1,
+            ),
+            timePickerTheme: TimePickerThemeData(
+              backgroundColor: AppColors.inputField,
+              dialHandColor: AppColors.n1,
+              entryModeIconColor: AppColors.n1,
+              dayPeriodColor: AppColors.n1,
+              dayPeriodTextColor: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (pickedTime == null) return;
@@ -79,74 +191,43 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
     });
   }
 
+  /// SUBMIT
   Future<void> _submitRequest() async {
     setState(() => isSubmitting = true);
+    final token = await TokenService.getToken();
 
-    /// Validation
-    if (patientCondition.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please complete all required fields')),
-      );
-      setState(() => isSubmitting = false);
+    if (selectedType == null) {
+      _showSnack('Please select assistance type');
       return;
     }
 
-    if (selectedTypes.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select at least one assistance type'),
-        ),
-      );
-      setState(() => isSubmitting = false);
+    /*if (selectedLat == null || selectedLng == null) {
+      _showSnack('Please select location');
       return;
-    }
+    }*/
 
-    //Location validation
-    if (selectedLat == null || selectedLng == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select the location of the patient'),
-        ),
-      );
-      setState(() => isSubmitting = false);
-      return;
-    }
-
-    // Date&Time validation
     if (selectedDate == null || selectedTime == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select date and time for assistance'),
-        ),
-      );
-      setState(() => isSubmitting = false);
+      _showSnack('Please select date & time');
       return;
     }
 
-    if (selectedTypes.contains('Other') &&
-        otherTypeController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please specify the assistance type')),
-      );
-      setState(() => isSubmitting = false);
+    if (selectedType == 'Other' && otherTypeController.text.trim().isEmpty) {
+      _showSnack('Please specify the assistance type');
       return;
     }
 
-    final typesText = selectedTypes.contains('Other')
-        ? [
-            ...selectedTypes.where((t) => t != 'Other'),
-            otherTypeController.text.trim(),
-          ].join(', ')
-        : selectedTypes.join(', ');
+    final typesText = selectedType == 'Other'
+        ? otherTypeController.text.trim()
+        : selectedType!;
 
-    /// BODY (مشترك بين Create و Edit)
     final body = {
       "title": "Assistance Request",
-      "content": "Patient Condition: $patientCondition\n"
-          "Type: $typesText\n"
+      "content": "Type: $typesText\n"
           "Location: $selectedLocationLabel\n"
           "Date & Time: $selectedDateTimeLabel\n"
           "Notes: ${notesController.text}",
+      "city": 2,
+      "city_data": {"name": "amman"},
       "state": 0,
     };
 
@@ -161,7 +242,7 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
               body: jsonEncode(body),
             )
           : await http.post(
-              Uri.parse('$baseUrl/api/account/post/create/'),
+              Uri.parse('$baseUrl/api/account/posts/'),
               headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer $token',
@@ -169,16 +250,18 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
               body: jsonEncode(body),
             );
 
-      debugPrint('Status: ${response.statusCode}');
-      debugPrint('Response: ${response.body}');
-
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Navigator.pop(context, true);
+        _showSnack('Request submitted successfully');
       }
     } catch (e) {
       debugPrint('Submit error: $e');
     }
 
+    setState(() => isSubmitting = false);
+  }
+
+  void _showSnack(String text) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
     setState(() => isSubmitting = false);
   }
 
@@ -188,262 +271,175 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.background,
-        title: Text(widget.isEdit ? 'Edit Request' : 'Assistance Request'),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
+        elevation: 0,
+        iconTheme: IconThemeData(color: AppColors.n1),
+        actions: [
+          IconButton(
+            icon: isSubmitting
+                ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.check, size: 28),
+            onPressed: isSubmitting ? null : _submitRequest,
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            /// Patient Condition
-            _card(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const _SectionTitle(title: 'Patient Condition'),
-                  RadioListTile(
-                    title: const Text('Visually Impaired'),
-                    value: 'Visually Impaired',
-                    groupValue: patientCondition,
-                    onChanged: (v) => setState(() => patientCondition = v!),
-                  ),
-                  RadioListTile(
-                    title: const Text('Hearing Impaired'),
-                    value: 'Hearing Impaired',
-                    groupValue: patientCondition,
-                    onChanged: (v) => setState(() => patientCondition = v!),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            /// Type
-            _card(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const _SectionTitle(title: 'Type of Assistance'),
-                  CheckboxListTile(
-                    title: const Text('Companion Support'),
-                    value: selectedTypes.contains('Companion Support'),
-                    onChanged: (v) {
-                      setState(() {
-                        v!
-                            ? selectedTypes.add('Companion Support')
-                            : selectedTypes.remove('Companion Support');
-                      });
-                    },
-                  ),
-                  CheckboxListTile(
-                    title: const Text('Reading/Writing Help'),
-                    value: selectedTypes.contains('Reading/Writing Help'),
-                    onChanged: (v) {
-                      setState(() {
-                        v!
-                            ? selectedTypes.add('Reading/Writing Help')
-                            : selectedTypes.remove('Reading/Writing Help');
-                      });
-                    },
-                  ),
-                  CheckboxListTile(
-                    title: const Text('Other'),
-                    value: selectedTypes.contains('Other'),
-                    onChanged: (v) {
-                      setState(() {
-                        v!
-                            ? selectedTypes.add('Other')
-                            : selectedTypes.remove('Other');
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-            if (selectedTypes.contains('Other'))
-              Padding(
-                padding: const EdgeInsets.only(left: 16, top: 8, right: 16),
-                child: TextField(
-                  controller: otherTypeController,
-                  decoration: const InputDecoration(
-                    hintText: 'Please specify the type of assistance',
-                    border: OutlineInputBorder(),
-                  ),
+        child: _card(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const _SectionTitle(title: 'Type of Assistance'),
+              if (patientType == null)
+                const Center(child: CircularProgressIndicator())
+              else
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: assistanceTypes.map((type) {
+                    return _typeIcon(
+                      icon: type['icon'],
+                      label: type['label'],
+                      value: type['value'],
+                      color: type['color'],
+                    );
+                  }).toList(),
                 ),
-              ),
-
-            const SizedBox(height: 10),
-
-            /// Location
-            _card(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const _SectionTitle(title: 'Location'),
-                  const SizedBox(height: 8),
-
-                  // Preview صغير إذا اختار لوكيشن
-                  if (selectedLocationLabel != null) ...[
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.background.withOpacity(0.6),
+              if (selectedType == 'Other')
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: TextField(
+                    controller: otherTypeController,
+                    decoration: InputDecoration(
+                      hintText: 'Specify assistance type',
+                      border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.black12),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.location_on, color: AppColors.accent),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              selectedLocationLabel!,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                  ],
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: 46,
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.accent,
-                        side: BorderSide(color: AppColors.accent),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      onPressed: () async {
-                        final result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const SelectLocationPage(),
-                          ),
-                        );
-
-                        if (result != null) {
-                          setState(() {
-                            selectedLat = result['lat'];
-                            selectedLng = result['lng'];
-                            selectedLocationLabel =
-                                'Lat: ${selectedLat!.toStringAsFixed(5)}, '
-                                'Lng: ${selectedLng!.toStringAsFixed(5)}';
-                          });
-                        }
-
-                        setState(() {
-                          selectedLocationLabel = "Location not selected yet";
-                        });
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content:
-                                Text('Next step: open map to pick location'),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.map_outlined),
-                      label: Text(
-                        selectedLocationLabel == null
-                            ? "Select Location"
-                            : "Change Location",
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            _card(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const _SectionTitle(title: 'Date & Time of Assistance'),
-                  ListTile(
-                    leading: const Icon(Icons.access_time),
-                    title: Text(
-                      selectedDateTimeLabel,
-                      style: TextStyle(
-                        color:
-                            selectedDate == null ? Colors.grey : Colors.black,
-                      ),
-                    ),
-                    trailing: const Icon(Icons.calendar_month),
-                    onTap: _pickDateTime,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-
-            /// Notes
-            _card(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const _SectionTitle(title: 'Additional Notes'),
-                  TextField(
-                    controller: notesController,
-                    maxLines: 1,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter any important details...',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            /// Submit
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accent,
                 ),
-                onPressed: isSubmitting ? null : _submitRequest,
-                child: isSubmitting
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : Text(
-                        widget.isEdit ? 'Save Changes' : 'Submit Request',
-                        style: const TextStyle(fontSize: 18),
-                      ),
+              const SizedBox(height: 24),
+              const _SectionTitle(title: 'Location'),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: AppColors.n1),
+                  //padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const SelectLocationPage(),
+                    ),
+                  );
+                  if (result != null) {
+                    setState(() {
+                      selectedLat = result['lat'];
+                      selectedLng = result['lng'];
+                      selectedLocationLabel =
+                          'Lat: ${selectedLat!.toStringAsFixed(5)}, '
+                          'Lng: ${selectedLng!.toStringAsFixed(5)}';
+                    });
+                  }
+                },
+                icon: const Icon(Icons.map, color: AppColors.n1),
+                label: Text(
+                  selectedLocationLabel ?? 'Select Location',
+                  style:
+                      TextStyle(color: const Color.fromARGB(221, 28, 27, 27)),
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 24),
+              const _SectionTitle(title: 'Date & Time of Assistance'),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.access_time),
+                title: Text(selectedDateTimeLabel),
+                trailing: const Icon(Icons.calendar_month),
+                onTap: _pickDateTime,
+              ),
+              const SizedBox(height: 24),
+              const _SectionTitle(title: 'Additional Notes'),
+              TextField(
+                controller: notesController,
+                decoration: const InputDecoration(
+                  hintText: 'Enter any important details...',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
+  /// COMPONENTS
   Widget _card({required Widget child}) {
     return Card(
       color: AppColors.dialogcolor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 4,
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         child: child,
+      ),
+    );
+  }
+
+  // أيقونة اختيار نوع المساعدة
+  // ملوّنة حتى قبل الاختيار عشان الواجهة ما تكون باهتة
+  Widget _typeIcon({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    final bool isSelected = selectedType == value;
+
+    return GestureDetector(
+      onTap: () => setState(() => selectedType = value),
+      child: Column(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: 58,
+            height: 58,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isSelected ? color : color.withOpacity(0.15),
+              border: Border.all(
+                color: isSelected ? color : color.withOpacity(0.4),
+              ),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: color.withOpacity(0.4),
+                        blurRadius: 10,
+                      ),
+                    ]
+                  : [],
+            ),
+            child: Icon(
+              icon,
+              color: isSelected ? Colors.white : color,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              color: isSelected ? color : Colors.black87,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -456,10 +452,13 @@ class _SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Text(
         title,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

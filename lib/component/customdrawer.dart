@@ -1,20 +1,22 @@
 import 'package:front/color.dart';
-import 'package:front/component/user_provider.dart';
 import 'package:front/component/customlisttile.dart';
 import 'package:front/component/viewinfo.dart';
+<<<<<<< HEAD
 
+=======
+>>>>>>> 75b0c82e998049800bdeb0548d38ed20d83cc671
 import 'package:flutter/material.dart';
+import 'package:front/provider/user_provider.dart';
 import 'dart:math' as math;
 import 'package:provider/provider.dart';
 
 class CustomDrawer extends StatelessWidget {
-  
-
   const CustomDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<UserProvider>(context);
+
     return Drawer(
       backgroundColor: AppColors.background,
       child: Container(
@@ -22,7 +24,6 @@ class CustomDrawer extends StatelessWidget {
         child: ListView(
           children: [
             Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
                   margin: const EdgeInsets.only(top: 10, left: 5, right: 10),
@@ -43,34 +44,37 @@ class CustomDrawer extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                        user.name ?? '',
-                        style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                      ),
-                    const SizedBox(height: 4),
-                    Text(
-                    user.email ?? '',
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                  ),
+                          user.name ?? '',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          user.email ?? '',
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                        ),
                         const SizedBox(height: 8),
-                        Align(
-                          child: SizedBox(
-                            width: 110,
-                            height: 40,
-                            child: MaterialButton(
-                              onPressed: () {
-                                Navigator.push(context, MaterialPageRoute(builder: (context)=> ViewInfo()));
-                              },
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              color: const Color.fromARGB(255, 28, 79, 127),
-                              child: const Text(
-                                "Edit Profile",
-                                style: TextStyle(color: Colors.white),
-                              ),
+                        SizedBox(
+                          width: 110,
+                          height: 40,
+                          child: MaterialButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ViewInfo(),
+                                ),
+                              );
+                            },
+                            color: const Color.fromARGB(255, 28, 79, 127),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Text(
+                              "Edit Profile",
+                              style: TextStyle(color: Colors.white),
                             ),
                           ),
                         ),
@@ -80,7 +84,39 @@ class CustomDrawer extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+
+            const SizedBox(height: 20),
+
+            //Emergency Switch
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: SwitchListTile(
+                activeColor: Colors.red,
+                title: const Text(
+                  "Emergency Mode",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                  ),
+                ),
+                /*subtitle: Text(
+                  user.emergencyEnabled
+                      ? "Emergency mode is ON"
+                      : "Emergency mode is OFF",
+                ),*/
+                value: user.emergencyEnabled,
+                onChanged: (value) {
+                  user.toggleEmergency(value);
+                },
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
             CustomListTile(
               icon: Icons.home,
               color: Colors.grey.shade700,
@@ -89,6 +125,7 @@ class CustomDrawer extends StatelessWidget {
                 Navigator.pop(context);
               },
             ),
+<<<<<<< HEAD
             ListTile(
               leading: Icon(
                 Icons.dark_mode,
@@ -111,6 +148,8 @@ class CustomDrawer extends StatelessWidget {
               ),
               
             ),
+=======
+>>>>>>> 75b0c82e998049800bdeb0548d38ed20d83cc671
             CustomListTile(
               icon: Icons.location_on_rounded,
               color: Colors.grey.shade700,
@@ -141,6 +180,7 @@ class CustomDrawer extends StatelessWidget {
               textTitle: "Contact Us",
               onTap: () {},
             ),
+
             ListTile(
               leading: Transform(
                 alignment: Alignment.center,
@@ -159,8 +199,8 @@ class CustomDrawer extends StatelessWidget {
                 ),
               ),
               onTap: () {
-                Navigator.of(context)
-                                    .pushReplacementNamed("login");
+                user.clearUser();
+                Navigator.of(context).pushReplacementNamed("login");
               },
             ),
           ],
