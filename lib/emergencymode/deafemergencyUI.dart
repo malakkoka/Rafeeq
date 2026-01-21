@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:front/color.dart';
 
 class DeafEmergencyUI extends StatefulWidget {
   const DeafEmergencyUI({super.key});
@@ -11,7 +12,6 @@ class DeafEmergencyUI extends StatefulWidget {
 class _DeafEmergencyUIState extends State<DeafEmergencyUI> {
   bool isRed = true;
   Timer? timer;
-
   @override
   void initState() {
     super.initState();
@@ -41,7 +41,10 @@ class _DeafEmergencyUIState extends State<DeafEmergencyUI> {
           onPressed: () {
             Navigator.pop(context);
           },
-          child: const Text("I am OK"),
+          child: const Text(
+            "I am OK",
+            style: TextStyle(color: AppColors.n1),
+          ),
         ),
       ),
     );

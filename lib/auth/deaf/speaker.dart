@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:front/color.dart';
-import 'package:front/component/customdrawer.dart';
 import 'package:front/main.dart';
 
 class Speaker extends StatefulWidget {

@@ -1,6 +1,7 @@
 // ignore_for_file: file_names
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:front/auth/volunteer/activityscreen.dart';
 import 'package:front/auth/volunteer/volunteerpage.dart';
 import 'package:front/color.dart';
 import 'package:front/component/viewinfo.dart';
@@ -43,7 +44,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       pages = const [
         SettingsPage(), // 0
         VolunteerHome(), // 1
-        VolunteerHome(), // 2 (مؤقتاً نفس الصفحة)
+        VolunteerActivityScreen(), //2
       ];
     }
   }

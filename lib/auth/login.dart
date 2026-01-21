@@ -29,6 +29,9 @@ class _LoginState extends State<Login> {
   Future<Map<String, dynamic>> loginToDjango() async {
     final url = Uri.parse('$baseUrl/api/account/login/');
 
+final deviceToken = context.read<UserProvider>().deviceToken;
+print("FCM TOKEN (Login): $deviceToken");
+
     try {
       final response = await http.post(
         url,
@@ -36,6 +39,7 @@ class _LoginState extends State<Login> {
         body: jsonEncode({
           "username": username.text.trim(),
           "password": password.text.trim(),
+           "device_token": deviceToken,
         }),
       );
 
@@ -193,7 +197,7 @@ class _LoginState extends State<Login> {
                                       userProvider.setUser(
                                         name: result["user"]["username"],
                                         email: result["user"]["email"],
-                                        role: role ?? '',
+                                        role: role ?? '', id: '', phone: '',
                                       );
 
                                       if (!mounted) return;

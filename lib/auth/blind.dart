@@ -1,6 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:front/component/customdrawer.dart';
 import 'package:front/main.dart';
 import 'package:avatar_glow/avatar_glow.dart';
 //import 'package:flutter_tts/flutter_tts.dart';
@@ -10,6 +11,7 @@ import 'package:http/http.dart' as http;
 import 'package:front/color.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 class Blind extends StatefulWidget {
   const Blind({super.key});
 
@@ -23,7 +25,7 @@ class _BlindState extends State<Blind> {
   String? lastPlayedAudio;
   Timer? captureTimer;
   bool isSending = false;
-  
+
   final AudioPlayer audioPlayer = AudioPlayer();
   final List<String> audioQueue = [];
   bool isSpeaking = false;
@@ -33,31 +35,32 @@ class _BlindState extends State<Blind> {
     super.initState();
     initCamera();
 
-  audioPlayer.onPlayerComplete.listen((event) {
+    audioPlayer.onPlayerComplete.listen((event) {
       setState(() {
         isSpeaking = false;
       });
       playNextIfIdle();
     });
 
-      //Future.delayed(const Duration(seconds: 2), () {
+    //Future.delayed(const Duration(seconds: 2), () {
     //tts.speak("Text to speech is working");
-  //});
+    //});
   }
+
 //===========get usertype by token =============
-  String exractusertype(String token){
-    Map<String , dynamic> payload = Jwt.parseJwt(token);
+  String exractusertype(String token) {
+    Map<String, dynamic> payload = Jwt.parseJwt(token);
 
     return payload["user"]["user_type"];
   }
 
 //===========save usertype===================
-Future<void> saveusertype(String token) async {
-  final prefs = await SharedPreferences.getInstance();
+  Future<void> saveusertype(String token) async {
+    final prefs = await SharedPreferences.getInstance();
 
-  String usertype = exractusertype(token);
-  await prefs.setString('user_type', usertype);
-}
+    String usertype = exractusertype(token);
+    await prefs.setString('user_type', usertype);
+  }
 
   // ================= CAMERA =================
 
@@ -106,45 +109,46 @@ Future<bool> checkAudioExists(String url) async {
 //==================captureAndSend =================
 
   Future<void> captureAndSend() async {
-  debugPrint("CAPTURE STARTED");
+    debugPrint("CAPTURE STARTED");
 
-  if (!controller.value.isInitialized) return;
-  if (isSending) return;
-  if (isSpeaking) return; // مهم
+    if (!controller.value.isInitialized) return;
+    if (isSending) return;
+    if (isSpeaking) return; // مهم
 
-  try {
-    isSending = true;
+    try {
+      isSending = true;
 
-    final XFile image = await controller.takePicture();
+      final XFile image = await controller.takePicture();
 
-    final request = http.MultipartRequest(
-      'POST',
-      Uri.parse('http://138.68.104.187/api/account/vision/'),
-    );
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('http://138.68.104.187/api/account/vision/'),
+      );
 
-    request.files.add(
-      await http.MultipartFile.fromPath('image', image.path),
-    );
+      request.files.add(
+        await http.MultipartFile.fromPath('image', image.path),
+      );
 
-    final response = await request.send();
-    debugPrint("STATUS CODE: ${response.statusCode}");
+      final response = await request.send();
+      debugPrint("STATUS CODE: ${response.statusCode}");
 
-    final body = await response.stream.bytesToString();
-    debugPrint("RAW BODY: $body");
+      final body = await response.stream.bytesToString();
+      debugPrint("RAW BODY: $body");
 
-    if (response.statusCode != 200) return;
+      if (response.statusCode != 200) return;
 
-    final data = jsonDecode(body);
+      final data = jsonDecode(body);
 
-    if (data['success'] == true && data['audio_file'] != null) {
-      final audioUrl = "http://138.68.104.187${data['audio_file']}";
-      debugPrint("AUDIO URL: $audioUrl");
+      if (data['success'] == true && data['audio_file'] != null) {
+        final audioUrl = "http://138.68.104.187${data['audio_file']}";
+        debugPrint("AUDIO URL: $audioUrl");
 
-      if (audioUrl != lastPlayedAudio) {
+        if (audioUrl != lastPlayedAudio) {
           await Future.delayed(const Duration(seconds: 1));
           audioQueue.add(audioUrl);
           playNextIfIdle();
-        } } else {
+        }
+      } else {
         debugPrint("NO AUDIO: ${data['message']}");
       }
     } catch (e) {
@@ -153,7 +157,7 @@ Future<bool> checkAudioExists(String url) async {
       isSending = false;
     }
   }
-      /*if (audioUrl != lastPlayedAudio) {
+  /*if (audioUrl != lastPlayedAudio) {
        // final ready = await waitForAudio(audioUrl);
 
           if (ready) {
@@ -174,27 +178,26 @@ Future<bool> checkAudioExists(String url) async {
   }
 }
 */
-  
-  
-/// ================= AUDIO PLAYER =================d
+
+  /// ================= AUDIO PLAYER =================d
   Future<void> playAudio(String url) async {
-  if (isSpeaking) return;
+    if (isSpeaking) return;
 
-  lastPlayedAudio = url;
-  setState(() {
-    isSpeaking = true;
-  });
+    lastPlayedAudio = url;
+    setState(() {
+      isSpeaking = true;
+    });
 
-  try {
-    await audioPlayer.stop();
+    try {
+      await audioPlayer.stop();
 
-   
-    audioPlayer.play(UrlSource(url));
-  } catch (e) {
-    debugPrint("AUDIO ERROR: $e");
-    setState(() => isSpeaking = false);
+      audioPlayer.play(UrlSource(url));
+    } catch (e) {
+      debugPrint("AUDIO ERROR: $e");
+      setState(() => isSpeaking = false);
+    }
   }
-}
+
   /*await audioPlayer.play(UrlSource(url));
   audioPlayer.onPlayerComplete.listen((event) {
     setState(() {
@@ -205,22 +208,22 @@ Future<bool> checkAudioExists(String url) async {
   });
 }*/
 //================== QUEUE HANDLER =================
-    void playNextIfIdle() {
-  if (isSpeaking) return;
-  if (audioQueue.isEmpty) return;
+  void playNextIfIdle() {
+    if (isSpeaking) return;
+    if (audioQueue.isEmpty) return;
 
-  final nextAudio = audioQueue.removeAt(0);
-  playAudio(nextAudio);
+    final nextAudio = audioQueue.removeAt(0);
+    playAudio(nextAudio);
+  }
 
-}
 //=========عشان اطفي الكاميرا ==========
-    @override
-void dispose() {
-  captureTimer?.cancel();
-  audioPlayer.dispose();
-  controller.dispose();
-  super.dispose();
-}
+  @override
+  void dispose() {
+    captureTimer?.cancel();
+    audioPlayer.dispose();
+    controller.dispose();
+    super.dispose();
+  }
 
   // ================= UI =================
 
@@ -228,67 +231,69 @@ void dispose() {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      
+      drawer: CustomDrawer(),
       appBar: AppBar(
-        title: const Text("   Blind Page", style: TextStyle(
-          color: AppColors.background, fontWeight: FontWeight.w500
-          //TextAlign.center,
-        ),),
-        backgroundColor:AppColors.n10,
+        title: const Text(
+          "   Blind Page",
+          style:
+              TextStyle(color: AppColors.background, fontWeight: FontWeight.w500
+                  //TextAlign.center,
+                  ),
+        ),
+        backgroundColor: AppColors.n10,
       ),
       body: Stack(
         fit: StackFit.expand,
         children: [
-      
           // ===== الكاميرا =====
           Positioned(
             top: 30,
-            left:MediaQuery.of(context).size.width * 0.05,
+            left: MediaQuery.of(context).size.width * 0.05,
             child: Container(
-                  height: 600,
-                  //color: AppColors.c7,
-                  width: MediaQuery.of(context).size.width * 0.9,
-                  decoration: BoxDecoration(
-                    color:  Color.fromARGB(255, 251, 187, 131),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                    color:  Color.fromARGB(255, 251, 187, 131),
-                    width:10,
-                    ),
-                  ),
-                  //#
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(17),
-                    child: isReady
-              ? CameraPreview(controller)
-              : const Center(child: CircularProgressIndicator()),
-                  ),
+              height: 600,
+              //color: AppColors.c7,
+              width: MediaQuery.of(context).size.width * 0.9,
+              decoration: BoxDecoration(
+                color: Color.fromARGB(255, 251, 187, 131),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Color.fromARGB(255, 251, 187, 131),
+                  width: 10,
+                ),
+              ),
+              //#
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(17),
+                child: isReady
+                    ? CameraPreview(controller)
+                    : const Center(child: CircularProgressIndicator()),
+              ),
             ),
           ),
-      
+
           const SizedBox(height: 10),
-      
+
           // ===== الصوت =====
           Positioned(
-            bottom:15,
-            left:MediaQuery.of(context).size.width * 0.40,
+            bottom: 15,
+            left: MediaQuery.of(context).size.width * 0.40,
             child: AvatarGlow(
-                  glowColor:Color.fromARGB(255, 251, 187, 131),
-                  animate: isSpeaking,
-                  duration: const Duration(milliseconds: 1500),
-                  child: const CircleAvatar(
-                    radius: 35,
-                    backgroundColor: AppColors.n10,
-                    child: Icon(Icons.graphic_eq,
-                    color:AppColors.background,
-                    size: 30,),
-                  ),
+              glowColor: Color.fromARGB(255, 251, 187, 131),
+              animate: isSpeaking,
+              duration: const Duration(milliseconds: 1500),
+              child: const CircleAvatar(
+                radius: 35,
+                backgroundColor: AppColors.n10,
+                child: Icon(
+                  Icons.graphic_eq,
+                  color: AppColors.background,
+                  size: 30,
+                ),
+              ),
             ),
           ),
         ],
       ),
     );
   }
-
-
 }

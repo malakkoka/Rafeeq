@@ -1,18 +1,14 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
-<<<<<<< HEAD
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:front/auth/patientsignup.dart';
 import 'package:front/color.dart';
-
-=======
+import 'package:provider/provider.dart';
 import 'package:front/assistant/mainNavBar.dart';
 //import 'package:front/auth/patientsignup.dart';
-import 'package:front/color.dart';
 import 'package:front/component/viewinfo.dart';
 import 'package:front/constats.dart';
 import 'package:front/provider/user_provider.dart';
->>>>>>> 75b0c82e998049800bdeb0548d38ed20d83cc671
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -23,7 +19,6 @@ import 'package:front/component/role_fields.dart';
 import 'package:front/component/password.dart';
 import 'package:front/component/textform.dart';
 import 'package:front/component/custom_button_auth.dart';
-
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -43,16 +38,13 @@ class _SignupState extends State<Signup> {
 
   // Role selection
   String? selectedRole;
-   String? disability;
+  String? disability;
 
   // Role-specific controllers
   final TextEditingController assistantnumber = TextEditingController();
   final TextEditingController patientAge = TextEditingController();
   final TextEditingController assistage = TextEditingController();
   final TextEditingController volunteerage = TextEditingController();
-  
-  
-
 
   @override
   void dispose() {
@@ -67,16 +59,18 @@ class _SignupState extends State<Signup> {
     patientAge.dispose();
     assistage.dispose();
     volunteerage.dispose();
-  
+
     super.dispose();
   }
 
   // API
   Future<Map<String, dynamic>> registerOnDjango() async {
     final url = Uri.parse('$baseUrl/api/account/register/');
+    
+    final deviceToken = context.read<UserProvider>().deviceToken;
+    print("FCM TOKEN (Signup): $deviceToken");
+
     int age = 0;
-
-
 
     if (selectedRole == "Patient") {
       age = int.tryParse(patientAge.text.trim()) ?? 0;
@@ -93,7 +87,8 @@ class _SignupState extends State<Signup> {
       userType = "volunteer";
     }
     if (selectedRole == "Patient") {
-      userType = disability??"blind";}
+      userType = disability ?? "blind";
+    }
 
     try {
       final response = await http.post(
@@ -111,7 +106,7 @@ class _SignupState extends State<Signup> {
           "is_active": true,
           "user_type": userType,
           "password": password.text.trim(),
-          
+          "device_token": deviceToken,
         }),
       );
 
@@ -127,47 +122,44 @@ class _SignupState extends State<Signup> {
     }
   }
 
-//=============هاي الداله بتسجل دخول عشان ناخد التوكين ============
+//هاي الفنكشن بتسجل دخول عشان ناخد التوكين 
 
-  Future<String?> loginandtoken()async{
-    final url =Uri.parse("http://138.68.104.187/api/account/login/");
+  /* Future<String?> loginandtoken() async {
+    final url = Uri.parse("http://138.68.104.187/api/account/login/");
 
     try {
       final response = await http.post(
         url,
         body: jsonEncode({
-          "username":username.text.trim(),
-          "password":password.text.trim(),
+          "username": username.text.trim(),
+          "password": password.text.trim(),
         }),
       );
 
-      final data =jsonDecode(response.body);
+      final data = jsonDecode(response.body);
 
       if (response.statusCode == 200 && data["access"] != null) {
-      return data["access"]; 
-    }
-    else {
+        return data["access"];
+      } else {
+        return null;
+      }
+    } catch (e) {
       return null;
     }
-    }
-  catch (e) {
-    return null;
-  }
-  }
-
+  }*/
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: AppColors.dialogcolor, 
+      backgroundColor: AppColors.dialogcolor,
       body: SafeArea(
         child: Column(
           children: [
-              Center(
-                child: Text(
-                  "Sign Up",
-                  style: GoogleFonts.poppins(
+            Center(
+              child: Text(
+                "Sign Up",
+                style: GoogleFonts.poppins(
                   fontSize: 38,
                   fontWeight: FontWeight.w600,
                   color: AppColors.n1,
@@ -176,56 +168,47 @@ class _SignupState extends State<Signup> {
             ),
             Gap(10),
             Expanded(
-              child: Container(padding: const EdgeInsets.symmetric(horizontal: 20),
-                  decoration: BoxDecoration(
-                    
-                  ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(),
                 child: Card(
-                  
                   child: Container(
-                  
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
                       color: AppColors.background,
-                      
                     ),
                     child: ListView(
-                      
-                      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                      
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
                       children: [
-                    _section("Username", username),
-                    _section("Email", email),
-                    _passwordSection("Password", password),
-                    _confirmPasswordSection(),
-                    _section("Phone Number", phone),
-                    Gap(16),
-                    const Text(
-                      "Your Role",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black,
-                      ),
-                    ),
-                    Gap(8),
-                    RoleDropdown(
-                      value: selectedRole,
-                      onChanged: (v) =>
-                          setState(() => selectedRole = v),
-                    ),
-                    Gap(12),
-                    RoleFields(
-                      selectedRole: selectedRole,
-                      assistantnumber: assistantnumber,
-                      patientAge: patientAge,
-                      assistage: assistage,
-                      volunteerage: volunteerage,
-                    ),
-                    
-                    
-                    
+                        _section("Username", username),
+                        _section("Email", email),
+                        _passwordSection("Password", password),
+                        _confirmPasswordSection(),
+                        _section("Phone Number", phone),
+                        Gap(16),
+                        const Text(
+                          "Your Role",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black,
+                          ),
+                        ),
+                        Gap(8),
+                        RoleDropdown(
+                          value: selectedRole,
+                          onChanged: (v) => setState(() => selectedRole = v),
+                        ),
+                        Gap(12),
+                        RoleFields(
+                          selectedRole: selectedRole,
+                          assistantnumber: assistantnumber,
+                          patientAge: patientAge,
+                          assistage: assistage,
+                          volunteerage: volunteerage,
+                        ),
                       ],
                     ),
                   ),
@@ -233,109 +216,87 @@ class _SignupState extends State<Signup> {
               ),
             ),
             Gap(20),
-                    SizedBox(
-                      width: 300,
-                      child: CustomButtonAuth(
-                                  title: "Sign Up", 
-                                  onPressed: () async { 
-                                      final result = await registerOnDjango();
-                                      
-                                      if (result["success"] == true){
-                                        final userData = result["data"]["user"];
-                                        final role = selectedRole;
-                                        //بجيب التوكين 
-                                      //  final token = await loginandtoken();
+            SizedBox(
+              width: 300,
+              child: CustomButtonAuth(
+                title: "Sign Up",
+                onPressed: () async {
+                  final result = await registerOnDjango();
 
-                                      //  if (token == null){
-                                        //  ScaffoldMessenger.of(context).showSnackBar(
-                                          //  const SnackBar(content: Text("Login failed after signup")),
-                                        //  );
-                                       //   return;
-                                       // }
-                                        //بخزن التوكين 
-                                       // await const FlutterSecureStorage().write(
-                                        //  key: "token",
-                                        //  value: token,
-                                      //  );
-                                        
-                                        if (role == "Assistant"){
-                                          final assistantId = userData["id"];
-                                          await const FlutterSecureStorage().write(
-                                          key: "assistant_id",
-                                          value: assistantId.toString(),
-                                        );
+                  if (result["success"] == true) {
+                    final userData = result["data"]["user"];
+                    final role = selectedRole;
 
-                                        if (!mounted) return;
-                                        Navigator.of(context).pushReplacement(
-                                        MaterialPageRoute(builder: (_) => const Patientsignup()),
-                                      );
-                                        }
-                                        else{
-                                          if (!mounted) return;
-<<<<<<< HEAD
-                                          Navigator.of(context).pushReplacementNamed("volunteerpage");
-                                        }
-                                      }else{
-                                        await  AwesomeDialog(
-                                          context: context,
-                                          dialogType: DialogType.error,
-                                          desc: result["message"].toString(),
-                                          btnOkOnPress: () {},
-                                          ).show();
-                                      }
-                                      }, ),
-=======
-                                                if (selectedRole == "Assistant")
-                                                {
-                                                Navigator.of(context).pushReplacement(
-                                                  MaterialPageRoute(builder: (_) => const MainNavigationPage(
-    role: UserRole.assistant,
-  ),
-),
-                                                );
-                                              }else { Navigator.of(context) .pushReplacementNamed("volunteer"); 
-                                              } } 
-                                                else { await AwesomeDialog( context: context,
-                                                dialogType: DialogType.error,
-                                                title: "Sign Up Error",
-                                                desc: result["message"].toString(),
-                                                  btnOkOnPress: () {}, ).show(); } }, ),
->>>>>>> 75b0c82e998049800bdeb0548d38ed20d83cc671
-                    ),
-                                            const Gap(12),
-                              InkWell(
-                                onTap: () =>
-                                    Navigator.of(context).pushReplacementNamed("login"),
-                                child: const Center(
-                                  child: Text.rich(
-                                    TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text: "Already have an account? ",
-                                          style: TextStyle(
-                                            fontSize: 14.7,
-                                            fontWeight: FontWeight.w400,
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: "Login",
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: AppColors.n1,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const Gap(12),
+                    if (role == "Assistant") {
+                      final assistantId = userData["id"];
+                      await const FlutterSecureStorage().write(
+                        key: "assistant_id",
+                        value: assistantId.toString(),
+                      );
+
+                      if (!mounted) return;
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                            builder: (_) => const Patientsignup()),
+                      );
+                    } else {
+                      if (!mounted) return;
+                      if (selectedRole == "Assistant") {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (_) => const MainNavigationPage(
+                              role: UserRole.assistant,
+                            ),
+                          ),
+                        );
+                      } else {
+                        Navigator.of(context).pushReplacementNamed("volunteer");
+                      }
+                    }
+                  } else {
+                    await AwesomeDialog(
+                      context: context,
+                      dialogType: DialogType.error,
+                      title: "Sign Up Error",
+                      desc: result["message"].toString(),
+                      btnOkOnPress: () {},
+                    ).show();
+                  }
+                },
+              ),
+            ),
+            const Gap(12),
+            InkWell(
+              onTap: () => Navigator.of(context).pushReplacementNamed("login"),
+              child: const Center(
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "Already have an account? ",
+                        style: TextStyle(
+                          fontSize: 14.7,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.black,
+                        ),
+                      ),
+                      TextSpan(
+                        text: "Login",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: AppColors.n1,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const Gap(12),
           ],
         ),
       ),
-
     );
   }
 
@@ -347,14 +308,13 @@ class _SignupState extends State<Signup> {
         Text(
           label,
           style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-          color: Colors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+          ),
         ),
-      ),
         const Gap(8),
         CustomText(
-
           hinttext: "Enter your ${label.toLowerCase()}",
           mycontroller: controller,
         ),
@@ -383,8 +343,7 @@ class _SignupState extends State<Signup> {
     );
   }*/
 
-  Widget _passwordSection(
-      String label, TextEditingController controller) {
+  Widget _passwordSection(String label, TextEditingController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -392,10 +351,10 @@ class _SignupState extends State<Signup> {
         Text(
           label,
           style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-          color: Colors.black,
-        ),
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+          ),
         ),
         const Gap(8),
         PasswordField(
@@ -417,10 +376,10 @@ class _SignupState extends State<Signup> {
         const Text(
           "Confirm Password",
           style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-          color: Colors.black,
-        ),
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+          ),
         ),
         const Gap(8),
         PasswordField(

@@ -1,42 +1,72 @@
 import 'package:flutter/material.dart';
 
 class UserProvider with ChangeNotifier {
-  // هادي بيانات اليوزر
+  // ===== User Identity =====
+  String? id;
   String? name;
   String? email;
-  String? role;
-  bool _emergencyEnabled = false;
-  //هادا عند الsignup وال login
-  void setUser({
-    required String name,
-    required String email,
-    required String role,
-  }) {
-    this.name = name;
-    this.email = email;
-    this.role = role;
-    notifyListeners(); //هادابخلي كل الواجهات اللي بتستخدم يوزر بروفايدر تتحدث تلقائي
-    //يعني هون بكون خلص فاهم مين اليوزر وبحدث عأساس مين هو
-  }
+  String? phone;
+String? deviceToken; 
 
-  // هادا عند الlogout
-  void clearUser() {
-    name = null;
-    email = null;
-    role = null;
-    _emergencyEnabled = false; //نطفي المود الطوارئ عند تسجيل الخروج
+  // role == user_type
+  String? role; // blind, deaf, assistant, volunteer
+
+  // ===== Abilities =====
+  bool canWrite = false;
+  bool canSpeakWithSignLanguage = false;
+
+  // ===== State =====
+  bool isActive = false;
+  bool isLoading = false;
+  bool _emergencyEnabled = false;
+
+  // ===== Set User =====
+  void setUser({
+    required String id,
+    required String name,
+    required String phone,
+    required String role,
+    String? email,
+    bool canWrite = false,
+    bool canSpeakWithSignLanguage = false,
+    bool isActive = true,
+  }) {
+    this.id = id;
+    this.name = name;
+    this.phone = phone;
+    this.role = role;
+    this.email = email;
+    this.canWrite = canWrite;
+    this.canSpeakWithSignLanguage = canSpeakWithSignLanguage;
+    this.isActive = isActive;
     notifyListeners();
   }
 
-  //هدول عشان نقرأ حالتهم من أي صفحة
+  // ===== Logout =====
+  void clearUser() {
+    id = null;
+    name = null;
+    email = null;
+    phone = null;
+    role = null;
+    canWrite = false;
+    canSpeakWithSignLanguage = false;
+    isActive = false;
+    _emergencyEnabled = false;
+    isLoading = false;
+    notifyListeners();
+  }
+
+  // ===== Getters =====
   bool get isLoggedIn => role != null;
-  bool get isAssistant => role == 'assistant';
   bool get isBlind => role == 'blind';
-  bool get isVolunteer => role == 'volunteer';
   bool get isDeaf => role == 'deaf';
+  bool get isAssistant => role == 'assistant';
+  bool get isVolunteer => role == 'volunteer';
   bool get emergencyEnabled => _emergencyEnabled;
 
-  void enabledEmegency() {
+  // ===== Emergency Mode =====
+  void enableEmergency() {
     _emergencyEnabled = true;
     notifyListeners();
   }
@@ -48,6 +78,12 @@ class UserProvider with ChangeNotifier {
 
   void toggleEmergency(bool value) {
     _emergencyEnabled = value;
+    print("Emergency mode: $value");
     notifyListeners();
   }
+
+  void setDeviceToken(String? token) {
+  deviceToken = token;
+  notifyListeners();
+}
 }

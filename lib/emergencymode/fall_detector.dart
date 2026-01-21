@@ -24,21 +24,24 @@ class _FallDetectorState extends State<FallDetector> {
   }
 
   void startListening() {
-    accelSub = accelerometerEvents.listen((event) {
-      double total =
-          (event.x * event.x) +
-          (event.y * event.y) +
-          (event.z * event.z);
+    try {
+      accelSub = accelerometerEvents.listen((event) {
+        final total =
+            (event.x * event.x) + (event.y * event.y) + (event.z * event.z);
 
-      if (total > 150 && !fallDetected) {
-        fallDetected = true;
-        handleFall();
-      }
-    });
+        if (total > 150 && !fallDetected) {
+          fallDetected = true;
+          handleFall();
+        }
+      });
+    } catch (e) {
+      debugPrint("❌ Accelerometer error: $e");
+    }
   }
 
   void handleFall() {
     final user = context.read<UserProvider>();
+    if (!user.emergencyEnabled) return;
 
     if (user.isBlind) {
       Navigator.pushReplacement(

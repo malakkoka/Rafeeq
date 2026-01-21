@@ -7,7 +7,6 @@ import 'package:front/color.dart';
 import 'package:front/constats.dart';
 import 'package:front/services/token_sevice.dart';
 import 'package:http/http.dart' as http;
-import 'package:jwt_decode/jwt_decode.dart';
 
 class AssistantPage extends StatefulWidget {
   const AssistantPage({super.key});
@@ -31,12 +30,6 @@ class _AssistantPageState extends State<AssistantPage> {
     _refreshData();
   }
 
-<<<<<<< HEAD
-  String exractusertype(String token){
-    Map<String , dynamic> payload = Jwt.parseJwt(token);
-
-    return payload["user"]["user_type"];
-=======
   Future<void> _loadPatientFromStorage() async {
     final user = await TokenService.getUser();
 
@@ -49,7 +42,6 @@ class _AssistantPageState extends State<AssistantPage> {
         patient = null;
       }
     });
->>>>>>> 75b0c82e998049800bdeb0548d38ed20d83cc671
   }
 
   Future<void> _handleDelete(Map<String, String> request) async {
@@ -174,7 +166,7 @@ class _AssistantPageState extends State<AssistantPage> {
       children: [
         const CircleAvatar(
           radius: 40,
-          backgroundImage: AssetImage('images/deafpic.webp'),
+          backgroundImage: AssetImage('images/blindper.png'),
         ),
         const SizedBox(width: 14),
         Column(
@@ -268,7 +260,7 @@ class _AssistantPageState extends State<AssistantPage> {
                 })
             .where((item) => item['status'] != 'Unknown')
             .toList();
- 
+
         _sortRequests();
       });
     }

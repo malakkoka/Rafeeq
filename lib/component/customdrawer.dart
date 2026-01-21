@@ -1,11 +1,8 @@
 import 'package:front/color.dart';
 import 'package:front/component/customlisttile.dart';
 import 'package:front/component/viewinfo.dart';
-<<<<<<< HEAD
-
-=======
->>>>>>> 75b0c82e998049800bdeb0548d38ed20d83cc671
 import 'package:flutter/material.dart';
+import 'package:front/emergencymode/fall_detector.dart';
 import 'package:front/provider/user_provider.dart';
 import 'dart:math' as math;
 import 'package:provider/provider.dart';
@@ -111,6 +108,15 @@ class CustomDrawer extends StatelessWidget {
                 value: user.emergencyEnabled,
                 onChanged: (value) {
                   user.toggleEmergency(value);
+
+                  if (value) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const FallDetector(),
+        ),
+      );
+    }
                 },
               ),
             ),
@@ -125,18 +131,7 @@ class CustomDrawer extends StatelessWidget {
                 Navigator.pop(context);
               },
             ),
-<<<<<<< HEAD
-            ListTile(
-              leading: Icon(
-                Icons.dark_mode,
-                color: Colors.grey.shade700,
-              ),
-              title: const Text(
-                "Theme",
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-              ),
-              
-            ),
+            
             ListTile(
               leading: Icon(
                 Icons.notifications,
@@ -148,8 +143,6 @@ class CustomDrawer extends StatelessWidget {
               ),
               
             ),
-=======
->>>>>>> 75b0c82e998049800bdeb0548d38ed20d83cc671
             CustomListTile(
               icon: Icons.location_on_rounded,
               color: Colors.grey.shade700,

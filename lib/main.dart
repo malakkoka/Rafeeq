@@ -5,12 +5,9 @@ import 'package:front/auth/blind.dart';
 import 'package:front/auth/deaf/deaf.dart';
 import 'package:front/auth/call/livecall.dart';
 import 'package:front/auth/deaf/switcher.dart';
-<<<<<<< HEAD
 import 'package:front/auth/call/vediocall.dart';
 import 'package:front/auth/repass/forgot.dart';
 
-=======
->>>>>>> 75b0c82e998049800bdeb0548d38ed20d83cc671
 import 'package:front/auth/login.dart';
 import 'package:front/auth/patientsignup.dart';
 import 'package:front/auth/repass/getcode.dart';
@@ -18,12 +15,9 @@ import 'package:front/auth/repass/reset.dart';
 import 'package:front/auth/signup.dart';
 import 'package:front/color.dart';
 import 'package:front/component/viewinfo.dart';
+import 'package:front/emergencymode/deafemergencyUI.dart';
 import 'package:front/homepage.dart';
-<<<<<<< HEAD
-
-=======
 import 'package:front/provider/user_provider.dart';
->>>>>>> 75b0c82e998049800bdeb0548d38ed20d83cc671
 import 'package:provider/provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
@@ -34,7 +28,7 @@ List<CameraDescription>? cameras;
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  print('📩 Background Message: ${message.messageId}');
+  print(' Background Message: ${message.messageId}');
 } // عشان تشتغل الاشعارات لما التطبيق يسكر
 
 Future<void> main() async {
@@ -82,39 +76,29 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _initFirebaseMessaging() async {
-    // طلب الصلاحيات (خصوصًا iOS)
-    NotificationSettings settings = await _messaging.requestPermission(
+    await _messaging.requestPermission(
       alert: true,
       badge: true,
       sound: true,
     );
 
-    print('🔔 Permission status: ${settings.authorizationStatus}');
+    final token = await _messaging.getToken();
+    print("FCM TOKEN: $token");
 
-    // جلب التوكن
-    String? token = await _messaging.getToken();
-    print('FCM Token: $token');
+    if (token != null) {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      userProvider.setDeviceToken(token);
+    }
 
-    // TODO: ابعت التوكن للباك إند وخزنه عنده
-    // sendTokenToBackend(token);
-
-    // إشعار والتطبيق مفتوح
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('📬 Foreground message received');
-      print('Title: ${message.notification?.title}');
-      print('Body: ${message.notification?.body}');
-    });
-
-    // لما المستخدم يضغط على الإشعار والتطبيق يكون مسكر
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print(' Notification clicked!');
-    });
+    await FirebaseMessaging.instance.subscribeToTopic("test");
+    print("Subscribed to topic: test");
 
     FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
-  print(" New Token: $newToken");
-  // ابعتي التوكن الجديد للباك-إند
-});
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      userProvider.setDeviceToken(newToken);
 
+      // إذا اليوزر عامل login → ابعت update للباك
+    });
   }
 
   @override
@@ -122,13 +106,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       color: AppColors.background,
       debugShowCheckedModeBanner: false,
-<<<<<<< HEAD
-      home: Patientsignup(),   
-
-
-=======
       home: Signup(),
->>>>>>> 75b0c82e998049800bdeb0548d38ed20d83cc671
       routes: {
         "login": (context) => Login(),
         "homepage": (context) => Homepage(),
@@ -147,19 +125,12 @@ class _MyAppState extends State<MyApp> {
         "deaf": (context) => Deaf(),
         "switcher": (context) => Switcher(),
         "patientsignup": (context) => Patientsignup(),
-<<<<<<< HEAD
         "forgot": (context) => Forgot(),
         "getcode": (context) => Getcode(),
         "reset": (context) => Reset(),
         "Vediocall": (context) => Vediocall(),
         "livecall": (context) => Livecall(),
-
       },
-
-      
-=======
-      },
->>>>>>> 75b0c82e998049800bdeb0548d38ed20d83cc671
     );
   }
 }

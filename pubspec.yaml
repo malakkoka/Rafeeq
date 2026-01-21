@@ -17,7 +17,7 @@ dependencies:
   geolocator: ^14.0.2
   provider: ^6.1.2
   http: ^1.5.0
-  sensors_plus: ^3.0.0
+  sensors_plus: ^5.0.0
   google_maps_flutter: ^2.6.0
   curved_navigation_bar: ^1.0.6
   google_fonts: ^6.1.0
@@ -38,14 +38,11 @@ dependencies:
   avatar_glow: ^3.0.1
   flutter_tts: ^3.6.3
   flutter_secure_storage: ^10.0.0
-<<<<<<< HEAD
   permission_handler: ^11.0.0
   socket_io_client: ^2.0.3
   jwt_decode: ^0.3.1
   shared_preferences: ^2.0.15
   
-=======
->>>>>>> 75b0c82e998049800bdeb0548d38ed20d83cc671
 
 dev_dependencies:
   flutter_test:
@@ -81,6 +78,9 @@ flutter:
     - images/deafpic.webp
     - images/blind.png
     - images/sign_language.png
+    - images/blindperson.jpg
+    - images/blindpic.jpg
+    - images/blindper.png
   fonts:
     - family: Caveat
       fonts:
