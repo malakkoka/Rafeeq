@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:front/assistant/assistanceRequestPage.dart';
+import 'package:front/assistant/post_volunteers_page.dart';
 import 'package:front/color.dart';
 import 'package:front/constats.dart';
 import 'package:front/services/token_sevice.dart';
@@ -18,7 +19,6 @@ class AssistantPage extends StatefulWidget {
 class _AssistantPageState extends State<AssistantPage> {
   bool isLoading = false;
 
-  /// بيانات المريض الحقيقي
   Map<String, dynamic>? patient;
 
   List<Map<String, String>> recentRequests = [];
@@ -166,7 +166,7 @@ class _AssistantPageState extends State<AssistantPage> {
       children: [
         const CircleAvatar(
           radius: 40,
-          backgroundImage: AssetImage('images/blindper.png'),
+          backgroundImage: AssetImage('images/deafpic.webp'),
         ),
         const SizedBox(width: 14),
         Column(
@@ -249,18 +249,20 @@ class _AssistantPageState extends State<AssistantPage> {
 
       setState(() {
         recentRequests = data
-            .where((item) =>
-                item['content'] != null &&
-                item['content'].toString().isNotEmpty &&
-                item['state'] != null)
             .map<Map<String, String>>((item) => {
                   'id': item['id'].toString(),
-                  'content': item['content'],
+                  'type': item['assistance_type'] ?? '',
+                  'content': item['content'] ?? '',
+                  'notes': item['notes'] ?? '',
+                  'date': item['scheduled_at'] ?? '',
                   'status': _mapStateToStatus(item['state']),
-                })
-            .where((item) => item['status'] != 'Unknown')
+                  'volunteersCount': (item['help_requesters_ids'] as List?)
+                          ?.length
+                          .toString() ??
+                      '0',
+                }
+                )
             .toList();
-
         _sortRequests();
       });
     }
@@ -281,6 +283,12 @@ class _AssistantPageState extends State<AssistantPage> {
     }
   }
 
+  String formatDateTime(String iso) {
+    if (iso.isEmpty) return '';
+    final dt = DateTime.parse(iso).toLocal();
+    return '${dt.day}/${dt.month}/${dt.year} - ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
+  }
+
   String _extractLine(String content, String key) {
     final lines = content.split('\n');
     try {
@@ -294,95 +302,180 @@ class _AssistantPageState extends State<AssistantPage> {
   }
 
   Widget _buildRequestCard(Map<String, String> request) {
-    final status = request['status']!;
+    final int volunteers = int.tryParse(request['volunteersCount'] ?? '0') ?? 0;
+
+    final status = request['status'] ?? 'Pending';
     final color = _statusColor(status);
 
-    final locationType =
-        _extractLine(request['content'] ?? '', 'Location Type');
-
-    final type = _extractLine(request['content'] ?? '', 'Type');
-    final location = _extractLine(request['content'] ?? '', 'Location');
-    final dateTime = _extractLine(request['content'] ?? '', 'Date & Time');
-    final notes = _extractLine(request['content'] ?? '', 'Notes');
-
+    final title = request['type'] ?? 'Help Request'; // نعرض النوع كعنوان
+    final dateTime = request['scheduled_at'] != null
+        ? formatDateTime(request['scheduled_at']!)
+        : ''; // عرض التاريخ
+    final createdAt = request['created_at'] != null
+        ? formatDateTime(request['created_at']!)
+        : 'Not Available'; // تاريخ الإنشاء
+    final content = request['content'] ?? '';
+    final notes = request['notes'] ?? '';
+ 
     return Card(
-      color: AppColors.dialogcolor,
-      margin: const EdgeInsets.only(bottom: 10),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      child: Row(
-        children: [
-          Container(
-            width: 5,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(14),
-                bottomLeft: Radius.circular(14),
-              ),
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 17,
-                        backgroundColor: color.withOpacity(0.15),
-                        child:
-                            Icon(_statusIcon(status), color: color, size: 18),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          type.isNotEmpty ? type : 'Assistance Request',
-                          style: const TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      _buildStatusChip(status),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  if (locationType == 'Home')
-                    _buildInfoRow(Icons.home_outlined, 'Patient Home'),
-                  if (locationType == 'Custom' && location.isNotEmpty)
-                    _buildInfoRow(Icons.location_on_outlined, location),
-                  if (dateTime.isNotEmpty)
-                    _buildInfoRow(Icons.schedule, dateTime),
-                  if (notes.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6),
-                      child: Text(notes,
-                          style: const TextStyle(
-                              fontSize: 13, color: Colors.grey)),
+        color: AppColors.dialogcolor,
+        margin: const EdgeInsets.only(bottom: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CircleAvatar(
+                      radius: 17,
+                      backgroundColor: color.withOpacity(0.15),
+                      child: Icon(_statusIcon(status), color: color, size: 18),
                     ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      if (status == 'Pending')
-                        IconButton(
-                          icon: const Icon(Icons.edit_outlined),
-                          onPressed: () => _goToEditRequest(request),
-                        ),
-                      IconButton(
-                        icon: Icon(status == 'Pending'
-                            ? Icons.delete_outline
-                            : Icons.archive_outlined),
-                        onPressed: () => _handleDelete(request),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title, // عرض النوع كعنوان
+                            style: const TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.bold),
+                          ),
+                          if (dateTime.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            _buildInfoRow(Icons.schedule, dateTime),
+                          ],
+                        ],
                       ),
-                    ],
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        if (status == 'Pending' && volunteers > 0) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  PostVolunteersPage(postId: request['id']!),
+                            ),
+                          );
+                        }
+                      },
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          _buildStatusChip(status),
+                          if (status == 'Pending' && volunteers > 0)
+                            Positioned(
+                              top: -6,
+                              right: -6,
+                              child: Container(
+                                width: 18,
+                                height: 18,
+                                alignment: Alignment.center,
+                                decoration: const BoxDecoration(
+                                  color: Colors.redAccent,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Text(
+                                  volunteers.toString(),
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 8),
+
+                if (dateTime.isNotEmpty)
+                  _buildInfoRow(Icons.schedule, dateTime),
+
+                if (notes.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      notes,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Colors.black87,
+                      ),
+                    ),
                   ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+                if (content.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      content,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Colors.black87,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+
+                const SizedBox(height: 8),
+
+                /// ===== NOTES =====
+                if (notes.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      notes,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Colors.black87,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+
+                const SizedBox(height: 10),
+
+                /// ===== ACTIONS =====
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (status == 'Pending')
+                      IconButton(
+                        icon: const Icon(Icons.edit_outlined),
+                        onPressed: () => _goToEditRequest(request),
+                      ),
+                    if (status == 'Pending')
+                      IconButton(
+                        icon: const Icon(Icons.people_outline),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => PostVolunteersPage(
+                                postId: request['id']!,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    IconButton(
+                      icon: Icon(
+                        status == 'Pending'
+                            ? Icons.delete_outline
+                            : Icons.archive_outlined,
+                      ),
+                      onPressed: () => _handleDelete(request),
+                    ),
+                  ],
+                ),
+              ],
+            )));
   }
 
   Widget _buildInfoRow(IconData icon, String text) {

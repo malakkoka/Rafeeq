@@ -25,10 +25,7 @@ class AssistanceRequestPage extends StatefulWidget {
 }
 
 class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
-  // ملاحظة:
-  // حالياً عم نعتبر إنو المريض كفيف، عشان الباك إند لسه مش مربوط
-  // بس لما نربط الباك بعدين، رح نغيّر أنواع المساعدة
-  // حسب نوع المريض بدون ما نغيّر الواجهة
+  
   String? selectedType;
   String? patientType; // blind / deaf
 
@@ -216,20 +213,32 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
       return;
     }
 
-    final typesText = selectedType == 'Other'
-        ? otherTypeController.text.trim()
-        : selectedType!;
+    
 
-    final body = {
-      "title": "Assistance Request",
-      "content": "Type: $typesText\n"
-          "Location: $selectedLocationLabel\n"
-          "Date & Time: $selectedDateTimeLabel\n"
-          "Notes: ${notesController.text}",
-      "city": 2,
-      "city_data": {"name": "amman"},
-      "state": 0,
-    };
+
+final DateTime scheduledDateTime = DateTime(
+  selectedDate!.year,
+  selectedDate!.month,
+  selectedDate!.day,
+  selectedTime!.hour,
+  selectedTime!.minute,
+);
+
+final String assistanceType = selectedType == 'Other'
+    ? otherTypeController.text.trim()
+    : selectedType!;
+
+
+final Map<String, dynamic> body = {
+  "assistance_type": assistanceType,
+  "notes": notesController.text.trim(),
+  "scheduled_at": scheduledDateTime.toIso8601String(),
+  "location_text": selectedLocationLabel,   //رح يتعدللللل بالباك
+  "created_at": DateTime.now().toIso8601String(),
+  "city": 2,  //رح تتعدل بالباك 
+};
+
+    
 
     try {
       final response = widget.isEdit
@@ -392,8 +401,7 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
     );
   }
 
-  // أيقونة اختيار نوع المساعدة
-  // ملوّنة حتى قبل الاختيار عشان الواجهة ما تكون باهتة
+  
   Widget _typeIcon({
     required IconData icon,
     required String label,

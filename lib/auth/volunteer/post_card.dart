@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:front/auth/volunteer/post_model.dart';
 import 'package:front/auth/volunteer/post_state_badge.dart';
 import 'package:front/color.dart';
+import 'package:front/constats.dart';
+import 'package:front/services/token_sevice.dart';
+import 'package:http/http.dart' as http;
 
 class PostCard extends StatelessWidget {
   final Post post;
@@ -159,7 +162,7 @@ class PostCard extends StatelessWidget {
                         ),
                       ),
                       onPressed: () {
-                        showConfirmDialog(context);
+                        showConfirmDialog(context, post);
                       },
                       child: const Text(
                         "I can help",
@@ -242,7 +245,7 @@ String getImageByPatientType(String patientType) {
 }
 
 /// ================= CONFIRM DIALOG =================
-void showConfirmDialog(BuildContext context) {
+void showConfirmDialog(BuildContext context, Post post) {
   showDialog(
     context: context,
     builder: (_) => AlertDialog(
@@ -254,7 +257,10 @@ void showConfirmDialog(BuildContext context) {
           child: const Text("Cancel"),
         ),
         ElevatedButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () async {
+            await sendHelpRequest(post.id!);
+            Navigator.pop(context);
+          },
           child: const Text("Yes, I'll help"),
         ),
       ],
@@ -273,4 +279,20 @@ String formatTimeAgoEn(String dateString) {
   if (diff.inDays == 1) return "Yesterday";
   if (diff.inDays < 7) return "${diff.inDays} days ago";
   return "${createdAt.day}/${createdAt.month}/${createdAt.year}";
+}
+
+Future<void> sendHelpRequest(int postId) async {
+  final token = await TokenService.getToken();
+
+  final response = await http.post(
+    Uri.parse('$baseUrl/api/account/posts/$postId/request-help/'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+  );
+
+  if (response.statusCode != 200 && response.statusCode != 201) {
+    throw Exception('Failed to send help request');
+  }
 }

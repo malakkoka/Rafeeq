@@ -32,20 +32,32 @@ class _DeafEmergencyUIState extends State<DeafEmergencyUI> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: isRed ? Colors.red : Colors.white,
-      body: Center(
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.all(24),
-            textStyle: const TextStyle(fontSize: 20),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Center(
+            child: Text(
+              "If you are OK, press the button below.",
+              style: TextStyle(fontSize: 15.5),
+            ),
           ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text(
-            "I am OK",
-            style: TextStyle(color: AppColors.n1),
+          SizedBox(height: 20),
+          Center(
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.all(24),
+                textStyle: const TextStyle(fontSize: 20),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text(
+                "I am OK",
+                style: TextStyle(color: AppColors.n1),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
