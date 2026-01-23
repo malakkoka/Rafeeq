@@ -1,4 +1,4 @@
-// ignore_for_file: unused_element, unnecessary_to_list_in_spreads
+// ignore_for_file: unused_element, unnecessary_to_list_in_spreads, unused_local_variable, no_leading_underscores_for_local_identifiers
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -226,8 +226,8 @@ class _AssistantPageState extends State<AssistantPage> {
     const order = {'Pending': 0, 'Accepted': 1, 'Completed': 2};
 
     recentRequests.sort((a, b) {
-      final aOrder = order[a['status']] ?? 3;
-      final bOrder = order[b['status']] ?? 3;
+      final aOrder = order[a['state']] ?? 3;
+      final bOrder = order[b['state']] ?? 3;
       return aOrder.compareTo(bOrder);
     });
   }
@@ -251,17 +251,11 @@ class _AssistantPageState extends State<AssistantPage> {
         recentRequests = data
             .map<Map<String, String>>((item) => {
                   'id': item['id'].toString(),
-                  'type': item['assistance_type'] ?? '',
+                  'title': item['title'] ?? '',
                   'content': item['content'] ?? '',
-                  'notes': item['notes'] ?? '',
-                  'date': item['scheduled_at'] ?? '',
-                  'status': _mapStateToStatus(item['state']),
-                  'volunteersCount': (item['help_requesters_ids'] as List?)
-                          ?.length
-                          .toString() ??
-                      '0',
-                }
-                )
+                  'created_at': item['created_at'] ?? '',
+                  'state': _mapStateToStatus(item['state']),
+                })
             .toList();
         _sortRequests();
       });
@@ -304,19 +298,18 @@ class _AssistantPageState extends State<AssistantPage> {
   Widget _buildRequestCard(Map<String, String> request) {
     final int volunteers = int.tryParse(request['volunteersCount'] ?? '0') ?? 0;
 
-    final status = request['status'] ?? 'Pending';
-    final color = _statusColor(status);
+    final _state = request['state'] ?? 'Pending';
+    final _color = _statusColor(_state);
 
-    final title = request['type'] ?? 'Help Request'; // نعرض النوع كعنوان
-    final dateTime = request['scheduled_at'] != null
-        ? formatDateTime(request['scheduled_at']!)
-        : ''; // عرض التاريخ
-    final createdAt = request['created_at'] != null
+    final _title =
+        request['title'] ?? 'Help Request'; // نعرض النوع كعنوان // عرض التاريخ
+    final createdDate = request['created_at'] != null
         ? formatDateTime(request['created_at']!)
-        : 'Not Available'; // تاريخ الإنشاء
-    final content = request['content'] ?? '';
-    final notes = request['notes'] ?? '';
- 
+        : 'Not Available';
+    print("Created At: ${request['created_at']}");
+
+    final _notes = request['content'] ?? '';
+
     return Card(
         color: AppColors.dialogcolor,
         margin: const EdgeInsets.only(bottom: 10),
@@ -331,8 +324,8 @@ class _AssistantPageState extends State<AssistantPage> {
                   children: [
                     CircleAvatar(
                       radius: 17,
-                      backgroundColor: color.withOpacity(0.15),
-                      child: Icon(_statusIcon(status), color: color, size: 18),
+                      backgroundColor: _color.withOpacity(0.15),
+                      child: Icon(_statusIcon(_state), color: _color, size: 18),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -340,20 +333,16 @@ class _AssistantPageState extends State<AssistantPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            title, // عرض النوع كعنوان
+                            _title,
                             style: const TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.bold),
+                                fontSize: 15.5, fontWeight: FontWeight.bold),
                           ),
-                          if (dateTime.isNotEmpty) ...[
-                            const SizedBox(height: 4),
-                            _buildInfoRow(Icons.schedule, dateTime),
-                          ],
                         ],
                       ),
                     ),
                     GestureDetector(
                       onTap: () {
-                        if (status == 'Pending' && volunteers > 0) {
+                        if (_state == 'Pending' && volunteers > 0) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -366,8 +355,8 @@ class _AssistantPageState extends State<AssistantPage> {
                       child: Stack(
                         clipBehavior: Clip.none,
                         children: [
-                          _buildStatusChip(status),
-                          if (status == 'Pending' && volunteers > 0)
+                          _buildStatusChip(_state),
+                          if (_state == 'Pending' && volunteers > 0)
                             Positioned(
                               top: -6,
                               right: -6,
@@ -395,44 +384,13 @@ class _AssistantPageState extends State<AssistantPage> {
                 ),
 
                 const SizedBox(height: 8),
-
-                if (dateTime.isNotEmpty)
-                  _buildInfoRow(Icons.schedule, dateTime),
-
-                if (notes.isNotEmpty)
+                if (_notes.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
-                      notes,
+                      _notes,
                       style: const TextStyle(
-                        fontSize: 13,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-                if (content.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Text(
-                      content,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Colors.black87,
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
-
-                const SizedBox(height: 8),
-
-                /// ===== NOTES =====
-                if (notes.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Text(
-                      notes,
-                      style: const TextStyle(
-                        fontSize: 13,
+                        fontSize: 15,
                         color: Colors.black87,
                         height: 1.4,
                       ),
@@ -440,17 +398,19 @@ class _AssistantPageState extends State<AssistantPage> {
                   ),
 
                 const SizedBox(height: 10),
+                if (createdDate.isNotEmpty)
+                  _buildInfoRow(Icons.schedule, createdDate),
 
                 /// ===== ACTIONS =====
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    if (status == 'Pending')
+                    if (_state == 'Pending')
                       IconButton(
                         icon: const Icon(Icons.edit_outlined),
                         onPressed: () => _goToEditRequest(request),
                       ),
-                    if (status == 'Pending')
+                    if (_state == 'Pending')
                       IconButton(
                         icon: const Icon(Icons.people_outline),
                         onPressed: () {
@@ -466,7 +426,7 @@ class _AssistantPageState extends State<AssistantPage> {
                       ),
                     IconButton(
                       icon: Icon(
-                        status == 'Pending'
+                        _state == 'Pending'
                             ? Icons.delete_outline
                             : Icons.archive_outlined,
                       ),

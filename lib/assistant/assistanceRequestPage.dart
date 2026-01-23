@@ -2,11 +2,14 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:front/assistant/mainNavBar.dart';
 import 'package:front/assistant/selectLocationPage.dart';
 import 'package:front/constats.dart';
 import 'package:front/services/token_sevice.dart';
 import 'package:http/http.dart' as http;
 import 'package:front/color.dart';
+
+import '../component/viewinfo.dart';
 
 class AssistanceRequestPage extends StatefulWidget {
   final String? postId;
@@ -25,7 +28,6 @@ class AssistanceRequestPage extends StatefulWidget {
 }
 
 class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
-  
   String? selectedType;
   String? patientType; // blind / deaf
 
@@ -213,32 +215,26 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
       return;
     }
 
-    
+    final DateTime scheduledDateTime = DateTime(
+      selectedDate!.year,
+      selectedDate!.month,
+      selectedDate!.day,
+      selectedTime!.hour,
+      selectedTime!.minute,
+    );
 
+    final String assistanceType = selectedType == 'Other'
+        ? otherTypeController.text.trim()
+        : selectedType!;
 
-final DateTime scheduledDateTime = DateTime(
-  selectedDate!.year,
-  selectedDate!.month,
-  selectedDate!.day,
-  selectedTime!.hour,
-  selectedTime!.minute,
-);
-
-final String assistanceType = selectedType == 'Other'
-    ? otherTypeController.text.trim()
-    : selectedType!;
-
-
-final Map<String, dynamic> body = {
-  "assistance_type": assistanceType,
-  "notes": notesController.text.trim(),
-  "scheduled_at": scheduledDateTime.toIso8601String(),
-  "location_text": selectedLocationLabel,   //رح يتعدللللل بالباك
-  "created_at": DateTime.now().toIso8601String(),
-  "city": 2,  //رح تتعدل بالباك 
-};
-
-    
+    final Map<String, dynamic> body = {
+      "title": assistanceType,
+      "content": notesController.text.trim(),
+      //"scheduled_at": scheduledDateTime.toIso8601String(),
+      "current_location": selectedLocationLabel, //رح يتعدللللل بالباك
+      "created_at": DateTime.now().toIso8601String(),
+      "city": 2, //رح تتعدل بالباك
+    };
 
     try {
       final response = widget.isEdit
@@ -256,11 +252,20 @@ final Map<String, dynamic> body = {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer $token',
               },
-              body: jsonEncode(body),
+              body: jsonEncode(
+                body,
+              ),
             );
-
+      print('Submit Response: ${response.body}');
       if (response.statusCode == 200 || response.statusCode == 201) {
-        _showSnack('Request submitted successfully');
+         Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (context) => MainNavigationPage(role: UserRole.assistant),
+    ),
+  );
+      } else {
+        _showSnack('Failed to submit request. Please try again.');
       }
     } catch (e) {
       debugPrint('Submit error: $e');
@@ -401,7 +406,6 @@ final Map<String, dynamic> body = {
     );
   }
 
-  
   Widget _typeIcon({
     required IconData icon,
     required String label,

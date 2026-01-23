@@ -27,8 +27,8 @@ class MainNavigationPage extends StatefulWidget {
 }
 
 class _MainNavigationPageState extends State<MainNavigationPage> {
-  int _currentIndex = 2;
   late List<Widget> pages;
+  int _currentIndex = 0;
 
   @override
   void initState() {
@@ -41,12 +41,14 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
         Homepage(), // 2
         AssistantPage(), // 3
       ];
+      _currentIndex = 3;
     } else {
       pages = const [
         SettingsPage(), // 0
         VolunteerHome(), // 1
         VolunteerActivityScreen(), //2
       ];
+      _currentIndex = 2;
     }
   }
 

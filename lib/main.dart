@@ -7,7 +7,6 @@ import 'package:front/auth/call/livecall.dart';
 import 'package:front/auth/deaf/switcher.dart';
 import 'package:front/auth/call/vediocall.dart';
 import 'package:front/auth/repass/forgot.dart';
-
 import 'package:front/auth/login.dart';
 import 'package:front/auth/patientsignup.dart';
 import 'package:front/auth/repass/getcode.dart';
@@ -15,8 +14,6 @@ import 'package:front/auth/repass/reset.dart';
 import 'package:front/auth/signup.dart';
 import 'package:front/color.dart';
 import 'package:front/component/viewinfo.dart';
-import 'package:front/emergencymode/blindemegencyUI.dart';
-import 'package:front/emergencymode/deafemergencyUI.dart';
 import 'package:front/homepage.dart';
 import 'package:front/provider/user_provider.dart';
 import 'package:provider/provider.dart';
