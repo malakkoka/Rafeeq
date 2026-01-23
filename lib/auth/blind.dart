@@ -2,8 +2,10 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:front/component/customdrawer.dart';
+import 'package:front/component/locationtracking.dart';
 import 'package:front/main.dart';
 import 'package:avatar_glow/avatar_glow.dart';
+import 'package:front/services/token_sevice.dart';
 //import 'package:flutter_tts/flutter_tts.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -21,6 +23,7 @@ class Blind extends StatefulWidget {
 
 class _BlindState extends State<Blind> {
   late CameraController controller;
+  late Locationtracking locationtracking;
   bool isReady = false;
   String? lastPlayedAudio;
   Timer? captureTimer;
@@ -34,6 +37,9 @@ class _BlindState extends State<Blind> {
   void initState() {
     super.initState();
     initCamera();
+    locationtracking = Locationtracking(); 
+
+    locationtracking.startLocationCheck(updateUserLocation);
 
     audioPlayer.onPlayerComplete.listen((event) {
       setState(() {
@@ -46,6 +52,43 @@ class _BlindState extends State<Blind> {
     //tts.speak("Text to speech is working");
     //});
   }
+
+   Future<void> updateUserLocation(int userId, String currentLocation) async {
+    String? token = await TokenService.getToken();
+
+    if (token == null) {
+      print("No token found. Please log in again.");
+      return;
+    }
+
+    final String url = 'http://138.68.104.187/api/account/users/$userId/';  
+
+    final Map<String, dynamic> data = {
+      'current_location': currentLocation,
+    };
+
+    final String body = json.encode(data);
+
+    try {
+      final response = await http.patch(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        print("=======================User location updated successfully!");
+      } else {
+        print("=============================Failed to update user location: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("====================Error: $e");
+    }
+  }
+
 
 //===========get usertype by token =============
   String exractusertype(String token) {

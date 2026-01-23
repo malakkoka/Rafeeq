@@ -1,6 +1,7 @@
 // ignore_for_file: file_names
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:front/auth/call/vediocall.dart';
 import 'package:front/auth/volunteer/activityscreen.dart';
 import 'package:front/auth/volunteer/volunteerpage.dart';
 import 'package:front/color.dart';
@@ -33,12 +34,12 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   void initState() {
     super.initState();
 
-    /// 👇 نحدد الصفحات حسب الدور
     if (widget.role == UserRole.assistant) {
       pages = const [
         SettingsPage(), // 0
         AssistanceRequestPage(), // 1
-        AssistantPage(), // 2
+        Vediocall(), // 2
+        AssistantPage(), // 3
       ];
     } else {
       pages = const [
@@ -71,12 +72,12 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     );
   }
 
-  /// 👇 الأيقونات كمان حسب الدور
   List<Widget> _buildNavItems() {
     if (widget.role == UserRole.assistant) {
       return const [
         Icon(Icons.settings, size: 25, color: Colors.white),
         Icon(Icons.add, size: 28, color: Colors.white),
+        Icon(Icons.video_call, size: 25, color: Colors.white),
         Icon(Icons.accessibility_new, size: 25, color: Colors.white),
       ];
     } else {
