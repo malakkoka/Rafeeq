@@ -21,7 +21,7 @@ class _BlindEmergencyUIState extends State<BlindEmergencyUI> {
 
   void startSpeaking() {
     timer = Timer.periodic(const Duration(seconds: 2), (_) {
-      tts.speak("I am here. If you are okay, tap the screen.");
+      tts.speak("I am here." /*If you are okay, tap the screen."*/);
     });
   }
 
@@ -43,7 +43,7 @@ class _BlindEmergencyUIState extends State<BlindEmergencyUI> {
         body: const Center(
           child: Text(
             "Emergency Mode",
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: Colors.white, fontSize: 20),
           ),
         ),
       ),
