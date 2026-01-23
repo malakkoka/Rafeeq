@@ -172,76 +172,82 @@ print("FCM TOKEN (Login): $deviceToken");
                                   ),
                                 ),*/
                               ),
+                              
                               Center(
-                                child: CustomButtonAuth(
-                                  title: ("Login"),
-                                  onPressed: () async {
-                                    final result = await loginToDjango();
+                                                              child: CustomButtonAuth(
+                                                                title: ("Login"),
+                                                                onPressed: () async {
+                                                                  final result = await loginToDjango();
+                              
+                                                                  if (result["success"] == true) {
+                                                                    // 🔐 حفظ التوكين
+                                                                    await TokenService.saveToken(
+                                                                        result["token"]);
+                              
+                                                                    // ⭐ خزّني user كامل (assistant + patient)
+                                                                    await TokenService.saveUser(
+                                                                        result["user"]);
+                              
+                                                                    final role = result["user"]["user_type"];
+                              
+                                                                    // 👤 حفظ بيانات المستخدم (زي ما كان عندك)
+                                                                    final userProvider =
+                                                                        Provider.of<UserProvider>(context,
+                                                                            listen: false);
+                              
+                                                                    userProvider.setUser(
+                                                                      name: result["user"]["username"],
+                                                                      email: result["user"]["email"],
+                                                                      role: result["user"]["user_type"],
+                                                                      id: '', phone: '',
+                                                                    );
+                                                                  
 
-                                    if (result["success"] == true) {
-                                      // 🔐 حفظ التوكين
-                                      await TokenService.saveToken(
-                                          result["token"]);
-
-                                      // ⭐ خزّني user كامل (assistant + patient)
-                                      await TokenService.saveUser(
-                                          result["user"]);
-
-                                      final role = result["user"]["user_type"];
-
-                                      // 👤 حفظ بيانات المستخدم (زي ما كان عندك)
-                                      final userProvider =
-                                          Provider.of<UserProvider>(context,
-                                              listen: false);
-
-                                      userProvider.setUser(
-                                        name: result["user"]["username"],
-                                        email: result["user"]["email"],
-                                        role: result["user"]["user_type"],
-                                        id: '', phone: '',
-                                      );
-
-                                      if (!mounted) return;
-
-                                      // 🚦 التوجيه حسب الدور
-                                      if (role == "blind") {
-                                        Navigator.of(context)
-                                            .pushReplacementNamed("blind");
-                                      } else if (role == "assistant") {
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(
-      builder: (_) => const MainNavigationPage(
-        role: UserRole.assistant,
-      ),
-    ),
-  );
-                                      } else if (role == "volunteer") {
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(
-      builder: (_) => const MainNavigationPage(
-        role: UserRole.volunteer,
-      ),
-    ),
-  );
-                                      } else if (role == "deaf") {
-                                        Navigator.of(context)
-                                            .pushReplacementNamed("switcher");
-                                      }
-                                    } else {
-                                      await AwesomeDialog(
-                                        context: context,
-                                        dialogType: DialogType.error,
-                                        title: "Login Error",
-                                        desc: result["message"].toString(),
-                                        btnOkOnPress: () {},
-                                      ).show();
-                                    }
-                                  },
-                                ),
-                              ),
-                              const Gap(12),
+                                                                  
+                              
+                              
+                              
+                                                                    if (!mounted) return;
+                              
+                                                                    // 🚦 التوجيه حسب الدور
+                                                                    if (role == "blind") {
+                                                                      Navigator.of(context)
+                                                                          .pushReplacementNamed("blind");
+                                                                    } else if (role == "assistant") {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const MainNavigationPage(
+                                      role: UserRole.assistant,
+                                    ),
+                                  ),
+                                );
+                                                                    } else if (role == "volunteer") {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const MainNavigationPage(
+                                      role: UserRole.volunteer,
+                                    ),
+                                  ),
+                                );
+                                                                    } else if (role == "deaf") {
+                                                                      Navigator.of(context)
+                                                                          .pushReplacementNamed("switcher");
+                                                                    }
+                                                                  } else {
+                                                                    await AwesomeDialog(
+                                                                      context: context,
+                                                                      dialogType: DialogType.error,
+                                                                      title: "Login Error",
+                                                                      desc: result["message"].toString(),
+                                                                      btnOkOnPress: () {},
+                                                                    ).show();
+                                                                  }
+                                                                },
+                                                              ),
+                                                            ),
+                                                            const Gap(12),
                               Row(
                                 children: [
                                   const Expanded(

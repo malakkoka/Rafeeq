@@ -68,6 +68,9 @@ class _DeafState extends State<Deaf> {
 }
 */
 
+  
+
+
   Future<void>initCamera()async{
     controller= CameraController(
       cameras![0],ResolutionPreset.medium,
