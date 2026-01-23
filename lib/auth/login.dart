@@ -197,7 +197,8 @@ print("FCM TOKEN (Login): $deviceToken");
                                       userProvider.setUser(
                                         name: result["user"]["username"],
                                         email: result["user"]["email"],
-                                        role: role ?? '', id: '', phone: '',
+                                        role: result["user"]["user_type"],
+                                        id: '', phone: '',
                                       );
 
                                       if (!mounted) return;
@@ -226,7 +227,7 @@ print("FCM TOKEN (Login): $deviceToken");
   );
                                       } else if (role == "deaf") {
                                         Navigator.of(context)
-                                            .pushReplacementNamed("deaf");
+                                            .pushReplacementNamed("switcher");
                                       }
                                     } else {
                                       await AwesomeDialog(

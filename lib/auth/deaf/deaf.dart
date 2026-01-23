@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:front/services/token_sevice.dart';
 import 'package:gap/gap.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:async';
@@ -9,6 +10,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:front/color.dart';
 import 'package:front/main.dart';
 import 'package:jwt_decode/jwt_decode.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Deaf extends StatefulWidget {
   const Deaf({super.key});
@@ -22,12 +24,15 @@ class _DeafState extends State<Deaf> {
   bool ready=false ;
   bool issending =false ;
 
+  Timer? locationtimer;
+
   Timer ?capturetimer ;
 
   String translatedText = "Waiting for sign language...";
   String? audiourl;
 
   final AudioPlayer audioPlayer = AudioPlayer();
+  
   bool speaking =false;
 
 
@@ -35,7 +40,33 @@ class _DeafState extends State<Deaf> {
   void initState(){
     super.initState();
     initCamera();
+    savecurrent(); 
+    startLocationCheck();
   }
+
+
+//==================get id
+  Future<int?> getUserId() async {
+  final user = await TokenService.getUser();
+  if (user != null) {
+    return user['id'];  // افترض أن الـ "id" هو المعرّف الخاص بالمستخدم
+  }
+  return null;
+}
+
+
+
+
+  /*Future<void> fetchToken() async {
+  String? token = await TokenService.getToken();  // استخدام await هنا لأن getToken() هي async
+  if (token != null) {
+    print("Token: $token");
+    // الآن يمكنك استخدام التوكين في أي مكان آخر، مثلًا لإجراء API requests
+  } else {
+    print("No token found");
+  }
+}
+*/
 
   Future<void>initCamera()async{
     controller= CameraController(
@@ -52,6 +83,7 @@ class _DeafState extends State<Deaf> {
   @override
 void dispose() {
   controller.dispose();
+  locationtimer?.cancel();
   super.dispose();
 }
 
@@ -76,6 +108,12 @@ void dispose() {
 
       final XFile image = await controller.takePicture();
 
+      Position position = await currentlocation();
+      double lat = position.latitude;
+      double lng = position.longitude;
+
+      String currentLocation = "$lat,$lng";
+
       final request = http.MultipartRequest(
         'POST',
         Uri.parse('http://192.168.52.212:8000/api/account/sign/'),
@@ -84,6 +122,8 @@ void dispose() {
       request.files.add(
         await http.MultipartFile.fromPath('image', image.path),
       );
+
+      request.fields['current_location'] = currentLocation;
 
       final response = await request.send();
 
@@ -126,6 +166,126 @@ void dispose() {
     desiredAccuracy:  LocationAccuracy.high,
     );
   }
+
+//===============save current location==========
+  Future<void>savecurrent()async{
+    print("============Starting savecurrent function...");
+
+    bool granted = await locationreq();
+    print("==============Location permission granted: $granted");
+
+
+    if (!granted){
+      print("Permission denied");
+    return;
+    }
+
+  Position position = await currentlocation();
+
+  print("==================Current location: Lat = ${position.latitude}, Lng = ${position.longitude}");
+
+  double lat = position.latitude;
+  double lng = position.longitude;
+
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setDouble('home_lat', lat);
+  await prefs.setDouble('home_lng', lng);
+  print("============================Home location saved: $lat, $lng");
+
+  double? savedLat = prefs.getDouble('home_lat');
+  double? savedLng = prefs.getDouble('home_lng');
+
+  print("===================Saved Lat: $savedLat, Saved Lng: $savedLng");
+
+  String currentLocation = "$lat,$lng";
+  int? userId = await getUserId();
+  if (userId != null) {
+    updateUserLocation(userId, currentLocation); // استدعاء دالة تحديث الموقع
+  } else {
+    print("==============================User ID is null, cannot update location.");
+  }
+  }
+
+  //=================
+  Future<void> updateUserLocation(int userId, String currentLocation) async {
+ 
+ 
+
+
+  String? token = await TokenService.getToken();  // استرجاع التوكين
+
+  if (token == null) {
+    print("No token found. Please log in again.");
+    return;
+  }
+
+  final String url = 'http://138.68.104.187/api/account/users/$userId/';  
+
+  final Map<String, dynamic> data = {
+    'current_location': currentLocation, 
+  };
+
+  final String body = json.encode(data);
+
+  try {
+    final response = await http.patch(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json', 
+        'Authorization': 'Bearer $token',  
+      },
+      body: body,  // إرسال البيانات
+    );
+
+    if (response.statusCode == 200) {
+      print("=======================User location updated successfully!");
+    } else {
+      print("=============================Failed to update user location: ${response.statusCode}");
+    }
+  } catch (e) {
+    print("====================Error: $e");
+  }
+}
+
+  //==========location traking==========
+  Future<void> startLocationCheck() async {
+  // بدء التحقق المستمر كل 30 ثانية
+  locationtimer = Timer.periodic(const Duration(seconds: 30), (_) async {
+    // احصل على الموقع الحالي
+    Position currentPosition = await currentlocation();
+    double currentLat = currentPosition.latitude;
+    double currentLng = currentPosition.longitude;
+
+    // استرجاع الموقع المخزن من SharedPreferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    double? savedLat = prefs.getDouble('home_lat');
+    double? savedLng = prefs.getDouble('home_lng');
+
+    // تحقق إذا كان الموقع قد تغير
+    if (savedLat != null && savedLng != null) {
+      if (currentLat != savedLat || currentLng != savedLng) {
+        print("========================Location changed! Updating location...");
+        
+        // تحديث الموقع في SharedPreferences
+        await prefs.setDouble('home_lat', currentLat);
+        await prefs.setDouble('home_lng', currentLng);
+
+        // قم بتحديث الموقع في الـ API
+        String currentLocation = "$currentLat,$currentLng";
+        int? userId = await getUserId();
+        if (userId != null) {
+          updateUserLocation(userId, currentLocation);
+        } else {
+          print("=============================User ID is null, cannot update location.");
+        }
+      } else {
+        print("==============================Location is the same, no update needed.");
+      }
+    }
+  });
+}
+
+  
 
   ///=============audio===============
   Future<void>playaudio()async{
@@ -199,7 +359,11 @@ void dispose() {
                 
                 
                 child: IconButton(
-                  onPressed:(){},
+                  onPressed:(){
+                    String currentLocation = "Amman, Jordan"; // مؤقتًا مثال
+
+    //await updateUserLocation(userId, currentLocation);
+                  },
                   icon:Icon(speaking? Icons.volume_up : Icons.play_arrow,
                   color: AppColors.background,
                             ),),
@@ -207,8 +371,9 @@ void dispose() {
           ,
             ],
           ),
-          Gap(16),
-          /*ElevatedButton.icon(
+          
+      
+          /* ElevatedButton.icon(
             onPressed: playaudio,
             icon: Icon(speaking? Icons.volume_up : Icons.play_arrow,
             ),
@@ -228,7 +393,7 @@ void dispose() {
               padding: EdgeInsets.symmetric(horizontal: 25,vertical: 12),
             ),
           ),*/
-          Gap(15)
+          
         ],
       )
     );

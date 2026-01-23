@@ -1,6 +1,8 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:camera/camera.dart';
+import 'package:front/auth/call/livecall.dart';
 import 'package:front/main.dart';
+import 'package:front/provider/user_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -9,6 +11,8 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:front/color.dart';
+import 'package:jwt_decode/jwt_decode.dart';
+import 'package:provider/provider.dart';
 
 class Calling extends StatefulWidget {
   const Calling({super.key});
@@ -22,7 +26,7 @@ class _CallingState extends State<Calling> {
   bool isConnected = true;
   bool isCameraOn = true;
   bool isMicOn = true;
-
+  String message = "Calling your assistant...";
 
 
 
@@ -30,11 +34,38 @@ class _CallingState extends State<Calling> {
   void initState(){
     super.initState();
     
+    simulateCall();
+  }
+
+  Future<void> simulateCall() async {
+    await Future.delayed(Duration(seconds: 5));  // تأخير 5 ثواني
+    setState(() {
+      isConnected = true;  // إذا تم الرد بنجاح
+      message = "Call Connected!";  // النص عند الاتصال
+    });
+
+  if (isConnected) {
+  await Future.delayed(Duration(seconds: 2)); // انتظار قبل الانتقال
+  if (mounted) {  // تحقق من أن الـ widget لا يزال موجودًا
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const Livecall()), // الانتقال للـ LiveCall
+    );
+  }
+}
   }
 
 //====================ui==================
   @override
   Widget build(BuildContext context) {
+    final userType = Provider.of<UserProvider>(context).role;
+
+    if (userType == 'assistant') {
+      message = "Calling your patient...";  // لو كان assistant
+    } else if (userType == 'deaf' || userType == 'blind') {
+      message = "Calling your assistant...";  // لو كان deaf أو blind
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -70,8 +101,9 @@ class _CallingState extends State<Calling> {
                       ),
                     ),
                     Gap(40),
-                    Text("Calling your assistant...",
-                    style: TextStyle(fontSize: 18,color:Colors.black.withOpacity(0.7), ),
+                    Text(
+                      message,  // النص المتغير حسب الـ userType
+                      style: TextStyle(fontSize: 18, color: Colors.black.withOpacity(0.7)),
                     ),
                     Spacer(flex: 2,)
                   ],

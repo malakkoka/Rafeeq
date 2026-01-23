@@ -1,6 +1,7 @@
 // ignore_for_file: file_names
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:front/auth/call/vediocall.dart';
 import 'package:front/auth/volunteer/activityscreen.dart';
 import 'package:front/auth/volunteer/volunteerpage.dart';
 import 'package:front/color.dart';
@@ -38,7 +39,11 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       pages = const [
         SettingsPage(), // 0
         AssistanceRequestPage(), // 1
+<<<<<<< HEAD
         Homepage(), // 2
+=======
+        Vediocall(), // 2
+>>>>>>> ef558c94cb9021c63c446dc62395e1a256c972b4
         AssistantPage(), // 3
       ];
     } else {
