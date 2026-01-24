@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:front/color.dart';
 import 'package:front/component/customdrawer.dart';
+
+import 'auth/call/video_call.dart';
 //import 'package:geolocator/geolocator.dart';
 //import 'package:http/http.dart' as http;
 
@@ -19,6 +21,16 @@ class _HomepageState extends State<Homepage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => VideoCall()));
+              },
+              icon: Icon(Icons.video_call))
+        ],
         backgroundColor: AppColors.background,
         title: Text("home page"),
       ),
