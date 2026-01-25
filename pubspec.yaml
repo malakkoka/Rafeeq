@@ -42,7 +42,17 @@ dependencies:
   socket_io_client: ^2.0.3
   jwt_decode: ^0.3.1
   shared_preferences: ^2.0.15
+<<<<<<< HEAD
   intl: ^0.20.2
+=======
+  agora_rtc_engine: ^6.3.0
+  video_player: ^2.10.1
+  
+
+
+
+  
+>>>>>>> 68eb14e82717cccb5e9009926e5af18faa281504
   
 
 dev_dependencies:

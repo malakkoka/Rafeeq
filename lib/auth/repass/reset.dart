@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:front/color.dart';
 import 'package:front/component/password.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 
 class Reset extends StatefulWidget{
   const Reset({super.key});
@@ -17,9 +20,94 @@ class _Resetstate extends State<Reset>{
 
   final TextEditingController password = TextEditingController();
   final TextEditingController repassword = TextEditingController();
+  late String userEmail;
+  
+  
 
-  final TextEditingController email = TextEditingController();
+  @override
+void didChangeDependencies() {
+  super.didChangeDependencies();
+  userEmail = ModalRoute.of(context)!.settings.arguments as String;
+}
 
+
+//================================
+Future<void> resetPasswordApi() async {
+  print("🔵 Reset Password button clicked");
+
+  print("📧 Email: $userEmail");
+  print("🔑 Password: ${password.text}");
+  print("🔑 RePassword: ${repassword.text}");
+
+  if (password.text.isEmpty || repassword.text.isEmpty) {
+    print("❌ One or more fields are empty");
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Please fill all fields")),
+    );
+    return;
+  }
+
+  if (password.text != repassword.text) {
+    print("❌ Passwords do not match");
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Passwords do not match")),
+    );
+    return;
+  }
+
+  final url = Uri.parse(
+    "http://138.68.104.187/api/account/reset-password/",
+  );
+
+  print("🌐 Sending request to API...");
+  print("➡️ URL: $url");
+
+  try {
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: jsonEncode({
+        "email": userEmail,
+        "code": "0000",
+        "new_password": password.text.trim(),
+      }),
+    );
+
+    print("✅ Response received");
+    print("📦 Status Code: ${response.statusCode}");
+    print("📨 Raw Body: ${response.body}");
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      print("🎉 Password reset SUCCESS");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(data["message"] ?? "Success")),
+      );
+
+      Navigator.of(context).pushReplacementNamed("login");
+    } else {
+      print("⚠️ API returned error");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(data["message"] ?? "Error from server")),
+      );
+    }
+  } catch (e) {
+    print("🔥 EXCEPTION: $e");
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Server error")),
+    );
+  }
+}
+//============================
 
   Widget _confirmPasswordSection() {
     return Column(
@@ -148,8 +236,7 @@ Widget build(BuildContext context) {
                                 ),
                                   ),
                           onPressed: (){
-                            Navigator.of(context)
-                                      .pushReplacementNamed("login");
+                            resetPasswordApi();
                           },
                               child: Text(
                                 "Reset Password",

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+<<<<<<< HEAD
 import 'package:front/assistant/mainNavBar.dart';
 import 'package:front/auth/blind.dart';
 import 'package:front/auth/deaf/deaf.dart';
@@ -17,18 +18,59 @@ import 'package:front/component/viewinfo.dart';
 import 'package:front/homepage.dart';
 import 'package:front/provider/user_provider.dart';
 import 'package:provider/provider.dart';
+=======
+>>>>>>> 68eb14e82717cccb5e9009926e5af18faa281504
 import 'package:firebase_messaging/firebase_messaging.dart';
-
-// camera
+import 'package:provider/provider.dart';
 import 'package:camera/camera.dart';
 
+// Assistant
+import 'package:front/assistant/mainNavBar.dart';
+
+// Auth
+import 'package:front/auth/login.dart';
+import 'package:front/auth/signup.dart';
+import 'package:front/auth/patientsignup.dart';
+import 'package:front/auth/blind.dart';
+import 'package:front/auth/deaf/deaf.dart';
+import 'package:front/auth/deaf/switcher.dart';
+
+// Calls
+import 'package:front/auth/call/calling.dart';
+import 'package:front/auth/call/livecall.dart';
+import 'package:front/auth/call/vediocall.dart';
+
+// Repass
+import 'package:front/auth/repass/forgot.dart';
+import 'package:front/auth/repass/getcode.dart';
+import 'package:front/auth/repass/reset.dart';
+
+// UI / Components
+import 'package:front/component/viewinfo.dart';
+import 'package:front/color.dart';
+
+// Home
+import 'package:front/homepage.dart';
+
+// Providers
+import 'package:front/provider/user_provider.dart';
+
+// =====================
+// GLOBALS
+// =====================
 List<CameraDescription>? cameras;
 
+// =====================
+// Firebase background
+// =====================
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  print(' Background Message: ${message.messageId}');
-} // عشان تشتغل الاشعارات لما التطبيق يسكر
+  print('Background Message: ${message.messageId}');
+}
 
+// =====================
+// MAIN
+// =====================
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -39,6 +81,7 @@ Future<void> main() async {
     _firebaseMessagingBackgroundHandler,
   );
 
+  
   runApp(
     MultiProvider(
       providers: [
@@ -49,6 +92,9 @@ Future<void> main() async {
   );
 }
 
+// =====================
+// APP
+// =====================
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -62,15 +108,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-
     _initFirebaseMessaging();
-    /*FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      if (user == null) {
-        print('User is currently signed out!');
-      } else {
-        print('User is signed in!');
-      }
-    });*/
   }
 
   Future<void> _initFirebaseMessaging() async {
@@ -88,14 +126,9 @@ class _MyAppState extends State<MyApp> {
       userProvider.setDeviceToken(token);
     }
 
-    await FirebaseMessaging.instance.subscribeToTopic("test");
-    print("Subscribed to topic: test");
-
     FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       userProvider.setDeviceToken(newToken);
-
-      // إذا اليوزر عامل login → ابعت update للباك
     });
   }
 
@@ -104,22 +137,17 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       color: AppColors.background,
       debugShowCheckedModeBanner: false,
-      home: Signup(),
+      home: Login(),
       routes: {
         "login": (context) => Login(),
         "homepage": (context) => Homepage(),
         "signup": (context) => Signup(),
-        //"editprofile": (context) => const EditProfile( isPatient: true),
         "viewinfo": (context) => ViewInfo(),
         "blind": (context) => Blind(),
-        "assistant": (context) => const MainNavigationPage(
-              role: UserRole.assistant,
-            ),
-
-        "volunteer": (context) => const MainNavigationPage(
-              role: UserRole.volunteer,
-            ),
-
+        "assistant": (context) =>
+            const MainNavigationPage(role: UserRole.assistant),
+        "volunteer": (context) =>
+            const MainNavigationPage(role: UserRole.volunteer),
         "deaf": (context) => Deaf(),
         "switcher": (context) => Switcher(),
         "patientsignup": (context) => Patientsignup(),
@@ -128,6 +156,7 @@ class _MyAppState extends State<MyApp> {
         "reset": (context) => Reset(),
         "Vediocall": (context) => Vediocall(),
         "livecall": (context) => Livecall(),
+        "calling": (context) => Calling(),
       },
     );
   }

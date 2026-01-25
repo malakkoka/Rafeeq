@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:front/color.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 
 class Forgot extends StatefulWidget{
   const Forgot({super.key});
@@ -12,9 +15,55 @@ class Forgot extends StatefulWidget{
 }
 
 class _Forgotstate extends State<Forgot>{
-
-
   final TextEditingController email = TextEditingController();
+
+
+
+//=============send code
+  Future<void> sendCode() async {
+  if (email.text.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Please enter your email")),
+    );
+    return;
+  }
+
+  final url = Uri.parse(
+    "http://138.68.104.187/api/account/forgot-password/",
+  );
+
+  try {
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: jsonEncode({
+        "email": email.text.trim(),
+      }),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(data["message"] ?? "Code sent")),
+      );
+
+      Navigator.of(context).pushReplacementNamed("getcode");
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(data["message"] ?? "Error")),
+      );
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Server error")),
+    );
+  }
+}
+
 
   @override
 Widget build(BuildContext context) {
@@ -87,6 +136,7 @@ Widget build(BuildContext context) {
                           Gap(30),
                           
                           TextFormField(
+                            controller: email,
                             decoration: InputDecoration(
                               prefixIcon: Icon(
                                 Icons.email_rounded,
@@ -126,8 +176,24 @@ Widget build(BuildContext context) {
                                 ),
                                   ),
                           onPressed: (){
-                            Navigator.of(context)
-                                      .pushReplacementNamed("getcode");
+                            print("🔵 Get Code button clicked");
+  print("📧 Email entered: ${email.text}");
+
+  if (email.text.isEmpty) {
+    print("❌ Email is empty");
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Please enter your email")),
+    );
+    return;
+  }
+
+  print("➡️ Navigating to Reset Password screen");
+
+  Navigator.of(context).pushReplacementNamed(
+    "reset",
+    arguments: email.text.trim(),
+  );
                           },
                               child: Text(
                                 "send code",
