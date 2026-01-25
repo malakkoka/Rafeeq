@@ -17,6 +17,8 @@ class _FallDetectorState extends State<FallDetector> {
   StreamSubscription<AccelerometerEvent>? accelSub;
   bool fallDetected = false;
 
+  static const double fallThreshold = 220; // 🔥 قيمة منطقية
+
   @override
   void initState() {
     super.initState();
@@ -24,33 +26,31 @@ class _FallDetectorState extends State<FallDetector> {
   }
 
   void startListening() {
-    try {
-      accelSub = accelerometerEvents.listen((event) {
-        final total =
-            (event.x * event.x) + (event.y * event.y) + (event.z * event.z);
+    accelSub = accelerometerEvents.listen((event) async {
+      final total =
+          event.x * event.x + event.y * event.y + event.z * event.z;
 
-        if (total > 150 && !fallDetected) {
-          fallDetected = true;
-          handleFall();
-        }
-      });
-    } catch (e) {
-      debugPrint("❌ Accelerometer error: $e");
-    }
+      if (total > fallThreshold && !fallDetected) {
+        fallDetected = true;
+        await handleFall();
+        fallDetected = false; // 🔁 جاهز لسقوط جديد
+      }
+    });
   }
 
-  void handleFall() {
+  Future<void> handleFall() async {
     final user = context.read<UserProvider>();
+
     if (!user.emergencyEnabled) return;
 
+    if (!mounted) return;
+
     if (user.isBlind) {
-      Navigator.pushReplacement(
-        context,
+      await Navigator.of(context, rootNavigator: true).push(
         MaterialPageRoute(builder: (_) => const BlindEmergencyUI()),
       );
     } else if (user.isDeaf) {
-      Navigator.pushReplacement(
-        context,
+      await Navigator.of(context, rootNavigator: true).push(
         MaterialPageRoute(builder: (_) => const DeafEmergencyUI()),
       );
     }

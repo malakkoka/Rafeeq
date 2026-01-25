@@ -62,4 +62,7 @@ const Map<int, String> postStateLabels = {
   0: "Pending",
   1: "Accepted",
   2: "Completed",
+  3: "Pending Approval",
+  4: "In progress",
+  5: "Cancelled",
 };

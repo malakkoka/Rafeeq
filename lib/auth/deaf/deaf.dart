@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:front/component/customdrawer.dart';
 import 'package:gap/gap.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:async';
@@ -141,6 +142,7 @@ void dispose() {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: CustomDrawer(),
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text(

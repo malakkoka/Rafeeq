@@ -258,12 +258,12 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
             );
       print('Submit Response: ${response.body}');
       if (response.statusCode == 200 || response.statusCode == 201) {
-         Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(
-      builder: (context) => MainNavigationPage(role: UserRole.assistant),
-    ),
-  );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainNavigationPage(role: UserRole.assistant),
+          ),
+        );
       } else {
         _showSnack('Failed to submit request. Please try again.');
       }
@@ -301,7 +301,7 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         child: _card(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,6 +1,6 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:front/auth/volunteer/activityscreen.dart';
 import 'package:front/auth/volunteer/post_model.dart';
 import 'package:front/auth/volunteer/post_state_badge.dart';
 import 'package:front/color.dart';
@@ -13,12 +13,12 @@ class PostCard extends StatelessWidget {
 
   const PostCard({
     super.key,
-    required this.post,
+    required this.post, required String postId,
   });
 
   @override
   Widget build(BuildContext context) {
-    final String city = post.cityName;
+    final String city = post.city;
     final String serviceType = post.title;
     final String patientType = getPatientTypeFromPost(post);
     final String authorName = cleanAuthorName(post.author);
@@ -35,11 +35,9 @@ class PostCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// ================= TOP (TEXT + IMAGE) =================
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /// ===== LEFT CONTENT =====
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,10 +67,7 @@ class PostCard extends StatelessWidget {
                     ],
                   ),
                 ),
-
                 const SizedBox(width: 12),
-
-                /// ===== IMAGE (SAFE PLACE) =====
                 SizedBox(
                   width: 100,
                   height: 100,
@@ -84,8 +79,6 @@ class PostCard extends StatelessWidget {
               ],
             ),
             SizedBox(height: 5),
-
-            /// ================= CONTENT =================
             Text(
               post.content,
               style: const TextStyle(
@@ -94,9 +87,7 @@ class PostCard extends StatelessWidget {
                 color: Colors.black87,
               ),
             ),
-
             const SizedBox(height: 14),
-
             Wrap(
               spacing: 12,
               children: [
@@ -117,7 +108,7 @@ class PostCard extends StatelessWidget {
                 buildStateBadge(post.state ?? 0),
                 const SizedBox(width: 10),
                 const Spacer(),
-                if (post.state == 0)
+                if (post.state == 0) // إذا كانت الحالة Pending
                   SizedBox(
                     height: 36,
                     child: ElevatedButton(
@@ -129,8 +120,14 @@ class PostCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(22),
                         ),
                       ),
-                      onPressed: () {
-                        showConfirmDialog(context, post);
+                      onPressed: () async {
+                        await sendHelpRequest(post.id!); // تحديث الحالة
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => VolunteerActivityScreen(), // الانتقال إلى صفحة الأنشطة
+                          ),
+                        );
                       },
                       child: const Text(
                         "I can help",
@@ -190,7 +187,43 @@ class PostCard extends StatelessWidget {
   }
 }
 
-/// ================= HELPERS =================
+// دالة لتحديث حالة البوست
+Future<void> sendHelpRequest(int postId) async {
+  final token = await TokenService.getToken();
+  await updatePostState(postId, 3);  // 3 تعني في انتظار موافقة المساعد
+
+  final response = await http.post(
+    Uri.parse('$baseUrl/api/account/posts/$postId/request-help/'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+  );
+
+  if (response.statusCode != 200 && response.statusCode != 201) {
+    throw Exception('Failed to send help request');
+  }
+}
+
+// دالة لتحديث حالة البوست
+Future<void> updatePostState(int postId, int state) async {
+  final token = await TokenService.getToken();
+
+  final response = await http.patch(
+    Uri.parse('$baseUrl/api/account/posts/$postId/'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+    body: jsonEncode({
+      'state': state,
+    }),
+  );
+
+  if (response.statusCode != 200 && response.statusCode != 201) {
+    throw Exception('Failed to update post state');
+  }
+}
 
 String cleanAuthorName(String raw) {
   return raw.replaceAll(
@@ -226,31 +259,6 @@ String getImageByPatientType(String patientType) {
   }
 }
 
-/// ================= CONFIRM DIALOG =================
-void showConfirmDialog(BuildContext context, Post post) {
-  showDialog(
-    context: context,
-    builder: (_) => AlertDialog(
-      title: const Text("Ready to help?"),
-      content: const Text("Are you sure you want help this person?"),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text("Cancel"),
-        ),
-        ElevatedButton(
-          onPressed: () async {
-            await sendHelpRequest(post.id!);
-            Navigator.pop(context);
-          },
-          child: const Text("Yes, I'll help"),
-        ),
-      ],
-    ),
-  );
-}
-
-/// ================= TIME FORMAT =================
 String formatTimeAgoEn(String dateString) {
   final DateTime createdAt = DateTime.parse(dateString);
   final Duration diff = DateTime.now().difference(createdAt);
@@ -263,39 +271,3 @@ String formatTimeAgoEn(String dateString) {
   return "${createdAt.day}/${createdAt.month}/${createdAt.year}";
 }
 
-Future<void> sendHelpRequest(int postId) async {
-  final token = await TokenService.getToken();
-  await updatePostState(postId, 1);  // 1 تعني في انتظار موافقة المساعد
-
-  final response = await http.post(
-    Uri.parse('$baseUrl/api/account/posts/$postId/request-help/'),
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    },
-  );
-
-  if (response.statusCode != 200 && response.statusCode != 201) {
-    throw Exception('Failed to send help request');
-  }
-}
-
-// دالة لتحديث حالة البوست
-Future<void> updatePostState(int postId, int state) async {
-  final token = await TokenService.getToken();
-
-  final response = await http.patch(
-    Uri.parse('$baseUrl/api/account/posts/$postId/'),
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    },
-    body: jsonEncode({
-      'state': state,
-    }),
-  );
-
-  if (response.statusCode != 200 && response.statusCode != 201) {
-    throw Exception('Failed to update post state');
-  }
-}

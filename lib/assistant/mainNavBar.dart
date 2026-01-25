@@ -1,7 +1,7 @@
-// ignore_for_file: file_names
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:front/auth/volunteer/activityscreen.dart';
+import 'package:front/auth/volunteer/post_model.dart';
 import 'package:front/auth/volunteer/volunteerpage.dart';
 import 'package:front/color.dart';
 import 'package:front/component/viewinfo.dart';
@@ -13,13 +13,12 @@ import 'package:front/assistant/assistantpage.dart';
 import 'package:front/assistant/assistanceRequestPage.dart';
 
 // volunteer pages
-
 class MainNavigationPage extends StatefulWidget {
-  final UserRole role;
+  final UserRole role; 
 
   const MainNavigationPage({
     super.key,
-    required this.role,
+    required this.role, 
   });
 
   @override
@@ -34,19 +33,20 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   void initState() {
     super.initState();
 
+    // تحديد الصفحات بناءً على الدور (Assistant أو Volunteer)
     if (widget.role == UserRole.assistant) {
-      pages = const [
-        SettingsPage(), // 0
-        AssistanceRequestPage(), // 1
-        Homepage(), // 2
+      pages = [
+        const SettingsPage(), // 0
+        const AssistanceRequestPage(), // 1
+        const Homepage(), // 2
         AssistantPage(), // 3
       ];
       _currentIndex = 3;
     } else {
-      pages = const [
-        SettingsPage(), // 0
-        VolunteerHome(), // 1
-        VolunteerActivityScreen(), //2
+      pages = [
+        const SettingsPage(), // 0
+        VolunteerHome(), // تمرير post هنا
+        VolunteerActivityScreen(), // تمرير post هنا
       ];
       _currentIndex = 2;
     }
@@ -57,23 +57,24 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     return Scaffold(
       extendBody: true,
       backgroundColor: AppColors.background,
-      body: pages[_currentIndex],
+      body: pages[_currentIndex], // عرض الصفحة بناءً على الفهرس الحالي
       bottomNavigationBar: CurvedNavigationBar(
         index: _currentIndex,
         height: 48,
         backgroundColor: AppColors.background,
         color: AppColors.n1,
         animationCurve: Curves.linearToEaseOut,
-        items: _buildNavItems(),
+        items: _buildNavItems(),  // قائمة الأيقونات
         onTap: (index) {
           setState(() {
-            _currentIndex = index;
+            _currentIndex = index; // تحديث الفهرس عند النقر
           });
         },
       ),
     );
   }
 
+  // تحديد الأيقونات بناءً على الدور
   List<Widget> _buildNavItems() {
     if (widget.role == UserRole.assistant) {
       return const [
