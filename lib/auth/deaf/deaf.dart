@@ -1,18 +1,18 @@
-import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
-import 'package:front/services/token_sevice.dart';
-import 'package:gap/gap.dart';
-import 'package:geolocator/geolocator.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
+import 'package:gap/gap.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:audioplayers/audioplayers.dart';
-import 'package:front/color.dart';
-import 'package:front/main.dart';
-import 'package:jwt_decode/jwt_decode.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../call/video_call.dart';
+import 'package:front/main.dart';
+import 'package:front/color.dart';
+import 'package:front/services/token_sevice.dart';
 
 class Deaf extends StatefulWidget {
   const Deaf({super.key});
@@ -23,20 +23,22 @@ class Deaf extends StatefulWidget {
 
 class _DeafState extends State<Deaf> {
   late CameraController controller;
+
   bool ready = false;
+  bool isBusy = false; // ✅ واحد فقط للتحكم بكل عمليات الكاميرا + الارسال
 
-  bool issending = false;
-
-  Timer? locationtimer;
-
-  Timer? capturetimer;
-
-  String translatedText = "Waiting for sign language...";
-  String? audiourl;
+  // STT result:
+  Uint8List? sttAudioBytes; // لو رجع صوت كبايتس
+  String? sttAudioUrl; // لو رجع audio_file
 
   final AudioPlayer audioPlayer = AudioPlayer();
-
   bool speaking = false;
+
+  // location
+  Timer? locationtimer;
+
+  // UI text
+  String translatedText = "Waiting for sign language...";
 
   @override
   void initState() {
@@ -46,360 +48,332 @@ class _DeafState extends State<Deaf> {
     startLocationCheck();
   }
 
-//==================get id
-  Future<int?> getUserId() async {
-    final user = await TokenService.getUser();
-    if (user != null) {
-      return user['id']; // افترض أن الـ "id" هو المعرّف الخاص بالمستخدم
-    }
-    return null;
-  }
-
-  /*Future<void> fetchToken() async {
-  String? token = await TokenService.getToken();  // استخدام await هنا لأن getToken() هي async
-  if (token != null) {
-    print("Token: $token");
-    // الآن يمكنك استخدام التوكين في أي مكان آخر، مثلًا لإجراء API requests
-  } else {
-    print("No token found");
-  }
-}
-*/
-
+  // ================= CAMERA INIT =================
   Future<void> initCamera() async {
+    
     controller = CameraController(
       cameras![0],
       ResolutionPreset.medium,
       enableAudio: false,
+      imageFormatGroup: ImageFormatGroup.jpeg, // ✅ يساعد يقلل مشاكل
     );
 
     await controller.initialize();
     if (!mounted) return;
 
     setState(() => ready = true);
-    startAutoCapture();
   }
 
   @override
   void dispose() {
-    controller.dispose();
     locationtimer?.cancel();
+    audioPlayer.dispose();
+    controller.dispose();
     super.dispose();
   }
 
-  void startAutoCapture() {
-    capturetimer = Timer.periodic(
-      const Duration(seconds: 1),
-      (_) => captureAndSend(),
-    );
-  }
+  // ================= STT SEND (JSON frames) =================
+  Future<void> captureAndSendSTT() async {
+    if (!controller.value.isInitialized) return;
 
-  String exractusertype(String token) {
-    Map<String, dynamic> payload = Jwt.parseJwt(token);
+    // ✅ حماية قوية ضد أي استدعاء مزدوج
+    if (isBusy || controller.value.isTakingPicture) {
+      debugPrint("⛔ Busy / isTakingPicture = true");
+      return;
+    }
 
-    return payload["user"]["user_type"];
-  }
-
-  ///===============frames sending ======================
-  Future<void> captureAndSend() async {
-    if (!controller.value.isInitialized || issending) return;
+    isBusy = true;
+    debugPrint("🟥 زر الكاميرا انكبس");
+    debugPrint("🚀 STT: start captureAndSendSTT");
 
     try {
-      issending = true;
-
+      // 1) take picture
       final XFile image = await controller.takePicture();
+      final bytes = await image.readAsBytes();
 
-      Position position = await currentlocation();
-      double lat = position.latitude;
-      double lng = position.longitude;
+      // 2) base64
+      final base64Frame = base64Encode(bytes);
+      debugPrint("📦 frame base64 length: ${base64Frame.length}");
 
-      String currentLocation = "$lat,$lng";
-
-      final request = http.MultipartRequest(
-        'POST',
-        Uri.parse('http://192.168.52.212:8000/api/account/sign/'),
+      // 3) send to backend (frames as JSON)
+      final response = await http.post(
+        Uri.parse("http://138.68.104.187/api/account/stt/"),
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json,audio/mpeg,*/*",
+        },
+        body: jsonEncode({
+          "frames": [base64Frame],
+        }),
       );
 
-      request.files.add(
-        await http.MultipartFile.fromPath('image', image.path),
-      );
-
-      request.fields['current_location'] = currentLocation;
-
-      final response = await request.send();
+      debugPrint("📡 STATUS: ${response.statusCode}");
+      final contentType = response.headers["content-type"] ?? "";
+      debugPrint("📄 content-type: $contentType");
 
       if (response.statusCode == 200) {
-        final body = await response.stream.bytesToString();
-        final data = jsonDecode(body);
+        // ✅ حالتين: يا بيرجع صوت bytes أو بيرجع json فيه audio_file
+        if (contentType.contains("audio") || contentType.contains("mpeg")) {
+          sttAudioBytes = response.bodyBytes;
+          sttAudioUrl = null;
+          debugPrint("✅ Audio bytes received: ${sttAudioBytes!.length} bytes");
+        } else {
+          // json
+          final data = jsonDecode(response.body);
+          final audioFile = data["audio_file"];
+          final text = data["text"];
 
-        setState(() {
-          translatedText = data['text'] ?? translatedText;
-
-          if (data['audio_file'] != null) {
-            audiourl = "http://192.168.52.212:8000${data['audio_file']}";
+          if (text != null) {
+            setState(() => translatedText = text.toString());
           }
-        });
+
+          if (audioFile != null) {
+            // مرات بيرجع كامل، مرات بيرجع path
+            final s = audioFile.toString();
+            sttAudioUrl = s.startsWith("http") ? s : "http://138.68.104.187$s";
+            sttAudioBytes = null;
+            debugPrint("✅ Audio URL saved: $sttAudioUrl");
+          } else {
+            debugPrint("⚠️ 200 but no audio_file in JSON");
+          }
+        }
+      } else {
+        debugPrint("❌ BODY: ${response.body}");
       }
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint("❌ STT ERROR: $e");
     } finally {
-      issending = false;
+      isBusy = false;
+      debugPrint("🔁 isBusy = false");
+      if (mounted) setState(() {});
     }
   }
 
-  ///==========location===============
+  // ================= PLAY =================
+  Future<void> playSTTAudio() async {
+    if (speaking) return;
+
+    // إذا ما في ولا bytes ولا url
+    if (sttAudioBytes == null && (sttAudioUrl == null || sttAudioUrl!.isEmpty)) {
+      debugPrint("⛔ No audio to play");
+      return;
+    }
+
+    setState(() => speaking = true);
+
+    try {
+      await audioPlayer.stop();
+
+      if (sttAudioBytes != null) {
+        await audioPlayer.play(BytesSource(sttAudioBytes!));
+      } else {
+        await audioPlayer.play(UrlSource(sttAudioUrl!));
+      }
+    } catch (e) {
+      debugPrint("❌ Audio play error: $e");
+      setState(() => speaking = false);
+      return;
+    }
+
+    audioPlayer.onPlayerComplete.listen((event) {
+      if (!mounted) return;
+      setState(() => speaking = false);
+    });
+  }
+
+  // ================= USER ID =================
+  Future<int?> getUserId() async {
+    final user = await TokenService.getUser();
+    if (user != null) return user['id'];
+    return null;
+  }
+
+  // ================= LOCATION =================
   Future<bool> locationreq() async {
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
-
-    if (permission == LocationPermission.deniedForever) {
-      return false;
-    }
-
+    if (permission == LocationPermission.deniedForever) return false;
     return permission == LocationPermission.always ||
         permission == LocationPermission.whileInUse;
   }
 
-  ///=========current location========
   Future<Position> currentlocation() async {
     return await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
   }
 
-//===============save current location==========
   Future<void> savecurrent() async {
-    print("============Starting savecurrent function...");
-
     bool granted = await locationreq();
-    print("==============Location permission granted: $granted");
-
-    if (!granted) {
-      print("Permission denied");
-      return;
-    }
+    if (!granted) return;
 
     Position position = await currentlocation();
-
-    print(
-        "==================Current location: Lat = ${position.latitude}, Lng = ${position.longitude}");
-
     double lat = position.latitude;
     double lng = position.longitude;
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setDouble('home_lat', lat);
     await prefs.setDouble('home_lng', lng);
-    print("============================Home location saved: $lat, $lng");
-
-    double? savedLat = prefs.getDouble('home_lat');
-    double? savedLng = prefs.getDouble('home_lng');
-
-    print("===================Saved Lat: $savedLat, Saved Lng: $savedLng");
 
     String currentLocation = "$lat,$lng";
     int? userId = await getUserId();
     if (userId != null) {
-      updateUserLocation(userId, currentLocation); // استدعاء دالة تحديث الموقع
-    } else {
-      print(
-          "==============================User ID is null, cannot update location.");
+      updateUserLocation(userId, currentLocation);
     }
   }
 
-  //=================
   Future<void> updateUserLocation(int userId, String currentLocation) async {
-    String? token = await TokenService.getToken(); // استرجاع التوكين
-
-    if (token == null) {
-      print("No token found. Please log in again.");
-      return;
-    }
+    String? token = await TokenService.getToken();
+    if (token == null) return;
 
     final String url = 'http://138.68.104.187/api/account/users/$userId/';
 
-    final Map<String, dynamic> data = {
-      'current_location': currentLocation,
-    };
+    final response = await http.patch(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: json.encode({'current_location': currentLocation}),
+    );
 
-    final String body = json.encode(data);
-
-    try {
-      final response = await http.patch(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: body, // إرسال البيانات
-      );
-
-      if (response.statusCode == 200) {
-        print("=======================User location updated successfully!");
-      } else {
-        print(
-            "=============================Failed to update user location: ${response.statusCode}");
-      }
-    } catch (e) {
-      print("====================Error: $e");
-    }
+    debugPrint("📍 update location status: ${response.statusCode}");
   }
 
-  //==========location traking==========
   Future<void> startLocationCheck() async {
-    // بدء التحقق المستمر كل 30 ثانية
     locationtimer = Timer.periodic(const Duration(seconds: 30), (_) async {
-      // احصل على الموقع الحالي
       Position currentPosition = await currentlocation();
       double currentLat = currentPosition.latitude;
       double currentLng = currentPosition.longitude;
 
-      // استرجاع الموقع المخزن من SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       double? savedLat = prefs.getDouble('home_lat');
       double? savedLng = prefs.getDouble('home_lng');
 
-      // تحقق إذا كان الموقع قد تغير
       if (savedLat != null && savedLng != null) {
         if (currentLat != savedLat || currentLng != savedLng) {
-          print(
-              "========================Location changed! Updating location...");
-
-          // تحديث الموقع في SharedPreferences
           await prefs.setDouble('home_lat', currentLat);
           await prefs.setDouble('home_lng', currentLng);
 
-          // قم بتحديث الموقع في الـ API
           String currentLocation = "$currentLat,$currentLng";
           int? userId = await getUserId();
           if (userId != null) {
             updateUserLocation(userId, currentLocation);
-          } else {
-            print(
-                "=============================User ID is null, cannot update location.");
           }
-        } else {
-          print(
-              "==============================Location is the same, no update needed.");
         }
       }
     });
   }
 
-  ///=============audio===============
-  Future<void> playaudio() async {
-    if (audiourl == null || speaking) return;
-    setState(() => speaking = true);
-
-    await audioPlayer.play(UrlSource(audiourl!));
-    audioPlayer.onPlayerComplete.listen((event) {
-      setState(() => speaking = false);
-    });
-  }
-
-//====================ui==================
+  // ================= UI =================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: AppBar(
-          actions: [
-            IconButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => VideoCall()));
-                },
-                icon: Icon(Icons.video_call))
-          ],
-          title: const Text(
-            "   Deaf Page",
-            style: TextStyle(
-                color: AppColors.background, fontWeight: FontWeight.w500),
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: const Text(
+          "Deaf Page",
+          style: TextStyle(
+            color: AppColors.background,
+            fontWeight: FontWeight.w500,
           ),
-          backgroundColor: AppColors.n4,
         ),
-        body: Column(
-          children: [
-            Container(
-              margin: EdgeInsets.all(20),
-              height: MediaQuery.of(context).size.height * .6,
-              width: MediaQuery.of(context).size.height * .5,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.n4, width: 6),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadiusGeometry.circular(15),
-                child: ready
-                    ? CameraPreview(controller)
-                    : const Center(child: CircularProgressIndicator()),
-              ),
+        backgroundColor: AppColors.n4,
+      ),
+      body: Column(
+        children: [
+          const Gap(20),
+          Container(
+            margin: const EdgeInsets.all(20),
+            height: MediaQuery.of(context).size.height * .6,
+            width: MediaQuery.of(context).size.height * .5,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.n4, width: 6),
             ),
-            Gap(10),
-            Row(
+            child: Stack(
+              alignment: Alignment.bottomRight,
               children: [
-                Gap(20),
-                Container(
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.background,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.n7, width: 2),
-                  ),
-                  child: Text(translatedText,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.n9,
-                      )),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: ready
+                      ? CameraPreview(controller)
+                      : const Center(child: CircularProgressIndicator()),
                 ),
-                Gap(10),
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.n10,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: IconButton(
-                    onPressed: () {
-                      String currentLocation = "Amman, Jordan"; // مؤقتًا مثال
 
-                      //await updateUserLocation(userId, currentLocation);
+                // زر التصوير/الإرسال
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 20, right: 20),
+                  child: GestureDetector(
+                    onTap: () async {
+                      if (isBusy) return;
+                      await captureAndSendSTT();
                     },
-                    icon: Icon(
-                      speaking ? Icons.volume_up : Icons.play_arrow,
-                      color: AppColors.background,
+                    child: Container(
+                      width: 70,
+                      height: 70,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isBusy ? Colors.grey : Colors.red,
+                        border: Border.all(color: Colors.white, width: 4),
+                      ),
+                      child: Icon(
+                        isBusy ? Icons.hourglass_top : Icons.fiber_manual_record,
+                        color: Colors.white,
+                        size: 40,
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
+          ),
 
-            /* ElevatedButton.icon(
-            onPressed: playaudio,
-            icon: Icon(speaking? Icons.volume_up : Icons.play_arrow,
-            ),
-            label: Text("",style: TextStyle(color: AppColors.background,fontSize: 18),),
-            style:  ElevatedButton.styleFrom(
-              backgroundColor: AppColors.n10,
-              iconSize: 30,
-              iconColor: AppColors.background,
-              padding: EdgeInsets.symmetric(horizontal: 25,vertical: 12),
-            ),
-            label: Text("play voice translation",
-            style: TextStyle(color: AppColors.background,fontSize: 18),),
-            style:  ElevatedButton.styleFrom(
-              backgroundColor: AppColors.n10,
-              iconSize: 30,
-              iconColor: AppColors.background,
-              padding: EdgeInsets.symmetric(horizontal: 25,vertical: 12),
-            ),
-          ),*/
-          ],
-        ));
+          const Gap(10),
+
+          Row(
+            children: [
+              const Gap(20),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.n7, width: 2),
+                  ),
+                  child: Text(
+                    translatedText,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.n9,
+                    ),
+                  ),
+                ),
+              ),
+              const Gap(10),
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.n10,
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: IconButton(
+                  onPressed: playSTTAudio,
+                  icon: Icon(
+                    speaking ? Icons.volume_up : Icons.play_arrow,
+                    color: AppColors.background,
+                  ),
+                ),
+              ),
+              const Gap(20),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }

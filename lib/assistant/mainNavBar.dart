@@ -39,11 +39,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       pages = const [
         SettingsPage(), // 0
         AssistanceRequestPage(), // 1
-<<<<<<< HEAD
-        Homepage(), // 2
-=======
-        Vediocall(), // 2
->>>>>>> ef558c94cb9021c63c446dc62395e1a256c972b4
+        Vediocall(), // 2ب
         AssistantPage(), // 3
       ];
     } else {

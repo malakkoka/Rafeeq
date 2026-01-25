@@ -1,6 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:camera/camera.dart';
 import 'package:front/auth/call/livecall.dart';
+import 'package:front/auth/call/video_call.dart';
 import 'package:front/main.dart';
 import 'package:front/provider/user_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -49,7 +50,7 @@ class _CallingState extends State<Calling> {
   if (mounted) {  // تحقق من أن الـ widget لا يزال موجودًا
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const Livecall()), // الانتقال للـ LiveCall
+      MaterialPageRoute(builder: (_) => const VideoCall()), // الانتقال للـ LiveCall
     );
   }
 }
