@@ -36,6 +36,11 @@ import 'package:front/homepage.dart';
 import 'package:front/provider/user_provider.dart';
 
 
+///////////////////
+final GlobalKey<NavigatorState> navigatorKey =
+    GlobalKey<NavigatorState>();
+
+
 List<CameraDescription>? cameras;
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -86,10 +91,8 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     _initFirebaseMessaging();
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) { //لسماع الإشعارات التي تصل أثناء تشغيل التطبيق في الواجهة الأمامية.
-      print('Foreground message: ${message.notification?.title}'); 
-      // هنا يمكنك إضافة الكود الذي يعرض إشعار للمستخدم داخل التطبيق
-      // مثل عرض Dialog أو نافذة إشعار باستخدام Scaffold
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Foreground message: ${message.notification?.title}');
       if (message.notification != null) {
         print('Notification Title: ${message.notification?.title}');
         print('Notification Body: ${message.notification?.body}');
@@ -108,12 +111,14 @@ class _MyAppState extends State<MyApp> {
     print("FCM TOKEN: $token");
 
     if (token != null) {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final userProvider =
+          Provider.of<UserProvider>(context, listen: false);
       userProvider.setDeviceToken(token);
     }
 
     FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final userProvider =
+          Provider.of<UserProvider>(context, listen: false);
       userProvider.setDeviceToken(newToken);
     });
   }
@@ -121,6 +126,11 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      /// ===============================
+      /// ✅ ADD THIS LINE ONLY
+      /// ===============================
+      navigatorKey: navigatorKey,
+
       color: AppColors.background,
       debugShowCheckedModeBanner: false,
       home: Login(),

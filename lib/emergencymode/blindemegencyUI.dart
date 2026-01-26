@@ -12,72 +12,132 @@ class BlindEmergencyUI extends StatefulWidget {
 
 class _BlindEmergencyUIState extends State<BlindEmergencyUI> {
   final FlutterTts tts = FlutterTts();
-  Timer? timer;
-  bool isTalking = true; // للتحكم في التحدث
-  bool isStable = false; // للتحقق من استقرار الحركة
-  bool isEmergencyResolved = false; // لتحديد إذا تم تأكيد الطوارئ
+
+  StreamSubscription? accelerometerSub;
+  Timer? speakingTimer;
+  Timer? emergencyTimer;
+
+  bool emergencyActive = false;
+  bool movementDetectedAfterFall = false;
+  bool awaitingUserConfirmation = false;
+
+  static const double fallThreshold = 40; // تسارع قوي = سقوط
+  static const Duration speakingDuration = Duration(seconds: 45);
+  static const Duration speakInterval = Duration(seconds: 2);
 
   @override
   void initState() {
     super.initState();
-    startSpeaking();
-    startListeningToAccelerometer();
+    _configureTts();
+    _listenToAccelerometer();
   }
 
-  void startSpeaking() {
-    // تكرار "I am here" حتى يتم التوقف
-    timer = Timer.periodic(const Duration(seconds: 2), (_) async {
-      if (isTalking) {
-        await tts.speak("I am here");
+  /// إعدادات الصوت – مهمة جدًا للكفيف
+  Future<void> _configureTts() async {
+    await tts.setLanguage("en-US");
+    await tts.setSpeechRate(0.45); // أبطأ من الطبيعي
+    await tts.setVolume(1.0); // أعلى صوت
+    await tts.setPitch(1.0); // نبرة طبيعية
+  }
+
+  /// مراقبة التسارع
+  void _listenToAccelerometer() {
+    accelerometerSub = accelerometerEvents.listen((event) {
+      final double total =
+          event.x * event.x + event.y * event.y + event.z * event.z;
+
+      // اشتباه سقوط
+      if (total > fallThreshold && !emergencyActive) {
+        _startEmergencyFlow();
+      }
+
+      // حركة بعد السقوط
+      if (emergencyActive &&
+          !movementDetectedAfterFall &&
+          total > 15) {
+        movementDetectedAfterFall = true;
+        _onPhoneFound();
       }
     });
   }
 
-  void startListeningToAccelerometer() {
-    accelerometerEvents.listen((event) {
-      // حساب التسارع
-      final total = event.x * event.x + event.y * event.y + event.z * event.z;
+  /// بدء وضع الطوارئ
+  void _startEmergencyFlow() {
+    emergencyActive = true;
+    movementDetectedAfterFall = false;
 
-      if (total < 10 && !isStable) {
-        // إذا كان التسارع صغيرًا فهذا يعني أن الهاتف ثابت
-        setState(() {
-          isStable = true;
-        });
-        stopSpeaking();
-        // التحدث بـ "Are you okay? If you are, tap the screen."
-        askIfOkay();
-      } else if (total > 30 && isStable) {
-        // إذا كان التسارع كبيرًا فهذا يعني أن الهاتف بدأ يتحرك
-        setState(() {
-          isStable = false;
-        });
-        startSpeaking(); // إعادة التحدث
+    _startSpeakingIamHere();
+
+    // عدّاد 45 ثانية
+    emergencyTimer = Timer(speakingDuration, () {
+      if (!movementDetectedAfterFall) {
+        _triggerEmergency();
       }
     });
   }
 
-  void stopSpeaking() {
-    setState(() {
-      isTalking = false;
+  /// تكرار "I am here"
+  void _startSpeakingIamHere() {
+    speakingTimer =
+        Timer.periodic(speakInterval, (_) async {
+      await tts.speak("I am here");
     });
-    tts.stop(); // إيقاف التحدث عندما يكون الهاتف ثابتًا
   }
 
-  void askIfOkay() {
-    tts.speak("Are you okay? If you are, tap the screen.");
+  /// عند العثور على الهاتف
+  void _onPhoneFound() {
+    speakingTimer?.cancel();
+    emergencyTimer?.cancel();
+
+    awaitingUserConfirmation = true;
+
+    tts.speak(
+      "If you are okay, tap the screen now.",
+    );
+
+    // انتظار ضغط المستخدم (10 ثواني مثلاً)
+    Timer(const Duration(seconds: 10), () {
+      if (awaitingUserConfirmation) {
+        _triggerEmergency();
+      }
+    });
   }
 
-  void resolveEmergency() {
-    setState(() {
-      isEmergencyResolved = true;
-    });
+  /// المستخدم أكد أنه بخير
+  void _resolveEmergency() {
+    awaitingUserConfirmation = false;
+    emergencyActive = false;
+
     tts.stop();
-    Navigator.pop(context); // العودة إلى الصفحة السابقة
+
+    Navigator.pop(context);
+  }
+
+  /// تصعيد الطوارئ (إشعار المساعد)
+  void _triggerEmergency() {
+    awaitingUserConfirmation = false;
+    emergencyActive = false;
+
+    tts.stop();
+
+    // TODO: هنا ترسل إشعار للمساعد (API / Firebase / SMS)
+    // مثال:
+    // sendEmergencyNotification();
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Emergency alert sent to assistant"),
+        ),
+      );
+    }
   }
 
   @override
   void dispose() {
-    timer?.cancel();
+    accelerometerSub?.cancel();
+    speakingTimer?.cancel();
+    emergencyTimer?.cancel();
     tts.stop();
     super.dispose();
   }
@@ -86,29 +146,22 @@ class _BlindEmergencyUIState extends State<BlindEmergencyUI> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (!isEmergencyResolved) {
-          resolveEmergency(); // إنهاء حالة الطوارئ عند الضغط على الشاشة
+        if (awaitingUserConfirmation) {
+          _resolveEmergency();
         }
       },
       child: Scaffold(
         backgroundColor: Colors.black,
         body: Center(
-          child: isEmergencyResolved
-              ? SizedBox.shrink() // إذا تم حل الطوارئ، لا يظهر شيء
-              : isStable
-                  ? Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "If you are okay, tap the screen",
-                          style: TextStyle(color: Colors.white, fontSize: 20),
-                        ),
-                      ],
-                    )
-                  : const Text(
-                      "I am here",
-                      style: TextStyle(color: Colors.white, fontSize: 20),
-                    ),
+          child: Text(
+            emergencyActive
+                ? "Emergency mode active"
+                : "Monitoring...",
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+            ),
+          ),
         ),
       ),
     );

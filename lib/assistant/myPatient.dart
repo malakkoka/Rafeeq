@@ -9,6 +9,7 @@ import 'package:front/constats.dart';
 import 'package:front/services/token_sevice.dart';
 import 'package:http/http.dart' as http;
 import 'package:geocoding/geocoding.dart';
+import 'package:flutter/services.dart';
 
 class MyPatient extends StatefulWidget {
   const MyPatient({super.key});
@@ -52,7 +53,10 @@ class _MyPatientState extends State<MyPatient> {
     super.initState();
     _loadPatientFromStorage();
     _loadPatientFromApi();
-    _refreshData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _refreshData();
+    });
   }
 
   Future<void> _loadPatientFromStorage() async {
@@ -126,7 +130,10 @@ class _MyPatientState extends State<MyPatient> {
           isEdit: true,
         ),
       ),
-    ).then((_) => _refreshData());
+    ).then((_) {
+      if (!mounted) return;
+      _refreshData();
+    });
   }
 
   @override
@@ -251,22 +258,32 @@ class _MyPatientState extends State<MyPatient> {
             ),
             const SizedBox(height: 12),
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(Icons.my_location, size: 18, color: Colors.grey),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    currentLocation,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      height: 1.4,
-                      color: Colors.black54,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    const Icon(Icons.my_location, size: 18, color: Colors.grey),
+    const SizedBox(width: 8),
+    Expanded(
+      child: SelectableText(
+        currentLocation,
+        style: const TextStyle(
+          fontSize: 14,
+          height: 1.4,
+          color: Colors.black54,
+        ),
+      ),
+    ),
+    IconButton(
+      icon: const Icon(Icons.copy, size: 18),
+      onPressed: () {
+        Clipboard.setData(ClipboardData(text: currentLocation));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Location copied')),
+        );
+      },
+    ),
+  ],
+),
+
             const SizedBox(height: 14),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
@@ -367,11 +384,9 @@ class _MyPatientState extends State<MyPatient> {
   Widget _buildRequestCard(Map<String, String> request) {
     final _state = request['state'] ?? 'Pending';
 
-    final bool canEdit =
-        _state == 'Pending' || _state == 'Pending Approval';
+    final bool canEdit = _state == 'Pending' || _state == 'Pending Approval';
 
-    final bool canArchive =
-        _state == 'Accepted' ||
+    final bool canArchive = _state == 'Accepted' ||
         _state == 'In Progress' ||
         _state == 'Completed';
 
@@ -407,7 +422,14 @@ class _MyPatientState extends State<MyPatient> {
                         fontSize: 15.5, fontWeight: FontWeight.bold),
                   ),
                 ),
-                _buildStatusChip(_state),
+                Row(
+  children: [
+    _buildStatusChip(_state),
+    const SizedBox(width: 8),
+    _buildQuickActionChip(_state, request['id']!),
+  ],
+),
+
               ],
             ),
             const SizedBox(height: 8),
@@ -444,9 +466,7 @@ class _MyPatientState extends State<MyPatient> {
                 if (canEdit || canArchive)
                   IconButton(
                     icon: Icon(
-                      canEdit
-                          ? Icons.delete_outline
-                          : Icons.archive_outlined,
+                      canEdit ? Icons.delete_outline : Icons.archive_outlined,
                     ),
                     onPressed: () => _handleDelete(request),
                   ),
@@ -537,5 +557,61 @@ class _MyPatientState extends State<MyPatient> {
     if (response.statusCode == 200) {
       _refreshData();
     }
+  }
+
+  Widget _buildQuickActionChip(String status, String postId) {
+    if (status == 'Accepted') {
+      return _actionChip(
+        label: 'Start',
+        color: Colors.blue,
+        icon: Icons.play_arrow_rounded,
+        onTap: () => _updatePostState(postId, 4), // In Progress
+      );
+    }
+
+    if (status == 'In Progress') {
+      return _actionChip(
+        label: 'Done',
+        color: Colors.green,
+        icon: Icons.check_rounded,
+        onTap: () => _updatePostState(postId, 2), // Completed
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  Widget _actionChip({
+    required String label,
+    required Color color,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: color),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
