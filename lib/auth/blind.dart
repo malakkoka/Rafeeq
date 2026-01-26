@@ -1,6 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:front/auth/call/calling.dart';
 import 'package:front/component/customdrawer.dart';
 import 'package:front/component/locationtracking.dart';
 import 'package:front/main.dart';
@@ -13,6 +14,8 @@ import 'package:http/http.dart' as http;
 import 'package:front/color.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+
 
 class Blind extends StatefulWidget {
   const Blind({super.key});
@@ -28,9 +31,17 @@ class _BlindState extends State<Blind> {
   String? lastPlayedAudio;
   Timer? captureTimer;
   bool isSending = false;
+  bool isCameraActive = true;
+  int _tapCount = 0;
+DateTime? _lastTapTime;
+
+//final FlutterLocalNotificationsPlugin notificationsPlugin =
+  //  FlutterLocalNotificationsPlugin();
 
   final AudioPlayer audioPlayer = AudioPlayer();
   final List<String> audioQueue = [];
+  final FlutterTts flutterTts = FlutterTts();
+
   bool isSpeaking = false;
   String lastSpokenText = '';
   @override
@@ -88,6 +99,39 @@ class _BlindState extends State<Blind> {
       print("====================Error: $e");
     }
   }
+  //========
+  void startVideoCall() {
+  debugPrint("VIDEO CALL STARTED");
+  stopCamera();
+ Navigator.push(
+   context,
+   MaterialPageRoute(builder: (_) => Calling()),
+ );
+}
+
+//=========vedio call taps
+  void handleBlindGesture() {
+  final now = DateTime.now();
+
+  if (_lastTapTime == null ||
+      now.difference(_lastTapTime!) > const Duration(seconds: 2)) {
+    _tapCount = 1;
+  } else {
+    _tapCount++;
+  }
+
+  _lastTapTime = now;
+
+  if (_tapCount == 3) {
+    _tapCount = 0;
+
+    // تأكيد صوتي
+    flutterTts.speak("Starting video call");
+
+    // تشغيل الكول
+    startVideoCall();
+  }
+}
 
 
 //===========get usertype by token =============
@@ -148,15 +192,36 @@ Future<bool> checkAudioExists(String url) async {
   final res = await http.head(Uri.parse(url));
   return res.statusCode == 200;
 }*/
+//=============stop camera
+  void stopCamera() {
+  captureTimer?.cancel();
+  captureTimer = null;
+
+  if (controller.value.isInitialized) {
+    controller.dispose();
+  }
+
+  setState(() {
+    isCameraActive = false;
+    isReady = false;
+  });
+}
+
 
 //==================captureAndSend =================
 
+
+
+
   Future<void> captureAndSend() async {
     debugPrint("CAPTURE STARTED");
+    if (!isCameraActive) return;
 
     if (!controller.value.isInitialized) return;
     if (isSending) return;
     if (isSpeaking) return; // مهم
+   // if (isSending && audioQueue.length > 3) return;
+
 
     try {
       isSending = true;
@@ -187,7 +252,7 @@ Future<bool> checkAudioExists(String url) async {
         debugPrint("AUDIO URL: $audioUrl");
 
         if (audioUrl != lastPlayedAudio) {
-          await Future.delayed(const Duration(seconds: 1));
+          await Future.delayed(const Duration(milliseconds:1000));
           audioQueue.add(audioUrl);
           playNextIfIdle();
         }
@@ -270,18 +335,21 @@ Future<bool> checkAudioExists(String url) async {
 
   // ================= UI =================
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+ @override
+Widget build(BuildContext context) {
+  return GestureDetector(
+    behavior: HitTestBehavior.opaque, // 👈 مهم جداً
+    onTapDown: (_) => handleBlindGesture(), // 👈 هنا السحر
+    child: Scaffold(
       backgroundColor: AppColors.background,
       drawer: CustomDrawer(),
       appBar: AppBar(
         title: const Text(
           "   Blind Page",
-          style:
-              TextStyle(color: AppColors.background, fontWeight: FontWeight.w500
-                  //TextAlign.center,
-                  ),
+          style: TextStyle(
+            color: AppColors.background,
+            fontWeight: FontWeight.w500,
+          ),
         ),
         backgroundColor: AppColors.n10,
       ),
@@ -294,17 +362,15 @@ Future<bool> checkAudioExists(String url) async {
             left: MediaQuery.of(context).size.width * 0.05,
             child: Container(
               height: 600,
-              //color: AppColors.c7,
               width: MediaQuery.of(context).size.width * 0.9,
               decoration: BoxDecoration(
-                color: Color.fromARGB(255, 251, 187, 131),
+                color: const Color.fromARGB(255, 251, 187, 131),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: Color.fromARGB(255, 251, 187, 131),
+                  color: const Color.fromARGB(255, 251, 187, 131),
                   width: 10,
                 ),
               ),
-              //#
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(17),
                 child: isReady
@@ -314,14 +380,12 @@ Future<bool> checkAudioExists(String url) async {
             ),
           ),
 
-          const SizedBox(height: 10),
-
           // ===== الصوت =====
           Positioned(
             bottom: 15,
             left: MediaQuery.of(context).size.width * 0.40,
             child: AvatarGlow(
-              glowColor: Color.fromARGB(255, 251, 187, 131),
+              glowColor: const Color.fromARGB(255, 251, 187, 131),
               animate: isSpeaking,
               duration: const Duration(milliseconds: 1500),
               child: const CircleAvatar(
@@ -337,6 +401,7 @@ Future<bool> checkAudioExists(String url) async {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

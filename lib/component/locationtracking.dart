@@ -45,9 +45,28 @@ class Locationtracking {
 
   // دالة للحصول على الموقع الحالي
   Future<Position> currentlocation() async {
-    return await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    throw Exception('Location services are disabled.');
+  }
+
+  // 2️⃣ افحص الإذن
+  LocationPermission permission = await Geolocator.checkPermission();
+
+  // 3️⃣ إذا ما كان مأذون → اطلب
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+  }
+
+  // 4️⃣ إذا رفض نهائي
+  if (permission == LocationPermission.deniedForever) {
+    throw Exception('Location permissions are permanently denied.');
+  }
+
+  // 5️⃣ الآن خُد الموقع
+  return await Geolocator.getCurrentPosition(
+    desiredAccuracy: LocationAccuracy.high,
+  );
   }
 
   // دالة لإيقاف الـ Timer

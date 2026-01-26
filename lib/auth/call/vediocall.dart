@@ -1,15 +1,11 @@
-import 'package:audioplayers/audioplayers.dart';
-import 'package:camera/camera.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:front/auth/call/calling.dart';
-import 'package:front/main.dart';
-import 'dart:async';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+
 
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:front/color.dart';
+
 
 class Vediocall extends StatefulWidget {
   
@@ -26,6 +22,7 @@ class _VediocallState extends State<Vediocall> {
   bool isConnected = true;
   bool isCameraOn = true;
   bool isMicOn = true;
+
 
 
 

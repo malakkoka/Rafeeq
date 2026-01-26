@@ -40,7 +40,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
             hintText: widget.hinttext,
             hintStyle: TextStyle(fontSize: 16),
             labelStyle: TextStyle(
-                fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.darkprimary),
+                fontSize: 22, fontWeight: FontWeight.w500, color: Colors.black12),
             floatingLabelBehavior: FloatingLabelBehavior.always,
             contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 30),
             label: Container(
@@ -49,12 +49,12 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
             suffixIcon: widget.iconButton,
             enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide(width: 3, color: Color.fromARGB(255, 54, 35, 23))),
+                borderSide: BorderSide(width: 1, color:AppColors.n9)),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18),
               borderSide: BorderSide(
-                  color: Color.fromARGB(255, 54, 35, 23),
-                  width: 3,
+                  color: AppColors.n9,
+                  width:1,
             ),
             ),
       ),

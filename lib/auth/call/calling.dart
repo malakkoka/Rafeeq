@@ -41,16 +41,16 @@ class _CallingState extends State<Calling> {
   Future<void> simulateCall() async {
     await Future.delayed(Duration(seconds: 5));  // تأخير 5 ثواني
     setState(() {
-      isConnected = true;  // إذا تم الرد بنجاح
-      message = "Call Connected!";  // النص عند الاتصال
+      isConnected = true;  
+      message = "Call Connected!";  
     });
 
   if (isConnected) {
   await Future.delayed(Duration(seconds: 2)); // انتظار قبل الانتقال
-  if (mounted) {  // تحقق من أن الـ widget لا يزال موجودًا
+  if (mounted) {  
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const VideoCall()), // الانتقال للـ LiveCall
+      MaterialPageRoute(builder: (_) => const VideoCall()), 
     );
   }
 }

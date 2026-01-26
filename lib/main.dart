@@ -35,6 +35,7 @@ import 'package:front/homepage.dart';
 // Providers
 import 'package:front/provider/user_provider.dart';
 
+
 // =====================
 // GLOBALS
 // =====================
@@ -57,9 +58,12 @@ Future<void> main() async {
   cameras = await availableCameras();
   await Firebase.initializeApp();
 
+
   FirebaseMessaging.onBackgroundMessage(
     _firebaseMessagingBackgroundHandler,
   );
+
+  
 
   
   runApp(
@@ -137,6 +141,7 @@ class _MyAppState extends State<MyApp> {
         "Vediocall": (context) => Vediocall(),
         "livecall": (context) => Livecall(),
         "calling": (context) => Calling(),
+        
       },
     );
   }

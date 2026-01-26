@@ -287,8 +287,9 @@ class _DeafState extends State<Deaf> {
           const Gap(20),
           Container(
             margin: const EdgeInsets.all(20),
-            height: MediaQuery.of(context).size.height * .6,
-            width: MediaQuery.of(context).size.height * .5,
+            height: MediaQuery.of(context).size.height * 0.57,
+width: MediaQuery.of(context).size.width * 0.88,
+
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: AppColors.n4, width: 6),
@@ -297,11 +298,16 @@ class _DeafState extends State<Deaf> {
               alignment: Alignment.bottomRight,
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: ready
-                      ? CameraPreview(controller)
-                      : const Center(child: CircularProgressIndicator()),
-                ),
+  borderRadius: BorderRadius.circular(15),
+  child: ready
+      ? OverflowBox(
+          alignment: Alignment.center,
+          child: CameraPreview(controller),
+        )
+      : const Center(child: CircularProgressIndicator()),
+),
+
+
 
                 // زر التصوير/الإرسال
                 Padding(
@@ -316,7 +322,7 @@ class _DeafState extends State<Deaf> {
                       height: 70,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: isBusy ? Colors.grey : Colors.red,
+                        color: isBusy ? Colors.grey : AppColors.n4,
                         border: Border.all(color: Colors.white, width: 4),
                       ),
                       child: Icon(

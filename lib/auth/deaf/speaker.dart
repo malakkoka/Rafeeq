@@ -8,7 +8,9 @@ import 'package:http/http.dart' as http;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:front/color.dart';
 import 'package:front/main.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:video_player/video_player.dart';
+import 'package:path_provider/path_provider.dart';
 
 class Speaker extends StatefulWidget {
   const Speaker({super.key});
@@ -30,6 +32,9 @@ class _SpeakerState extends State<Speaker> {
   bool speaking =false;
   String? audiourl;
   String? signVideoUrl;
+  String? recordedFilePath;
+  //final AudioRecorder _recorder = AudioRecorder();
+
 
   
 
@@ -48,15 +53,78 @@ class _SpeakerState extends State<Speaker> {
   }
 
   
-  
+/*  
+//================start recording
+  Future<void> startRecording() async {
+  final micStatus = await Permission.microphone.request();
+  if (!micStatus.isGranted) return;
 
-  void startRecording(){
+  final dir = await getTemporaryDirectory();
+  recordedFilePath = '${dir.path}/voice.m4a';
 
+  await _recorder.start(
+    const RecordConfig(
+      encoder: AudioEncoder.aacLc,
+    ),
+    path: recordedFilePath!,
+  );
+
+  setState(() {
+    recording = true;
+  });
+}
+//=================stop recording
+  Future<void> stopRecording() async {
+  await _recorder.stop();
+
+  setState(() {
+    recording = false;
+  });
+
+  if (recordedFilePath != null) {
+    await sendVoiceToSign(recordedFilePath!);
   }
+}
 
-  void stopRecording(){
+/=============send voice
+  Future<void> sendVoiceToSign(String path) async {
+  setState(() => isLoading = true);
 
+  try {
+    var request = http.MultipartRequest(
+      "POST",
+      Uri.parse("http://138.68.104.187/api/account/sign-language/"),
+    );
+
+    request.fields["input_type"] = "audio";
+    request.files.add(
+      await http.MultipartFile.fromPath("input_data", path),
+    );
+
+    final response = await request.send();
+    final resBody = await response.stream.bytesToString();
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(resBody);
+      final url = data["video_url"];
+
+      await videoController?.dispose();
+      videoController = VideoPlayerController.network(url);
+      await videoController!.initialize();
+      videoController!
+        ..setLooping(true)
+        ..play();
+
+      setState(() {
+        signVideoUrl = url;
+      });
+    }
+  } catch (e) {
+    debugPrint("❌ Voice Error: $e");
+  } finally {
+    setState(() => isLoading = false);
   }
+}
 
 
   ///=============audio===============
@@ -69,7 +137,7 @@ class _SpeakerState extends State<Speaker> {
       setState(() => speaking = false);
     });
   }
-
+*/
   //=========send text
 
  Future<void> sendTextToSign() async {
@@ -133,6 +201,33 @@ void dispose() {
 
   super.dispose();
 }
+//===============clear==================
+  Future<void> clearAll() async {
+
+  try {
+    await audioPlayer.stop();
+  } catch (_) {}
+
+
+  if (videoController != null) {
+    await videoController!.pause();
+    await videoController!.dispose();
+    videoController = null;
+  }
+
+
+  setState(() {
+    textController.clear();
+    recording = false;
+    ready = false;
+    issending = false;
+    isLoading = false;
+    speaking = false;
+    audiourl = null;
+    signVideoUrl = null;
+  });
+}
+
 
 //====================ui==================
   @override
@@ -196,14 +291,7 @@ void dispose() {
                         color : recording ? AppColors.n10: AppColors.n10
                       ),
                       onPressed: () {
-                        setState(() {
-                          recording=!recording;
-                        });
-                        if (recording)
-                        {startRecording();}
-                        else{
-                          stopRecording();
-                        }
+                        
                       },)
                     ),),
                 ),
@@ -238,7 +326,7 @@ void dispose() {
                   Expanded(
                     
                       child: ElevatedButton(
-                        onPressed:(){}, 
+                        onPressed:clearAll, 
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.n1,
                           foregroundColor: Colors.white,
