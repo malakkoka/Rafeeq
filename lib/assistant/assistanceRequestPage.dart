@@ -4,14 +4,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:front/assistant/mainNavBar.dart';
 import 'package:front/assistant/selectLocationPage.dart';
-import 'package:front/auth/call/incomming.dart';
 import 'package:front/constats.dart';
 import 'package:front/services/token_sevice.dart';
 import 'package:http/http.dart' as http;
 import 'package:front/color.dart';
 
 import '../component/viewinfo.dart';
-
 class AssistanceRequestPage extends StatefulWidget {
   final String? postId;
   final String? initialContent;
@@ -29,6 +27,7 @@ class AssistanceRequestPage extends StatefulWidget {
 }
 
 class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
+  bool useHomeLocation = true;
   String? selectedType;
   String? patientType; // blind / deaf
 
@@ -228,14 +227,28 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
         ? otherTypeController.text.trim()
         : selectedType!;
 
+final user = await TokenService.getUser();
+final String? homeAddress = user?['patient']?['address'];
+
+final String? finalLocation = useHomeLocation
+    ? homeAddress
+    : selectedLocationLabel;
+
+if (finalLocation == null || finalLocation.isEmpty) {
+  _showSnack('Please select a location');
+  return;
+}
+
+
+
     final Map<String, dynamic> body = {
-      "title": assistanceType,
-      "content": notesController.text.trim(),
-      //"scheduled_at": scheduledDateTime.toIso8601String(),
-      "current_location": selectedLocationLabel, //رح يتعدللللل بالباك
-      "created_at": DateTime.now().toIso8601String(),
-      "city": 2, //رح تتعدل بالباك
-    };
+  "title": assistanceType,
+  "content": notesController.text.trim(),
+  "current_location": finalLocation,
+  "created_at": DateTime.now().toIso8601String(),
+  "city": 2, // مؤقت
+};
+
 
     try {
       final response = widget.isEdit
@@ -337,47 +350,72 @@ class _AssistanceRequestPageState extends State<AssistanceRequestPage> {
                 ),
               const SizedBox(height: 24),
               const _SectionTitle(title: 'Location'),
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: AppColors.n1),
-                  //padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const SelectLocationPage(),
-                    ),
-                  );
-                  if (result != null) {
-                    setState(() {
-                      selectedLat = result['lat'];
-                      selectedLng = result['lng'];
-                      selectedLocationLabel =
-                          'Lat: ${selectedLat!.toStringAsFixed(5)}, '
-                          'Lng: ${selectedLng!.toStringAsFixed(5)}';
-                    });
-                  }
-                },
-                icon: const Icon(Icons.map, color: AppColors.n1),
-                label: Text(
-                  selectedLocationLabel ?? 'Select Location',
-                  style:
-                      TextStyle(color: const Color.fromARGB(221, 28, 27, 27)),
-                ),
-              ),
-              const SizedBox(height: 24),
-              //////teessttt
-              IconButton(onPressed: (){
-                Navigator.push(
-  context,
-  MaterialPageRoute(builder: (_) => const Incomming()),
-);
 
-              }, icon: Icon(Icons.call)),
+Column(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    // ===== HOME LOCATION =====
+    RadioListTile<bool>(
+      value: true,
+      groupValue: useHomeLocation,
+      activeColor: AppColors.n1,
+      title: const Text('Patient home location'),
+      subtitle: const Text('Use patient home address'),
+      onChanged: (value) {
+        setState(() {
+          useHomeLocation = true;
+          selectedLocationLabel = null;
+          selectedLat = null;
+          selectedLng = null;
+        });
+      },
+    ),
+
+    // ===== CUSTOM LOCATION =====
+    RadioListTile<bool>(
+      value: false,
+      groupValue: useHomeLocation,
+      activeColor: AppColors.n1,
+      title: const Text('Choose another location'),
+      onChanged: (value) {
+        setState(() {
+          useHomeLocation = false;
+        });
+      },
+    ),
+
+    if (!useHomeLocation)
+      Padding(
+        padding: const EdgeInsets.only(left: 16, top: 8),
+        child: OutlinedButton.icon(
+          icon: const Icon(Icons.map, color: AppColors.n1),
+          label: Text(
+            selectedLocationLabel ?? 'Select location from map',
+          ),
+          onPressed: () async {
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const SelectLocationPage(),
+              ),
+            );
+
+            if (result != null) {
+              setState(() {
+                selectedLat = result['lat'];
+                selectedLng = result['lng'];
+                selectedLocationLabel =
+                    'Lat: ${selectedLat!.toStringAsFixed(5)}, '
+                    'Lng: ${selectedLng!.toStringAsFixed(5)}';
+              });
+            }
+          },
+        ),
+      ),
+  ],
+),
+
+              const SizedBox(height: 24),
               const _SectionTitle(title: 'Date & Time of Assistance'),
               ListTile(
                 contentPadding: EdgeInsets.zero,

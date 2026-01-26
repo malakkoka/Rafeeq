@@ -226,6 +226,16 @@ class _SignupState extends State<Signup> {
                   if (result["success"] == true) {
                     final userData = result["data"]["user"];
                     final role = selectedRole;
+if (role == "Assistant" || role == "Volunteer") {
+  // TODO: Show success dialog for Assistant and Volunteer
+AwesomeDialog(
+            context: context,
+            dialogType: DialogType.success,
+            title: "Welcome to the App!",
+            desc: "You have successfully signed up as a $role.",
+            btnOkOnPress: () {},
+          ).show();
+        }
 
                     if (role == "Assistant") {
                       final assistantId = userData["id"];

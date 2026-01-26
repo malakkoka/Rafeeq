@@ -8,25 +8,50 @@ import 'package:front/color.dart';
 import 'package:front/constats.dart';
 import 'package:front/services/token_sevice.dart';
 import 'package:http/http.dart' as http;
+import 'package:geocoding/geocoding.dart';
 
-class AssistantPage extends StatefulWidget {
-  const AssistantPage({super.key});
+class MyPatient extends StatefulWidget {
+  const MyPatient({super.key});
 
   @override
-  State<AssistantPage> createState() => _AssistantPageState();
+  State<MyPatient> createState() => _MyPatientState();
 }
 
-class _AssistantPageState extends State<AssistantPage> {
+Future<String> getAddressFromLatLng(String location) async {
+  try {
+    final parts = location.split(',');
+    final double lat = double.parse(parts[0]);
+    final double lng = double.parse(parts[1]);
+
+    final placemarks = await placemarkFromCoordinates(lat, lng);
+
+    if (placemarks.isNotEmpty) {
+      final place = placemarks.first;
+
+      return [
+        place.street,
+        place.locality,
+        place.administrativeArea,
+      ].where((e) => e != null && e!.isNotEmpty).join(', ');
+    }
+  } catch (e) {
+    debugPrint('Geocoding error: $e');
+  }
+
+  return 'Location not available';
+}
+
+class _MyPatientState extends State<MyPatient> {
   bool isLoading = false;
-
+  Map<String, dynamic>? patientApi;
   Map<String, dynamic>? patient;
-
   List<Map<String, String>> recentRequests = [];
 
   @override
   void initState() {
     super.initState();
     _loadPatientFromStorage();
+    _loadPatientFromApi();
     _refreshData();
   }
 
@@ -44,15 +69,19 @@ class _AssistantPageState extends State<AssistantPage> {
     });
   }
 
+  // ================= DELETE / ARCHIVE =================
+
   Future<void> _handleDelete(Map<String, String> request) async {
-    final status = request['status'];
+    final state = request['state'];
     final postId = request['id'];
 
     if (postId == null) return;
 
-    if (status == 'Pending') {
+    if (state == 'Pending' || state == 'Pending Approval') {
       await _deletePostHard(postId);
-    } else if (status == 'Accepted' || status == 'Completed') {
+    } else if (state == 'Accepted' ||
+        state == 'In Progress' ||
+        state == 'Completed') {
       await _archivePost(postId);
     }
   }
@@ -159,7 +188,7 @@ class _AssistantPageState extends State<AssistantPage> {
     );
   }
 
-  //WIDGETS
+  // ================= WIDGETS =================
 
   Widget _buildProfileHeader() {
     return Row(
@@ -196,23 +225,74 @@ class _AssistantPageState extends State<AssistantPage> {
   }
 
   Widget _buildPatientStatusCard() {
-    return Card(
-      color: AppColors.dialogcolor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      child: const Padding(
-        padding: EdgeInsets.all(16),
+    final String currentLocation =
+        patientApi?['current_location'] ?? 'Location not available';
+
+    final bool inHome = patientApi?['in_home'] ?? false;
+    final Color statusColor = inHome ? Colors.green : Colors.orange;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9FAF9),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.black.withOpacity(0.05)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Patient Status',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            SizedBox(height: 10),
+            const Text(
+              'Current Location',
+              style: TextStyle(
+                fontSize: 15.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.location_on, color: AppColors.n1),
-                SizedBox(width: 8),
-                Text('Location: Home'),
+                const Icon(Icons.my_location, size: 18, color: Colors.grey),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    currentLocation,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      height: 1.4,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ),
               ],
+            ),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+              decoration: BoxDecoration(
+                color: statusColor.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    inHome ? Icons.home_outlined : Icons.directions_walk,
+                    size: 17,
+                    color: statusColor,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    inHome ? 'At Home' : 'Not At Home',
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      color: statusColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -220,19 +300,16 @@ class _AssistantPageState extends State<AssistantPage> {
     );
   }
 
-  //SORT
+  // ================= DATA =================
 
   void _sortRequests() {
     const order = {'Pending': 0, 'Accepted': 1, 'Completed': 2};
-
     recentRequests.sort((a, b) {
       final aOrder = order[a['state']] ?? 3;
       final bOrder = order[b['state']] ?? 3;
       return aOrder.compareTo(bOrder);
     });
   }
-
-  //FETCH POSTS
 
   Future<void> _refreshData() async {
     final token = await TokenService.getToken();
@@ -262,8 +339,6 @@ class _AssistantPageState extends State<AssistantPage> {
     }
   }
 
-  // HELPERS
-
   String _mapStateToStatus(dynamic state) {
     switch (state) {
       case 0:
@@ -272,6 +347,10 @@ class _AssistantPageState extends State<AssistantPage> {
         return 'Accepted';
       case 2:
         return 'Completed';
+      case 3:
+        return 'Pending Approval';
+      case 4:
+        return 'In Progress';
       default:
         return 'Unknown';
     }
@@ -283,163 +362,103 @@ class _AssistantPageState extends State<AssistantPage> {
     return '${dt.day}/${dt.month}/${dt.year} - ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
   }
 
-  String _extractLine(String content, String key) {
-    final lines = content.split('\n');
-    try {
-      return lines
-          .firstWhere((line) => line.startsWith('$key:'))
-          .replaceFirst('$key:', '')
-          .trim();
-    } catch (_) {
-      return '';
-    }
-  }
+  // ================= CARD =================
 
   Widget _buildRequestCard(Map<String, String> request) {
-    final int volunteers = int.tryParse(request['volunteersCount'] ?? '0') ?? 0;
-
     final _state = request['state'] ?? 'Pending';
-    final _color = _statusColor(_state);
 
-    final _title =
-        request['title'] ?? 'Help Request'; // نعرض النوع كعنوان // عرض التاريخ
+    final bool canEdit =
+        _state == 'Pending' || _state == 'Pending Approval';
+
+    final bool canArchive =
+        _state == 'Accepted' ||
+        _state == 'In Progress' ||
+        _state == 'Completed';
+
+    final _color = _statusColor(_state);
+    final _title = request['title'] ?? 'Help Request';
     final createdDate = request['created_at'] != null
         ? formatDateTime(request['created_at']!)
-        : 'Not Available';
-    print("Created At: ${request['created_at']}");
+        : '';
 
     final _notes = request['content'] ?? '';
 
     return Card(
-        color: AppColors.dialogcolor,
-        margin: const EdgeInsets.only(bottom: 10),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      color: AppColors.dialogcolor,
+      margin: const EdgeInsets.only(bottom: 10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CircleAvatar(
-                      radius: 17,
-                      backgroundColor: _color.withOpacity(0.15),
-                      child: Icon(_statusIcon(_state), color: _color, size: 18),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _title,
-                            style: const TextStyle(
-                                fontSize: 15.5, fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        if (_state == 'Pending' && volunteers > 0) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  PostVolunteersPage(postId: request['id']!),
-                            ),
-                          );
-                        }
-                      },
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          _buildStatusChip(_state),
-                          if (_state == 'Pending' && volunteers > 0)
-                            Positioned(
-                              top: -6,
-                              right: -6,
-                              child: Container(
-                                width: 18,
-                                height: 18,
-                                alignment: Alignment.center,
-                                decoration: const BoxDecoration(
-                                  color: Colors.redAccent,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Text(
-                                  volunteers.toString(),
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
+                CircleAvatar(
+                  radius: 17,
+                  backgroundColor: _color.withOpacity(0.15),
+                  child: Icon(_statusIcon(_state), color: _color, size: 18),
                 ),
-
-                const SizedBox(height: 8),
-                if (_notes.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Text(
-                      _notes,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        color: Colors.black87,
-                        height: 1.4,
-                      ),
-                    ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    _title,
+                    style: const TextStyle(
+                        fontSize: 15.5, fontWeight: FontWeight.bold),
                   ),
-
-                const SizedBox(height: 10),
-                if (createdDate.isNotEmpty)
-                  _buildInfoRow(Icons.schedule, createdDate),
-
-                /// ===== ACTIONS =====
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    if (_state == 'Pending')
-                      IconButton(
-                        icon: const Icon(Icons.edit_outlined),
-                        onPressed: () => _goToEditRequest(request),
-                      ),
-                    if (_state == 'Pending')
-                      IconButton(
-                        icon: const Icon(Icons.people_outline),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => PostVolunteersPage(
-                                postId: request['id']!,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    IconButton(
-                      icon: Icon(
-                        _state == 'Pending'
-                            ? Icons.delete_outline
-                            : Icons.archive_outlined,
-                      ),
-                      onPressed: () => _handleDelete(request),
-                    ),
-                  ],
                 ),
+                _buildStatusChip(_state),
               ],
-            )));
+            ),
+            const SizedBox(height: 8),
+            if (_notes.isNotEmpty)
+              Text(
+                _notes,
+                style: const TextStyle(fontSize: 15, height: 1.4),
+              ),
+            const SizedBox(height: 10),
+            if (createdDate.isNotEmpty)
+              _buildInfoRow(Icons.schedule, createdDate),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (canEdit)
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined),
+                    onPressed: () => _goToEditRequest(request),
+                  ),
+                if (canEdit)
+                  IconButton(
+                    icon: const Icon(Icons.people_outline),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PostVolunteersPage(
+                            postId: request['id']!,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                if (canEdit || canArchive)
+                  IconButton(
+                    icon: Icon(
+                      canEdit
+                          ? Icons.delete_outline
+                          : Icons.archive_outlined,
+                    ),
+                    onPressed: () => _handleDelete(request),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildInfoRow(IconData icon, String text) {
-    if (text.isEmpty || text == 'null') return const SizedBox();
     return Row(
       children: [
         Icon(icon, size: 16, color: Colors.grey),
@@ -481,6 +500,42 @@ class _AssistantPageState extends State<AssistantPage> {
         return Icons.handshake;
       default:
         return Icons.hourglass_bottom;
+    }
+  }
+
+  Future<void> _loadPatientFromApi() async {
+    final token = await TokenService.getToken();
+    final user = await TokenService.getUser();
+    if (user == null) return;
+
+    final int patientId = user['patient']['id'];
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/account/users/$patientId/'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200 && mounted) {
+      setState(() {
+        patientApi = jsonDecode(response.body);
+      });
+    }
+  }
+
+  Future<void> _updatePostState(String postId, int newState) async {
+    final token = await TokenService.getToken();
+
+    final response = await http.patch(
+      Uri.parse('$baseUrl/api/account/posts/$postId/'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'state': newState}),
+    );
+
+    if (response.statusCode == 200) {
+      _refreshData();
     }
   }
 }

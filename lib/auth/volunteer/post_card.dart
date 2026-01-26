@@ -13,7 +13,8 @@ class PostCard extends StatelessWidget {
 
   const PostCard({
     super.key,
-    required this.post, required String postId,
+    required this.post,
+    required String postId,
   });
 
   @override
@@ -57,13 +58,13 @@ class PostCard extends StatelessWidget {
                         Colors.orange,
                       ),
                       SizedBox(height: 8),
-                      Text(
+                      /*Text(
                         "by $authorName",
                         style: const TextStyle(
                           fontSize: 12.5,
                           color: Colors.black45,
                         ),
-                      ),
+                      ),*/
                     ],
                   ),
                 ),
@@ -78,11 +79,10 @@ class PostCard extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 5),
             Text(
               post.content,
               style: const TextStyle(
-                fontSize: 15,
+                fontSize: 17,
                 height: 1.4,
                 color: Colors.black87,
               ),
@@ -121,13 +121,54 @@ class PostCard extends StatelessWidget {
                         ),
                       ),
                       onPressed: () async {
-                        await sendHelpRequest(post.id!); // تحديث الحالة
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => VolunteerActivityScreen(), // الانتقال إلى صفحة الأنشطة
-                          ),
+                        final bool? confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              /*title: const Text(
+                                'Confirm Help',
+                                style: TextStyle(fontWeight: FontWeight.w400),
+                              ),*/
+                              content: const Text(
+                                'Are you sure you want to help?',
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: const Text(
+                                    'No',
+                                    style: TextStyle(color: Colors.black),
+                                  ),
+                                ),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    elevation: 0,
+                                  ),
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: const Text(
+                                    'Yes',
+                                    style: TextStyle(color: Colors.black),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                         );
+
+                        if (confirmed == true) {
+                          await sendHelpRequest(post.id!); // تحديث الحالة
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => VolunteerActivityScreen(),
+                            ),
+                          );
+                        }
                       },
                       child: const Text(
                         "I can help",
@@ -190,7 +231,7 @@ class PostCard extends StatelessWidget {
 // دالة لتحديث حالة البوست
 Future<void> sendHelpRequest(int postId) async {
   final token = await TokenService.getToken();
-  await updatePostState(postId, 3);  // 3 تعني في انتظار موافقة المساعد
+  await updatePostState(postId, 3); // 3 تعني في انتظار موافقة المساعد
 
   final response = await http.post(
     Uri.parse('$baseUrl/api/account/posts/$postId/request-help/'),
@@ -270,4 +311,3 @@ String formatTimeAgoEn(String dateString) {
   if (diff.inDays < 7) return "${diff.inDays} days ago";
   return "${createdAt.day}/${createdAt.month}/${createdAt.year}";
 }
-

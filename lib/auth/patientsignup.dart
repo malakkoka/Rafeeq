@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:front/assistant/assistantpage.dart';
+import 'package:front/assistant/myPatient.dart';
 import 'package:front/color.dart';
 import 'package:front/component/custom_button_auth.dart';
 import 'package:front/component/password.dart';
@@ -324,7 +324,7 @@ class _PatientsignupState extends State<Patientsignup> {
                   final result = await registerPatient();
                   if (result["success"] == true) {
                     Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (_) => const AssistantPage()),
+                      MaterialPageRoute(builder: (_) => const MyPatient()),
                     );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(

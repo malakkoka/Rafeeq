@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:front/auth/call/vediocall.dart';
 import 'package:front/auth/volunteer/activityscreen.dart';
-import 'package:front/auth/volunteer/post_model.dart';
 import 'package:front/auth/volunteer/volunteerpage.dart';
 import 'package:front/color.dart';
 import 'package:front/component/viewinfo.dart';
-import 'package:front/homepage.dart';
 import 'package:front/settings.dart';
 
 // assistant pages
-import 'package:front/assistant/assistantpage.dart';
+import 'package:front/assistant/myPatient.dart';
 import 'package:front/assistant/assistanceRequestPage.dart';
 
 // volunteer pages
@@ -36,25 +34,19 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
 
     // تحديد الصفحات بناءً على الدور (Assistant أو Volunteer)
     if (widget.role == UserRole.assistant) {
-<<<<<<< HEAD
-      pages = [
-        const SettingsPage(), // 0
-        const AssistanceRequestPage(), // 1
-        const Homepage(), // 2
-=======
       pages = const [
         SettingsPage(), // 0
         AssistanceRequestPage(), // 1
         Vediocall(), // 2ب
->>>>>>> 68eb14e82717cccb5e9009926e5af18faa281504
-        AssistantPage(), // 3
+        MyPatient(), // 3
       ];
       _currentIndex = 3;
     } else {
       pages = [
-        const SettingsPage(), // 0
-        VolunteerHome(), // تمرير post هنا
-        VolunteerActivityScreen(), // تمرير post هنا
+        const SettingsPage(), //0
+        VolunteerActivityScreen(),// 1
+        VolunteerHome(), //2
+        
       ];
       _currentIndex = 2;
     }
