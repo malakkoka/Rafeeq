@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:camera/camera.dart';
 
 // Assistant
@@ -36,22 +36,13 @@ import 'package:front/homepage.dart';
 import 'package:front/provider/user_provider.dart';
 
 
-// =====================
-// GLOBALS
-// =====================
 List<CameraDescription>? cameras;
 
-// =====================
-// Firebase background
-// =====================
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   print('Background Message: ${message.messageId}');
 }
 
-// =====================
-// MAIN
-// =====================
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -66,6 +57,7 @@ Future<void> main() async {
   
 
   
+
   runApp(
     MultiProvider(
       providers: [
@@ -93,6 +85,16 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _initFirebaseMessaging();
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) { //لسماع الإشعارات التي تصل أثناء تشغيل التطبيق في الواجهة الأمامية.
+      print('Foreground message: ${message.notification?.title}'); 
+      // هنا يمكنك إضافة الكود الذي يعرض إشعار للمستخدم داخل التطبيق
+      // مثل عرض Dialog أو نافذة إشعار باستخدام Scaffold
+      if (message.notification != null) {
+        print('Notification Title: ${message.notification?.title}');
+        print('Notification Body: ${message.notification?.body}');
+      }
+    });
   }
 
   Future<void> _initFirebaseMessaging() async {

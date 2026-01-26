@@ -1,4 +1,3 @@
-// ignore_for_file: file_names
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:front/auth/call/vediocall.dart';
@@ -6,21 +5,19 @@ import 'package:front/auth/volunteer/activityscreen.dart';
 import 'package:front/auth/volunteer/volunteerpage.dart';
 import 'package:front/color.dart';
 import 'package:front/component/viewinfo.dart';
-import 'package:front/homepage.dart';
 import 'package:front/settings.dart';
 
 // assistant pages
-import 'package:front/assistant/assistantpage.dart';
+import 'package:front/assistant/myPatient.dart';
 import 'package:front/assistant/assistanceRequestPage.dart';
 
 // volunteer pages
-
 class MainNavigationPage extends StatefulWidget {
-  final UserRole role;
+  final UserRole role; 
 
   const MainNavigationPage({
     super.key,
-    required this.role,
+    required this.role, 
   });
 
   @override
@@ -28,26 +25,30 @@ class MainNavigationPage extends StatefulWidget {
 }
 
 class _MainNavigationPageState extends State<MainNavigationPage> {
-  int _currentIndex = 2;
   late List<Widget> pages;
+  int _currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
 
+    // تحديد الصفحات بناءً على الدور (Assistant أو Volunteer)
     if (widget.role == UserRole.assistant) {
       pages = const [
         SettingsPage(), // 0
         AssistanceRequestPage(), // 1
         Vediocall(), // 2ب
-        AssistantPage(), // 3
+        MyPatient(), // 3
       ];
+      _currentIndex = 3;
     } else {
-      pages = const [
-        SettingsPage(), // 0
-        VolunteerHome(), // 1
-        VolunteerActivityScreen(), //2
+      pages = [
+        const SettingsPage(), //0
+        VolunteerActivityScreen(),// 1
+        VolunteerHome(), //2
+        
       ];
+      _currentIndex = 2;
     }
   }
 
@@ -56,23 +57,24 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     return Scaffold(
       extendBody: true,
       backgroundColor: AppColors.background,
-      body: pages[_currentIndex],
+      body: pages[_currentIndex], // عرض الصفحة بناءً على الفهرس الحالي
       bottomNavigationBar: CurvedNavigationBar(
         index: _currentIndex,
         height: 48,
         backgroundColor: AppColors.background,
         color: AppColors.n1,
         animationCurve: Curves.linearToEaseOut,
-        items: _buildNavItems(),
+        items: _buildNavItems(),  // قائمة الأيقونات
         onTap: (index) {
           setState(() {
-            _currentIndex = index;
+            _currentIndex = index; // تحديث الفهرس عند النقر
           });
         },
       ),
     );
   }
 
+  // تحديد الأيقونات بناءً على الدور
   List<Widget> _buildNavItems() {
     if (widget.role == UserRole.assistant) {
       return const [

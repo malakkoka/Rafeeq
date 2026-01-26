@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:front/auth/volunteer/activityscreen.dart';
 import 'package:front/auth/volunteer/post_model.dart';
 import 'package:front/auth/volunteer/post_state_badge.dart';
 import 'package:front/color.dart';
@@ -12,11 +14,12 @@ class PostCard extends StatelessWidget {
   const PostCard({
     super.key,
     required this.post,
+    required String postId,
   });
 
   @override
   Widget build(BuildContext context) {
-    final String city = post.cityName;
+    final String city = post.city;
     final String serviceType = post.title;
     final String patientType = getPatientTypeFromPost(post);
     final String authorName = cleanAuthorName(post.author);
@@ -33,77 +36,58 @@ class PostCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// ================= TOP (TEXT + IMAGE) =================
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /// ===== LEFT CONTENT =====
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        "Assistance Request",
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        "by $authorName",
-                        style: const TextStyle(
-                          fontSize: 12.5,
-                          color: Colors.black45,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
                       Text(
                         serviceType,
                         style: TextStyle(
-                          fontSize: 13.5,
+                          fontSize: 15.5,
                           fontWeight: FontWeight.w600,
                           color: AppColors.primaryColor,
                         ),
                       ),
-                      const SizedBox(height: 10),
+                      SizedBox(height: 10),
                       _softChip(
                         getPatientIcon(patientType),
                         patientType,
                         Colors.orange,
                       ),
+                      SizedBox(height: 8),
+                      /*Text(
+                        "by $authorName",
+                        style: const TextStyle(
+                          fontSize: 12.5,
+                          color: Colors.black45,
+                        ),
+                      ),*/
                     ],
                   ),
                 ),
-
                 const SizedBox(width: 12),
-
-                /// ===== IMAGE (SAFE PLACE) =====
                 SizedBox(
-                  width: 90,
-                  height: 90,
+                  width: 100,
+                  height: 100,
                   child: Image.asset(
                     getImageByPatientType(patientType),
-                    fit: BoxFit.contain,
+                    fit: BoxFit.fitHeight,
                   ),
                 ),
               ],
             ),
-
-            const SizedBox(height: 12),
-
-            /// ================= CONTENT =================
             Text(
               post.content,
               style: const TextStyle(
-                fontSize: 13.5,
+                fontSize: 17,
                 height: 1.4,
                 color: Colors.black87,
               ),
             ),
-
             const SizedBox(height: 14),
-
             Wrap(
               spacing: 12,
               children: [
@@ -116,40 +100,15 @@ class PostCard extends StatelessWidget {
                     Text(city, style: const TextStyle(fontSize: 13)),
                   ],
                 ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.calendar_today,
-                        size: 14, color: Colors.black45),
-                    const SizedBox(width: 4),
-                    Text(
-                      post.created_at,
-                      style: const TextStyle(
-                        fontSize: 12.5,
-                        color: Colors.black54,
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
-
-            const SizedBox(height: 16),
-
-            /// ================= FOOTER =================
+            SizedBox(height: 10),
             Row(
               children: [
                 buildStateBadge(post.state ?? 0),
                 const SizedBox(width: 10),
-                Text(
-                  formatTimeAgoEn(post.created_at),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.black38,
-                  ),
-                ),
                 const Spacer(),
-                if (post.state == 0)
+                if (post.state == 0) // إذا كانت الحالة Pending
                   SizedBox(
                     height: 36,
                     child: ElevatedButton(
@@ -161,8 +120,55 @@ class PostCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(22),
                         ),
                       ),
-                      onPressed: () {
-                        showConfirmDialog(context, post);
+                      onPressed: () async {
+                        final bool? confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              /*title: const Text(
+                                'Confirm Help',
+                                style: TextStyle(fontWeight: FontWeight.w400),
+                              ),*/
+                              content: const Text(
+                                'Are you sure you want to help?',
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: const Text(
+                                    'No',
+                                    style: TextStyle(color: Colors.black),
+                                  ),
+                                ),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    elevation: 0,
+                                  ),
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: const Text(
+                                    'Yes',
+                                    style: TextStyle(color: Colors.black),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+
+                        if (confirmed == true) {
+                          await sendHelpRequest(post.id!); // تحديث الحالة
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => VolunteerActivityScreen(),
+                            ),
+                          );
+                        }
                       },
                       child: const Text(
                         "I can help",
@@ -174,6 +180,20 @@ class PostCard extends StatelessWidget {
                       ),
                     ),
                   ),
+              ],
+            ),
+            SizedBox(height: 10),
+            Row(
+              children: [
+                const Icon(Icons.timer_sharp, size: 14, color: Colors.black45),
+                const SizedBox(width: 3),
+                Text(
+                  formatTimeAgoEn(post.created_at),
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    color: Colors.black38,
+                  ),
+                ),
               ],
             ),
           ],
@@ -208,7 +228,43 @@ class PostCard extends StatelessWidget {
   }
 }
 
-/// ================= HELPERS =================
+// دالة لتحديث حالة البوست
+Future<void> sendHelpRequest(int postId) async {
+  final token = await TokenService.getToken();
+  await updatePostState(postId, 3); // 3 تعني في انتظار موافقة المساعد
+
+  final response = await http.post(
+    Uri.parse('$baseUrl/api/account/posts/$postId/request-help/'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+  );
+
+  if (response.statusCode != 200 && response.statusCode != 201) {
+    throw Exception('Failed to send help request');
+  }
+}
+
+// دالة لتحديث حالة البوست
+Future<void> updatePostState(int postId, int state) async {
+  final token = await TokenService.getToken();
+
+  final response = await http.patch(
+    Uri.parse('$baseUrl/api/account/posts/$postId/'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+    body: jsonEncode({
+      'state': state,
+    }),
+  );
+
+  if (response.statusCode != 200 && response.statusCode != 201) {
+    throw Exception('Failed to update post state');
+  }
+}
 
 String cleanAuthorName(String raw) {
   return raw.replaceAll(
@@ -244,31 +300,6 @@ String getImageByPatientType(String patientType) {
   }
 }
 
-/// ================= CONFIRM DIALOG =================
-void showConfirmDialog(BuildContext context, Post post) {
-  showDialog(
-    context: context,
-    builder: (_) => AlertDialog(
-      title: const Text("Ready to help?"),
-      content: const Text("Are you sure you want help this person?"),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text("Cancel"),
-        ),
-        ElevatedButton(
-          onPressed: () async {
-            await sendHelpRequest(post.id!);
-            Navigator.pop(context);
-          },
-          child: const Text("Yes, I'll help"),
-        ),
-      ],
-    ),
-  );
-}
-
-/// ================= TIME FORMAT =================
 String formatTimeAgoEn(String dateString) {
   final DateTime createdAt = DateTime.parse(dateString);
   final Duration diff = DateTime.now().difference(createdAt);
@@ -279,20 +310,4 @@ String formatTimeAgoEn(String dateString) {
   if (diff.inDays == 1) return "Yesterday";
   if (diff.inDays < 7) return "${diff.inDays} days ago";
   return "${createdAt.day}/${createdAt.month}/${createdAt.year}";
-}
-
-Future<void> sendHelpRequest(int postId) async {
-  final token = await TokenService.getToken();
-
-  final response = await http.post(
-    Uri.parse('$baseUrl/api/account/posts/$postId/request-help/'),
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    },
-  );
-
-  if (response.statusCode != 200 && response.statusCode != 201) {
-    throw Exception('Failed to send help request');
-  }
 }

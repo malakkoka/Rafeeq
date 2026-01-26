@@ -110,13 +110,10 @@ class CustomDrawer extends StatelessWidget {
                   user.toggleEmergency(value);
 
                   if (value) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const FallDetector(),
-        ),
-      );
-    }
+                       Navigator.pop(context); 
+                    FallDetectorService.start(context); // Start fall detection
+                    
+                  }
                 },
               ),
             ),
@@ -131,7 +128,7 @@ class CustomDrawer extends StatelessWidget {
                 Navigator.pop(context);
               },
             ),
-            
+
             ListTile(
               leading: Icon(
                 Icons.notifications,
@@ -141,7 +138,6 @@ class CustomDrawer extends StatelessWidget {
                 "Notifications",
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
               ),
-              
             ),
             CustomListTile(
               icon: Icons.location_on_rounded,

@@ -6,7 +6,7 @@ class Post {
   final int? state;
   final String created_at;
   final String? updated_at;
-  final String cityName;
+  final String city;
 
   Post({
     required this.title,
@@ -16,7 +16,7 @@ class Post {
     this.state,
     required this.created_at,
     this.updated_at,
-    required this.cityName,
+    required this.city,
   });
 
   factory Post.fromJson(Map<String, dynamic> json) {
@@ -28,7 +28,7 @@ class Post {
       title: json['title'],
       content: json['content'],
       author: json['author'].toString(),
-      cityName: json['city_data']?['name'] ?? '',
+      city: json['city_data']?['name'] ?? '',
     );
   }
 }

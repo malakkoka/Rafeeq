@@ -23,6 +23,8 @@ class _VolunteerHomeState extends State<VolunteerHome> {
     futurePosts = PostService.getPosts();
   }
 
+  
+
   // ===== Apply filters =====
   List<Post> _applyFilters(List<Post> posts) {
     List<Post> filtered = posts;
@@ -85,7 +87,7 @@ class _VolunteerHomeState extends State<VolunteerHome> {
             itemBuilder: (context, index) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 10),
-                child: PostCard(post: filteredPosts[index]),
+                child: PostCard(post: filteredPosts[index], postId: filteredPosts[index].id.toString()),
               );
             },
           );
@@ -106,3 +108,4 @@ String _mapStateToStatus(int? state) {
       return 'All';
   }
 }
+

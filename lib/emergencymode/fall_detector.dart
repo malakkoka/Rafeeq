@@ -6,68 +6,45 @@ import 'package:front/provider/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
-class FallDetector extends StatefulWidget {
-  const FallDetector({super.key});
+class FallDetectorService {
+  static StreamSubscription<AccelerometerEvent>? _accelSub;
+  static bool _fallDetected = false;
 
-  @override
-  State<FallDetector> createState() => _FallDetectorState();
-}
+  static const double fallThreshold = 300;
 
-class _FallDetectorState extends State<FallDetector> {
-  StreamSubscription<AccelerometerEvent>? accelSub;
-  bool fallDetected = false;
+  static void start(BuildContext context) {
+    if (_accelSub != null) return; // already running
 
-  @override
-  void initState() {
-    super.initState();
-    startListening();
+    _accelSub = accelerometerEvents.listen((event) async {
+      final total = event.x * event.x + event.y * event.y + event.z * event.z;
+
+      if (total > fallThreshold && !_fallDetected) {
+        _fallDetected = true;
+        await _handleFall(context);
+        _fallDetected = false;
+      }
+    });
   }
 
-  void startListening() {
-    try {
-      accelSub = accelerometerEvents.listen((event) {
-        final total =
-            (event.x * event.x) + (event.y * event.y) + (event.z * event.z);
-
-        if (total > 150 && !fallDetected) {
-          fallDetected = true;
-          handleFall();
-        }
-      });
-    } catch (e) {
-      debugPrint("❌ Accelerometer error: $e");
-    }
-  }
-
-  void handleFall() {
+  static Future<void> _handleFall(BuildContext context) async {
     final user = context.read<UserProvider>();
+
     if (!user.emergencyEnabled) return;
+    if (!context.mounted) return;
 
     if (user.isBlind) {
-      Navigator.pushReplacement(
-        context,
+      Navigator.of(context, rootNavigator: true).push(
         MaterialPageRoute(builder: (_) => const BlindEmergencyUI()),
       );
     } else if (user.isDeaf) {
-      Navigator.pushReplacement(
-        context,
+      Navigator.of(context, rootNavigator: true).push(
         MaterialPageRoute(builder: (_) => const DeafEmergencyUI()),
       );
     }
   }
 
-  @override
-  void dispose() {
-    accelSub?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text("Monitoring for fall..."),
-      ),
-    );
+  static void stop() {
+    _accelSub?.cancel();
+    _accelSub = null;
   }
 }
